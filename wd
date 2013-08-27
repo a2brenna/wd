@@ -11,6 +11,7 @@ def main():
 
     parser.add_argument("COMMAND", help="The command to be watched. Ignored if running daemon.", type=str)
     parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
+    parser.add_argument("--delay", help="Number of seconds to wait before initially contacting watchdog server.", type=int)
 
     parser.parse_args()
     pass
