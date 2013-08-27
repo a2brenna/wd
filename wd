@@ -3,8 +3,16 @@
 import argparse
 
 def main():
-    #Parse cmdline arguments
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser("Seamlessly monitor processes...")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
+    group.add_argument("-s", "--server", help="Hostname of watchdog server to use.")
+
+    parser.add_argument("COMMAND", help="The command to be watched. Ignored if running daemon.", type=str)
+    parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
+
+    parser.parse_args()
     pass
 
 if __name__ == '__main__':
