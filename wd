@@ -1,8 +1,26 @@
 #!/usr/bin/python3
 
-import argparse
+import argparse, signal, sys
+
+#TODO: List of ports to use in succession in case of collisions?
+DEFAULT_PORT = 7877
+
+def handler():
+    sys.exit(0)
+
+def run_daemon(args):
+    import socket, select
+    inet = socket.socket(socket.AF_INET)
+    inet.bind((socket.gethostname(), DEFAULT_PORT))
+    inet.listen(1)
+
+    while True:
+        for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
+            pass
+
 
 def main():
+    signal.signal(signal.SIGTERM, handler)
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
 
     group = parser.add_mutually_exclusive_group()
@@ -13,8 +31,12 @@ def main():
     parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("--delay", help="Number of seconds to wait before initially contacting watchdog server.", type=int)
 
-    parser.parse_args()
-    pass
+    args = parser.parse_args()
+
+    if args.daemon:
+        run_daemon(args)
+    else:
+        run_client(args)
 
 if __name__ == '__main__':
     main()
