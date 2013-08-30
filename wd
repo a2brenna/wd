@@ -12,12 +12,18 @@ def handler():
 def run_daemon(args):
     import socket, select
     inet = socket.socket(socket.AF_INET)
-    inet.bind((socket.gethostname(), DEFAULT_PORT))
+    try:
+        inet.bind((socket.gethostname(), DEFAULT_PORT))
+    except OSError as e:
+        if (e.errno == 98): #Socket in use
+            print("Socket in use!")
+            print(e)
     inet.listen(1)
 
     while True:
         for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
-            print(x.recv(RECV_BUFF_SIZE))
+            c, client_addr = x.accept()
+            print(c.recv(RECV_BUFF_SIZE))
 
 
 def main():
