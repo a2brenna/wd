@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import argparse, signal, sys
+import argparse, signal, sys, socket
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
@@ -11,7 +11,7 @@ def handler():
     sys.exit(0)
 
 def run_daemon(args):
-    import socket, select
+    import select
     inet = socket.socket(socket.AF_INET)
     try:
         inet.bind((socket.gethostname(), DEFAULT_PORT))
@@ -27,7 +27,6 @@ def run_daemon(args):
             print(c.recv(RECV_BUFF_SIZE))
 
 def client(args):
-    import socket, select
     inet = socket.socket(socket.AF_INET)
     inet.connect((DEFAULT_SERVER, DEFAULT_PORT))
     inet.send(b'TEST')
