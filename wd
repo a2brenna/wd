@@ -27,7 +27,7 @@ def main():
     group.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
     group.add_argument("-s", "--server", help="Hostname of watchdog server to use.")
 
-    parser.add_argument("COMMAND", help="The command to be watched. Ignored if running daemon.", type=str)
+    parser.add_argument("COMMAND", nargs='*', help="The command to be watched. Ignored if running daemon.", type=str)
     parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("--delay", help="Number of seconds to wait before initially contacting watchdog server.", type=int)
 
