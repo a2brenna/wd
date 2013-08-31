@@ -31,14 +31,19 @@ def daemon(port):
     inet.bind(('', port))
     inet.listen(1)
 
-    next_expiration(None, 3600)
+    next_expiration = (None, 3600)
 
     while True:
         for x in select.select([inet],[],[],next_expiration[1])[0]: #Readable sockets returned by select
             if x == None:
                 if next_expiration[0] != None:
                     print(next_expiration[0] + " has expired.")
-                    for x in tasks:
+                    min_expiration = (None, 3600)
+                    for x in tasks.keys():
+                        if tasks[x] < min_expiration[1]:
+                            min_expiration = (x, tasks[x])
+
+                    next_expiration = min_expiration
                 else:
                     continue
 
