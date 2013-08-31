@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import signal, sys, socket, select, watchdog_pb2
 import time
