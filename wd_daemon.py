@@ -6,12 +6,7 @@ RECV_BUFF_SIZE=4096
 
 def daemon(port):
     inet = socket.socket(socket.AF_INET)
-    try:
-        inet.bind(('', port))
-    except OSError as e:
-        if (e.errno == 98): #Port in use
-            print("Portin use!")
-            print(e)
+    inet.bind(('', port))
     inet.listen(1)
 
     while True:
