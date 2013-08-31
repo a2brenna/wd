@@ -1,8 +1,19 @@
 #!/usr/bin/python3
 
 import signal, sys, socket, select, watchdog_pb2
+import time
 
 RECV_BUFF_SIZE=4096
+
+class Task():
+    def __init__(self, signature):
+        self.signature = signature
+        self.beats = []
+
+    def beat(self):
+        self.beats.append(time.time())
+
+tasks = {}
 
 def daemon(port):
     inet = socket.socket(socket.AF_INET)
