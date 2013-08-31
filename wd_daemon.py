@@ -23,5 +23,7 @@ def daemon(port):
     while True:
         for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
             c, client_addr = x.accept()
-            message = c.recv(RECV_BUFF_SIZE)
-            print(message)
+            data = c.recv(RECV_BUFF_SIZE)
+            beat = watchdog_pb2.Heartbeat()
+            beat.ParseFromString(data)
+            print(beat)
