@@ -1,36 +1,15 @@
 #!/usr/bin/python3
 
-import argparse, signal, sys, socket
+import argparse, signal, sys
+from wd_daemon import daemon
+from wd_client import client
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
-RECV_BUFF_SIZE = 4096
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 
 def handler():
     sys.exit(0)
-
-def run_daemon(args):
-    import select
-    inet = socket.socket(socket.AF_INET)
-    try:
-        inet.bind(('', DEFAULT_PORT))
-    except OSError as e:
-        if (e.errno == 98): #Socket in use
-            print("Socket in use!")
-            print(e)
-    inet.listen(1)
-
-    while True:
-        for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
-            c, client_addr = x.accept()
-            print(c.recv(RECV_BUFF_SIZE))
-
-def client(args):
-    inet = socket.socket(socket.AF_INET)
-    inet.connect((DEFAULT_SERVER, DEFAULT_PORT))
-    inet.send(b'TEST')
-    inet.close()
 
 def main():
     signal.signal(signal.SIGTERM, handler)
@@ -47,9 +26,9 @@ def main():
     args = parser.parse_args()
 
     if args.daemon:
-        run_daemon(args)
+        daemon(port=DEFAULT_PORT)
     else:
-        client(args)
+        client(server=DEFAULT_SERVER, target_port=DEFAULT_PORT)
 
 if __name__ == '__main__':
     main()
