@@ -7,6 +7,7 @@ import numpy
 RECV_BUFF_SIZE=4096
 
 def sig_handler(signum, frame):
+    import pprint
     pprint.pprint(tasks)
 
 def extract_sig(b):
