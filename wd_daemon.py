@@ -13,6 +13,9 @@ class Task():
     def beat(self):
         self.beats.append(time.time())
 
+def extract_sig(b):
+    return (b.host + ":" + b.user + ":" + b.execed + ":" + str(b.pid))
+
 tasks = {}
 
 def daemon(port):
