@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import socket
+import socket, watchdog_pb2
 
 def client(server, target_port):
     inet = socket.socket(socket.AF_INET)

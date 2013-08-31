@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import signal, sys, socket, select
+import signal, sys, socket, select, watchdog_pb2
 
 RECV_BUFF_SIZE=4096
 
