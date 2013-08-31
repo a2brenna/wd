@@ -38,6 +38,8 @@ def daemon(port):
             if x == None:
                 if next_expiration[0] != None:
                     print(next_expiration[0] + " has expired.")
+                    del tasks[next_expiration[0]]
+
                     min_expiration = (None, 3600)
                     for x in tasks.keys():
                         if tasks[x] < min_expiration[1]:
