@@ -8,7 +8,8 @@ from wd_client import client
 DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 
-def handler():
+def handler(signum, frame):
+    print("exiting")
     sys.exit(0)
 
 def main():

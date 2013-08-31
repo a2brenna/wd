@@ -5,13 +5,8 @@ import time
 
 RECV_BUFF_SIZE=4096
 
-class Task():
-    def __init__(self, signature):
-        self.signature = signature
-        self.beats = []
-
-    def beat(self):
-        self.beats.append(time.time())
+def sig_handler(signum, frame):
+    pprint.pprint(tasks)
 
 def extract_sig(b):
     return (b.host + ":" + b.user + ":" + b.execed + ":" + str(b.pid))
@@ -19,6 +14,7 @@ def extract_sig(b):
 tasks = {}
 
 def daemon(port):
+    signal.signal(signal.SIGUSR1, sig_handler)
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
