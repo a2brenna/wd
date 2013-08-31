@@ -14,7 +14,7 @@ def run_daemon(args):
     import select
     inet = socket.socket(socket.AF_INET)
     try:
-        inet.bind((socket.gethostname(), DEFAULT_PORT))
+        inet.bind(('', DEFAULT_PORT))
     except OSError as e:
         if (e.errno == 98): #Socket in use
             print("Socket in use!")
