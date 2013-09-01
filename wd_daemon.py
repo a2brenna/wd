@@ -55,25 +55,24 @@ def daemon(port):
                         next_expiration = min_expiration
                     else:
                         continue
-
-                c, client_addr = x.accept()
-                data = c.recv(RECV_BUFF_SIZE)
-                beat = watchdog_pb2.Heartbeat()
-                beat.ParseFromString(data)
-                if beat.IsInitialized():
-                    sig = extract_sig(beat)
-                    try:
-                        t = tasks[sig]
-                        t.append(time.time())
-                        if len(t) > 1001:
-                            e = expiration(t)
-                            if e < next_expiration[1]:
-                                next_expiration = (sig, e)
-                    except KeyError:
-                        tasks[sig] = []
-                        tasks[sig].append(time.time())
+                else:
+                    c, client_addr = x.accept()
+                    data = c.recv(RECV_BUFF_SIZE)
+                    beat = watchdog_pb2.Heartbeat()
+                    beat.ParseFromString(data)
+                    if beat.IsInitialized():
+                        sig = extract_sig(beat)
+                        try:
+                            t = tasks[sig]
+                            t.append(time.time())
+                            if len(t) > 1001:
+                                e = expiration(t)
+                                if e < next_expiration[1]:
+                                    next_expiration = (sig, e)
+                        except KeyError:
+                            tasks[sig] = []
+                            tasks[sig].append(time.time())
         except KeyboardInterrupt:
             exit()
         except:
             continue
-            
