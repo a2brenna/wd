@@ -18,10 +18,10 @@ def main():
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
-    group.add_argument("-s", "--server", help="Hostname of watchdog server to use.")
+    group.add_argument("-s", "--server", default=DEFAULT_SERVER, help="Hostname of watchdog server to use.")
 
     parser.add_argument("COMMAND", nargs=argparse.REMAINDER, help="The command to be watched. Ignored if running daemon.", type=str)
-    parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
+    parser.add_argument("-p", "--port", default=DEFAULT_PORT, help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("--delay", help="Number of seconds to wait before initially contacting watchdog server.", type=int)
 
     args = parser.parse_args()
@@ -29,7 +29,7 @@ def main():
     if args.daemon:
         daemon(port=DEFAULT_PORT)
     else:
-        client(server=DEFAULT_SERVER, target_port=DEFAULT_PORT, command=args.COMMAND)
+        client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay)
 
 if __name__ == '__main__':
     main()
