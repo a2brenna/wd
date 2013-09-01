@@ -17,7 +17,7 @@ def sig_handler(signum, frame):
         exit()
 
 def extract_sig(b):
-    return (b.host + ":" + b.user + ":" + b.execed + ":" + str(b.pid))
+    return (b.signature)
 
 def expiration(t):
     intervals = pwise_diff(t[-1000:])

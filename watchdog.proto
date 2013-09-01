@@ -1,8 +1,5 @@
 package watchdog;
 
 message Heartbeat{
-    optional string user = 1;
-    optional string execed = 2;
-    optional int32 pid = 3;
-    optional string host = 4;
+    optional string signature = 1;
 }
