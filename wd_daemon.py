@@ -30,8 +30,6 @@ def sig_handler(signum, frame):
     else:
         sys.exit(0)
 
-tasks = {}
-
 def pwise_diff(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
 
@@ -40,7 +38,8 @@ def daemon(port):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
-    next_expiration = (None, 3600)
+    tasks = {}
+    next_expiration = ""
 
     while True:
         try:
