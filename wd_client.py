@@ -2,7 +2,7 @@
 
 import socket, watchdog_pb2
 
-def client(server, target_port, command, delay):
+def client(server, target_port, command, delay, heartrate):
     inet = socket.socket(socket.AF_INET)
     inet.connect((server, target_port))
     beat = watchdog_pb2.Heartbeat()
