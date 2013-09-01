@@ -23,15 +23,12 @@ class Task():
             self.expiration = (time.time() + (mean + 3.0 * std))
             return
 
-def exit():
-    sys.exit(0)
-
 def sig_handler(signum, frame):
     if signum == signal.SIGUSR1:
         import pprint
         pprint.pprint(tasks)
     else:
-        exit()
+        sys.exit(0)
 
 tasks = {}
 
@@ -79,6 +76,6 @@ def daemon(port):
                             tasks[sig] = []
                             tasks[sig].append(time.time())
         except KeyboardInterrupt:
-            exit()
+            sys.exit(0)
         except:
             continue
