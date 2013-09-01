@@ -20,9 +20,9 @@ def extract_sig(b):
     return (b.signature)
 
 def expiration(t):
-    intervals = pwise_diff(t[-1000:])
-    mean = numpy.mean(intervals[-1000:])
-    std = numpy.std(intervals[-1000:])
+    intervals = pwise_diff(t[-100:])
+    mean = numpy.mean(intervals[-100:])
+    std = numpy.std(intervals[-100:])
     e = (time.time() + (mean + 3.0 * std))
     return e
 
@@ -36,7 +36,6 @@ def daemon(port):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
-
     next_expiration = (None, 3600)
 
     while True:
@@ -65,7 +64,7 @@ def daemon(port):
                         try:
                             t = tasks[sig]
                             t.append(time.time())
-                            if len(t) > 1001:
+                            if len(t) > 101:
                                 e = expiration(t)
                                 if e < next_expiration[1]:
                                     next_expiration = (sig, e)
