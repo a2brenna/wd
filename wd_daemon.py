@@ -33,16 +33,6 @@ def sig_handler(signum, frame):
     else:
         exit()
 
-def extract_sig(b):
-    return (b.signature)
-
-def expiration(t):
-    intervals = pwise_diff(t[-100:])
-    mean = numpy.mean(intervals[-100:])
-    std = numpy.std(intervals[-100:])
-    e = (time.time() + (mean + 3.0 * std))
-    return e
-
 tasks = {}
 
 def pwise_diff(t):
@@ -77,7 +67,7 @@ def daemon(port):
                     beat = watchdog_pb2.Heartbeat()
                     beat.ParseFromString(data)
                     if beat.IsInitialized():
-                        sig = extract_sig(beat)
+                        sig = b.signature
                         try:
                             t = tasks[sig]
                             t.append(time.time())
