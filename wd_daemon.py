@@ -6,6 +6,23 @@ import numpy
 
 RECV_BUFF_SIZE=4096
 
+class Task():
+    def __init__(self, signature):
+        self.signature = signature
+        self.expiration = time.time() + 3600 * 24
+        self.heartbeats = []
+
+    def beat(self):
+        self.heartbeats.append(time.time())
+        if len(heartbeats) < 101:
+            return
+        else:
+            intervals = pwise_diff(self.heartbeats[-100:])
+            mean = numpy.mean(intervals[-100:])
+            std = numpy.std(intervals[-100:])
+            self.expiration = (time.time() + (mean + 3.0 * std))
+            return
+
 def exit():
     sys.exit(0)
 
