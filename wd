@@ -7,6 +7,7 @@ from wd_client import client
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
+DEFAULT_HEARTRATE = 60
 
 def handler(signum, frame):
     print("exiting")
@@ -18,18 +19,19 @@ def main():
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
-    group.add_argument("-s", "--server", help="Hostname of watchdog server to use.")
+    group.add_argument("-s", "--server", default=DEFAULT_SERVER, help="Hostname of watchdog server to use.")
 
     parser.add_argument("COMMAND", nargs=argparse.REMAINDER, help="The command to be watched. Ignored if running daemon.", type=str)
-    parser.add_argument("-p", "--port", help="Port to target on server, or in the case of server, port to listen on.", type=int)
-    parser.add_argument("--delay", help="Number of seconds to wait before initially contacting watchdog server.", type=int)
+    parser.add_argument("-p", "--port", default=DEFAULT_PORT, help="Port to target on server, or in the case of server, port to listen on.", type=int)
+    parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
+    parser.add_argument("-r", "--heartrate", default=DEFAULT_HEARTRATE, help="Number of seconds between heartbeats.", type=int)
 
     args = parser.parse_args()
 
     if args.daemon:
         daemon(port=DEFAULT_PORT)
     else:
-        client(server=DEFAULT_SERVER, target_port=DEFAULT_PORT, command=args.COMMAND)
+        client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate)
 
 if __name__ == '__main__':
     main()
