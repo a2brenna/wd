@@ -3,8 +3,12 @@
 import signal, sys, socket, select, watchdog_pb2
 import time
 import numpy
+import os
+import pprint
 
 RECV_BUFF_SIZE=4096
+
+tasks = {}
 
 class Task():
     def __init__(self, signature):
