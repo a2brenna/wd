@@ -1,0 +1,3 @@
+[submodule "jarvis"]
+	path = jarvis
+	url = csclub.uwaterloo.ca:git/jarvisd.git
