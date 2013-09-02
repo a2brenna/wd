@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
 import argparse, signal, sys
-from wd_daemon import daemon
+from wd_daemon import daemon as exec_daemon
 from wd_client import client
+import daemon
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
@@ -29,7 +30,8 @@ def main():
     args = parser.parse_args()
 
     if args.daemon:
-        daemon(port=DEFAULT_PORT)
+        with daemon.DaemonContext():
+            exec_daemon(port=DEFAULT_PORT)
     else:
         client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate)
 
