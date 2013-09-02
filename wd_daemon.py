@@ -62,7 +62,7 @@ def daemon(port):
                     beat = watchdog_pb2.Heartbeat()
                     beat.ParseFromString(data)
                     if beat.IsInitialized():
-                        sig = b.signature
+                        sig = beat.signature
                         try:
                             t = tasks[sig]
                             t.append(time.time())
