@@ -19,7 +19,7 @@ class Task():
         if len(self.heartbeats) < (INTERVALS + 1):
             return
         else:
-            intervals = pwise_diff(self.heartbeats[-INTERVALS:])
+            intervals = get_intervals(self.heartbeats[-INTERVALS:])
             mean = numpy.mean(intervals[-INTERVALS:])
             std = numpy.std(intervals[-INTERVALS:])
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
@@ -34,7 +34,7 @@ def sig_handler(signum, frame):
     else:
         sys.exit(0)
 
-def pwise_diff(t):
+def get_intervals(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
 
 def get_exp(t):
