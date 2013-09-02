@@ -87,5 +87,3 @@ def daemon(port):
                 f.write("Number of beats: " + str(len(t.heartbeats)) + "\n")
                 f.write(pprint.pformat(t.heartbeats) + "\n")
             sys.exit(0)
-        except:
-            continue
