@@ -78,10 +78,11 @@ def daemon(port):
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             f = open("state.out", 'w')
-            f.write("At time: " + str(time.time()) + "\n")
-            f.write("Next expiration at " + str(next_expiration.expiration) + " of " + next_expiration.signature)
+            f.write("Time: " + str(time.time()) + "\n")
+            f.write("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature)
             for t in tasks.values():
-                f.write(str(t.signature) + "\n")
-                f.write(str(t.expiration) + "\n")
-                f.write("Number of beats: " + str(len(t.heartbeats)) + "\n")
-                f.write(pprint.pformat(t.heartbeats) + "\n")
+                f.write(str(t) + "\n")
+                f.write("\t" + str(t.signature) + "\n")
+                f.write("\t" + str(t.expiration) + "\n")
+                f.write("\t" + str(len(t.heartbeats)) + "\n")
+                f.write(pprint.pformat(t.heartbeats) + "\n\n")
