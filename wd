@@ -26,12 +26,13 @@ def main():
     parser.add_argument("-p", "--port", default=DEFAULT_PORT, help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
     parser.add_argument("-r", "--heartrate", default=DEFAULT_HEARTRATE, help="Number of seconds between heartbeats.", type=int)
+    parser.add_argument("--dumpdir", default="/tmp", help="Directory to dump state files to upon request.", type=str)
 
     args = parser.parse_args()
 
     if args.daemon:
         with daemon.DaemonContext():
-            exec_daemon(port=DEFAULT_PORT)
+            exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir)
     else:
         client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate)
 

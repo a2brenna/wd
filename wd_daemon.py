@@ -43,7 +43,7 @@ def get_intervals(t):
 def get_exp(t):
     return t.expiration
 
-def daemon(port):
+def daemon(port, dumpdir):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
@@ -79,6 +79,6 @@ def daemon(port):
             except:
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
-            f = open("/tmp/wd." + str(os.getpid()) + "." + str(time.time()), 'w')
+            f = open(dumpdir + "/wd." + str(os.getpid()) + "." + str(time.time()), 'w')
             f.write(dump(tasks, next_expiration))
             f.close()
