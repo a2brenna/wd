@@ -29,8 +29,10 @@ class Task():
 
 def sig_handler(signum, frame):
     if signum == signal.SIGUSR1:
-        import pprint
-        pprint.pprint(tasks)
+        for t in tasks.keys():
+            pprint.pprint(tasks[t].signature)
+            pprint.pprint(tasks[t].expiration)
+            pprint.pprint(tasks[t].heartbeats)
     else:
         sys.exit(0)
 
