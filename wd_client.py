@@ -13,11 +13,11 @@ def client(server, target_port, command, delay, heartrate):
 
     else: #IS PARENT
         time.sleep(delay)
+        beat = watchdog_pb2.Heartbeat()
+        beat.signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
         while True:
             inet = socket.socket(socket.AF_INET)
             inet.connect((server, target_port))
-            beat = watchdog_pb2.Heartbeat()
-            beat.signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
             pid, status = os.waitpid(-1, os.WNOHANG)
             if pid != 0:
                 break
