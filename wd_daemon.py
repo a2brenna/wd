@@ -18,7 +18,7 @@ class Task():
 
     def beat(self):
         self.heartbeats.append(time.time())
-        if len(heartbeats) < 101:
+        if len(self.heartbeats) < 101:
             return
         else:
             intervals = pwise_diff(self.heartbeats[-100:])
