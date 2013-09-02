@@ -24,7 +24,7 @@ class Task():
             intervals = pwise_diff(self.heartbeats[-100:])
             mean = numpy.mean(intervals[-100:])
             std = numpy.std(intervals[-100:])
-            self.expiration = (time.time() + (mean + 3.0 * std))
+            self.expiration = (time.time() + mean + (3.0 * std))
             return
 
 def sig_handler(signum, frame):
