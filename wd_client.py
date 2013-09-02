@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import socket, watchdog_pb2, os, time, socket, pwd
+import socket, watchdog_pb2, os, time, socket, pwd, signal
 
 def client(server, target_port, command, delay, heartrate):
     try:
@@ -12,6 +12,9 @@ def client(server, target_port, command, delay, heartrate):
         os.execv("/bin/sh", ['sh', '-c'] + command)
 
     else: #IS PARENT
+        #Mask off signals
+        for sig in [signal.SIGINT]:
+            signal.signal(sig, signal.SIG_IGN)
         time.sleep(delay)
         beat = watchdog_pb2.Heartbeat()
         beat.signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
