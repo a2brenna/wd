@@ -28,7 +28,8 @@ class Task():
 def dump(tasks, next_expiration):
     s = ""
     s += ("Time: " + str(time.time()) + "\n")
-    s += ("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature + "\n")
+    if next_expiration != None:
+        s += ("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature + "\n")
     for t in tasks.values():
         s += ("\tExpiration: " + str(t.expiration) + "\n")
         s += ("\tHeartbeats: " + str(len(t.heartbeats)) + "\n")
