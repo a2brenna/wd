@@ -65,11 +65,7 @@ def daemon(port):
                         sig = beat.signature
                         try:
                             t = tasks[sig]
-                            t.append(time.time())
-                            if len(t) > 101:
-                                e = expiration(t)
-                                if e < next_expiration[1]:
-                                    next_expiration = (sig, e)
+                            t.beat()
                         except KeyError:
                             t = Task(sig)
                             t.beat()
