@@ -39,13 +39,18 @@ def sig_handler(signum, frame):
 def pwise_diff(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
 
+def get_exp(t):
+    return t.expiration
+
 def daemon(port):
     signal.signal(signal.SIGUSR1, sig_handler)
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
-    tasks = {}
-    next_expiration = ""
+    try:
+        next_expiration = min(tasks, key=get_exp)
+    except:
+        next_expiration = None
 
     while True:
         try:
