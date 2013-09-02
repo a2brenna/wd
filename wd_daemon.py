@@ -25,14 +25,16 @@ class Task():
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
             return
 
-def sig_handler(signum, frame):
-    if signum == signal.SIGUSR1:
-        for t in tasks.keys():
-            pprint.pprint(tasks[t].signature)
-            pprint.pprint(tasks[t].expiration)
-            pprint.pprint(tasks[t].heartbeats)
-    else:
-        sys.exit(0)
+def dump(tasks, next_expiration):
+    s = ""
+    s += ("Time: " + str(time.time()) + "\n")
+    s += ("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature + "\n")
+    for t in tasks.values():
+        s += ("\tExpiration: " + str(t.expiration) + "\n")
+        s += ("\tHeartbeats: " + str(len(t.heartbeats)) + "\n")
+        s += (pprint.pformat(t.heartbeats) + "\n\n")
+    return s
+
 
 def get_intervals(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
@@ -41,7 +43,6 @@ def get_exp(t):
     return t.expiration
 
 def daemon(port):
-    signal.signal(signal.SIGUSR1, sig_handler)
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
@@ -78,11 +79,5 @@ def daemon(port):
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             f = open("state.out", 'w')
-            f.write("Time: " + str(time.time()) + "\n")
-            f.write("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature)
-            for t in tasks.values():
-                f.write(str(t) + "\n")
-                f.write("\t" + str(t.signature) + "\n")
-                f.write("\t" + str(t.expiration) + "\n")
-                f.write("\t" + str(len(t.heartbeats)) + "\n")
-                f.write(pprint.pformat(t.heartbeats) + "\n\n")
+            f.write(dump(tasks, next_expiration))
+            f.close()
