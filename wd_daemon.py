@@ -3,6 +3,8 @@
 import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint
 
 RECV_BUFF_SIZE=4096
+INTERVALS = 100
+CONFIDENCE = 3.0
 
 tasks = {}
 
@@ -14,13 +16,13 @@ class Task():
 
     def beat(self):
         self.heartbeats.append(time.time())
-        if len(self.heartbeats) < 101:
+        if len(self.heartbeats) < (INTERVALS + 1):
             return
         else:
-            intervals = pwise_diff(self.heartbeats[-100:])
-            mean = numpy.mean(intervals[-100:])
-            std = numpy.std(intervals[-100:])
-            self.expiration = (time.time() + mean + (3.0 * std))
+            intervals = pwise_diff(self.heartbeats[-INTERVALS:])
+            mean = numpy.mean(intervals[-INTERVALS:])
+            std = numpy.std(intervals[-INTERVALS:])
+            self.expiration = (time.time() + mean + (CONFIDENCE * std))
             return
 
 def sig_handler(signum, frame):
