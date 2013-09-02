@@ -47,10 +47,8 @@ def daemon(port):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
-    try:
-        next_expiration = min(tasks, key=get_exp)
-    except:
-        next_expiration = None
+
+    next_expiration = None
 
     while True:
         try:
@@ -70,22 +68,20 @@ def daemon(port):
                             t = Task(sig)
                             t.beat()
                             tasks[sig] = t
+            if next_expiration != None:
+                if next_expiration.expiration > time.time():
+                    continue
                 else:
-                    if next_expiration != None:
-                        if next_expiration.expiration > time.time():
-                            continue
-                        else:
-                            print(next_expiration.signature + " has expired.")
-                            del tasks[next_expiration.signature]
-                    else:
-                        continue
+                    print(next_expiration.signature + " has expired.")
+                    del tasks[next_expiration.signature]
             try:
-                next_expiration = min(tasks, key=get_exp)
+                next_expiration = min(tasks.values(), key=get_exp)
             except:
                 next_expiration = None
         except KeyboardInterrupt:
             f = open("state.out", 'w')
             f.write("At time: " + str(time.time()) + "\n")
+            f.write("Next expiration at " + str(next_expiration.expiration) + " of " + next_expiration.signature)
             for t in tasks.values():
                 f.write(str(t.signature) + "\n")
                 f.write(str(t.expiration) + "\n")
