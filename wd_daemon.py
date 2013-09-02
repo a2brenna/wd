@@ -79,6 +79,13 @@ def daemon(port):
                             tasks[sig] = []
                             tasks[sig].append(time.time())
         except KeyboardInterrupt:
+            f = open("state.out", 'w')
+            f.write("At time: " + str(time.time()) + "\n")
+            for t in tasks.values():
+                f.write(str(t.signature) + "\n")
+                f.write(str(t.expiration) + "\n")
+                f.write("Number of beats: " + str(len(t.heartbeats)) + "\n")
+                f.write(pprint.pformat(t.heartbeats) + "\n")
             sys.exit(0)
         except:
             continue
