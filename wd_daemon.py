@@ -79,6 +79,6 @@ def daemon(port):
             except:
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
-            f = open("state.out", 'w')
+            f = open("/tmp/wd." + str(os.getpid()) + "." + str(time.time()), 'w')
             f.write(dump(tasks, next_expiration))
             f.close()
