@@ -1,10 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2
-import time
-import numpy
-import os
-import pprint
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint
 
 RECV_BUFF_SIZE=4096
 
