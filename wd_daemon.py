@@ -76,7 +76,7 @@ def daemon(port):
                 next_expiration = min(tasks.values(), key=get_exp)
             except:
                 next_expiration = None
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: #ALSO CATCHES SIGINT
             f = open("state.out", 'w')
             f.write("At time: " + str(time.time()) + "\n")
             f.write("Next expiration at " + str(next_expiration.expiration) + " of " + next_expiration.signature)
