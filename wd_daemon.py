@@ -54,21 +54,9 @@ def daemon(port):
 
     while True:
         try:
-            for x in select.select([inet],[],[],next_expiration[1])[0]: #Readable sockets returned by select
-                if x == None:
-                    if next_expiration[0] != None:
-                        print(next_expiration[0] + " has expired.")
-                        del tasks[next_expiration[0]]
+            for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
-                        min_expiration = (None, 3600)
-                        for x in tasks.keys():
-                            if tasks[x] < min_expiration[1]:
-                                min_expiration = (x, tasks[x])
-
-                        next_expiration = min_expiration
-                    else:
-                        continue
-                else:
+                if x == inet:
                     c, client_addr = x.accept()
                     data = c.recv(RECV_BUFF_SIZE)
                     beat = watchdog_pb2.Heartbeat()
@@ -83,8 +71,22 @@ def daemon(port):
                                 if e < next_expiration[1]:
                                     next_expiration = (sig, e)
                         except KeyError:
-                            tasks[sig] = []
-                            tasks[sig].append(time.time())
+                            t = Task(sig)
+                            t.beat()
+                            tasks[sig] = t
+                else:
+                    if next_expiration != None:
+                        if next_expiration.expiration > time.time():
+                            continue
+                        else:
+                            print(next_expiration.signature + " has expired.")
+                            del tasks[next_expiration.signature]
+                    else:
+                        continue
+            try:
+                next_expiration = min(tasks, key=get_exp)
+            except:
+                next_expiration = None
         except KeyboardInterrupt:
             f = open("state.out", 'w')
             f.write("At time: " + str(time.time()) + "\n")
