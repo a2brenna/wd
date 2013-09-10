@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd
 
 RECV_BUFF_SIZE=4096
 INTERVALS = 100
@@ -43,6 +43,17 @@ def get_intervals(t):
 def get_exp(t):
     return t.expiration
 
+def expiration_notice(t):
+    message = jarvis_pb2.Message()
+    message.message = t.signature + " has expired."
+    message.sender = "wd." + socket.gethostname()
+    message.target = pwd.getpwuid( os.getuid() )[ 0 ]
+
+    jarvis = socket.socket(socket.AF_INET)
+    jarvis.connect(('taurine.uwaterloo.ca', 7878))
+    jarvis.send(message.SerializeToString())
+    jarvis.close()
+
 def daemon(port, dumpdir):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
@@ -72,7 +83,7 @@ def daemon(port, dumpdir):
                 if next_expiration.expiration > time.time():
                     continue
                 else:
-                    print(next_expiration.signature + " has expired.")
+                    expiration_notice(next_expiration)
                     del tasks[next_expiration.signature]
             try:
                 next_expiration = min(tasks.values(), key=get_exp)
