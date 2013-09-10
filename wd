@@ -6,11 +6,22 @@ from wd_client import client
 import daemon
 import socket
 import watchdog_pb2
+import pwd
+import os
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 DEFAULT_HEARTRATE = 60
+
+def beat(server=DEFAULT_SERVER, port=DEFAULT_PORT, signature=pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + sys.argv[0] + ":" + str(child_pid)):
+    beat = watchdog_pb2.Beat()
+    beat.signature = signature
+
+    s = socket.socket(socket.AF_INET)
+    s.connect((server,port))
+    s.send(beat.SerializeToString())
+    s.close
 
 def handler(signum, frame):
     print("exiting")
@@ -31,7 +42,6 @@ def main():
     parser.add_argument("--dumpdir", default="/tmp", help="Directory to dump state files to upon request.", type=str)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
 
-
     args = parser.parse_args()
 
     if args.daemon:
@@ -39,13 +49,7 @@ def main():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir)
     elif args.signature:
         try:
-            beat = watchdog_pb2.Heartbeat()
-            beat.signature = args.signature
-
-            s = socket.socket(socket.AF_INET)
-            s.connect((args.server, args.port))
-            s.send(beat.SerializeToString())
-            s.close()
+            beat(signature=args.signature)
         except:
             raise
     else:
