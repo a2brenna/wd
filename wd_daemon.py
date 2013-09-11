@@ -81,7 +81,7 @@ def daemon(port, dumpdir):
                             t = Task(sig)
                             t.beat()
                             tasks[sig] = t
-                        log.write(str(time.time()) + ": " + str(beat.signature) + "\n")
+                        log.write(str(time.time()) + ": BEAT: " + str(beat.signature) + "\n")
             if next_expiration != None:
                 if next_expiration.expiration > time.time():
                     continue
