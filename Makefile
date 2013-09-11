@@ -10,4 +10,6 @@ jarvis_pb2.py: jarvis/jarvis.proto
 clean:
 	rm -f watchdog_pb2.py
 	rm -f jarvis_pb2.py
+	rm -f *.pyc
+	rm -rf __pycache__
 
