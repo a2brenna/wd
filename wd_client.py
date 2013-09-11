@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import socket, watchdog_pb2, os, time, socket, pwd, signal, sys
+import socket, os, time, socket, pwd, signal, sys, heartbeat
 
 def t_wait(time_to_wait):
     end_time = time.time() + time_to_wait
@@ -25,8 +25,7 @@ def client(server, target_port, command, delay, heartrate, retry):
         for sig in [signal.SIGINT]:
             signal.signal(sig, signal.SIG_IGN)
         time.sleep(delay)
-        beat = watchdog_pb2.Heartbeat()
-        beat.signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
+        signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
         while True:
             pid = t_wait(heartrate)
             if pid == child_pid:
@@ -35,10 +34,7 @@ def client(server, target_port, command, delay, heartrate, retry):
                 attempts = 0
                 while attempts < retry :
                     try:
-                        inet = socket.socket(socket.AF_INET)
-                        inet.connect((server, target_port))
-                        inet.send(beat.SerializeToString())
-                        inet.close()
+                        heartbeat.beat(signature, server, target_port)
                         break
                     except:
                         attempts = attempts + 1

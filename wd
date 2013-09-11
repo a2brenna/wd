@@ -5,7 +5,7 @@ from wd_daemon import daemon as exec_daemon
 from wd_client import client
 import daemon
 import socket
-import watchdog_pb2
+import heartbeat
 import pwd
 import os
 import psutil
@@ -15,15 +15,6 @@ DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 DEFAULT_HEARTRATE = 60
 MAX_ATTEMPTS = 5
-
-def beat(signature, server=DEFAULT_SERVER, port=DEFAULT_PORT):
-    hb = watchdog_pb2.Beat()
-    hb.signature = signature
-
-    s = socket.socket(socket.AF_INET)
-    s.connect((server,port))
-    s.send(hb.SerializeToString())
-    s.close
 
 def handler(signum, frame):
     print("exiting")
@@ -66,7 +57,7 @@ def main():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir)
     elif args.signature:
         try:
-            beat(signature=args.signature)
+            heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
         except:
             raise
     else:
