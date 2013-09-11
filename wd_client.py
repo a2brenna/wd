@@ -1,6 +1,15 @@
 #!/usr/bin/python
 
-import socket, watchdog_pb2, os, time, socket, pwd, signal
+import socket, watchdog_pb2, os, time, socket, pwd, signal, sys
+
+def t_wait(time_to_wait):
+    end_time = time.time() + time_to_wait
+    while time.time() < end_time:
+        pid, status = os.waitpid(-1, os.WNOHANG)
+        if pid != 0:
+            return pid
+        else:
+            time.sleep(1)
 
 def client(server, target_port, command, delay, heartrate):
     try:
@@ -19,11 +28,11 @@ def client(server, target_port, command, delay, heartrate):
         beat = watchdog_pb2.Heartbeat()
         beat.signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
         while True:
-            inet = socket.socket(socket.AF_INET)
-            inet.connect((server, target_port))
-            pid, status = os.waitpid(-1, os.WNOHANG)
-            if pid != 0:
+            pid = t_wait(heartrate)
+            if pid == child_pid:
                 break
-            inet.send(beat.SerializeToString())
-            inet.close()
-            time.sleep(heartrate)
+            else:
+                inet = socket.socket(socket.AF_INET)
+                inet.connect((server, target_port))
+                inet.send(beat.SerializeToString())
+                inet.close()
