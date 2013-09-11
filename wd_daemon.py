@@ -61,6 +61,8 @@ def daemon(port, dumpdir):
 
     next_expiration = None
 
+    log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
+
     while True:
         try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
@@ -79,6 +81,7 @@ def daemon(port, dumpdir):
                             t = Task(sig)
                             t.beat()
                             tasks[sig] = t
+                        log.write(str(time.time()) + ": " + str(beat.signature) + "\n")
             if next_expiration != None:
                 if next_expiration.expiration > time.time():
                     continue
