@@ -41,6 +41,7 @@ def client(server, target_port, command, delay, heartrate):
                         inet.connect((server, target_port))
                         inet.send(beat.SerializeToString())
                         inet.close()
+                        break
                     except:
                         print("Could not reach server, retrying")
                         attempts = attempts + 1
