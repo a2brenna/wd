@@ -8,6 +8,7 @@ import socket
 import watchdog_pb2
 import pwd
 import os
+import psutil
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
@@ -45,6 +46,19 @@ def main():
     args = parser.parse_args()
 
     if args.daemon:
+        #look for already running daemon and kill it
+
+        for p in psutil.process_iter():
+            if p.name == "wd":
+                if p.pid != os.getpid():
+                    if p.ppid == 1:
+                        for c in p.get_connections():
+                            try:
+                                if c.local_address[1] == args.port:
+                                    p.kill() #TODO: Maybe swap this for terminate and graceful shutdown behaviour
+                            except:
+                                pass
+
         with daemon.DaemonContext():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir)
     elif args.signature:
