@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle
 
 RECV_BUFF_SIZE=4096
 INTERVALS = 100
@@ -61,6 +61,13 @@ def daemon(port, dumpdir):
 
     next_expiration = None
 
+    try:
+        with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
+            tasks = dict(pickle.load(f))
+    except:
+        tasks = {}
+
+
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
     while True:
@@ -82,6 +89,11 @@ def daemon(port, dumpdir):
                             t.beat()
                             tasks[sig] = t
                         log.write(str(time.time()) + ": BEAT: " + str(beat.signature) + "\n")
+                        try:
+                            with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
+                                pickle.dump(tasks, f)
+                        except:
+                            pass
             if next_expiration != None:
                 if next_expiration.expiration > time.time():
                     continue
