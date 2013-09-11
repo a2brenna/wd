@@ -14,13 +14,13 @@ DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 DEFAULT_HEARTRATE = 60
 
-def beat(server=DEFAULT_SERVER, port=DEFAULT_PORT, signature=pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + sys.argv[0] + ":" + str(child_pid)):
-    beat = watchdog_pb2.Beat()
-    beat.signature = signature
+def beat(signature, server=DEFAULT_SERVER, port=DEFAULT_PORT):
+    hb = watchdog_pb2.Beat()
+    hb.signature = signature
 
     s = socket.socket(socket.AF_INET)
     s.connect((server,port))
-    s.send(beat.SerializeToString())
+    s.send(hb.SerializeToString())
     s.close
 
 def handler(signum, frame):
