@@ -8,6 +8,6 @@ jarvis_pb2.py: jarvis/jarvis.proto
 	mv jarvis/jarvis_pb2.py .
 
 clean:
-	rm watchdog_pb2.py
-	rm jarvis_pb2.py
+	rm -f watchdog_pb2.py
+	rm -f jarvis_pb2.py
 
