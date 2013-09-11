@@ -14,6 +14,7 @@ import psutil
 DEFAULT_PORT = 7877
 DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
 DEFAULT_HEARTRATE = 60
+MAX_ATTEMPTS = 5
 
 def beat(signature, server=DEFAULT_SERVER, port=DEFAULT_PORT):
     hb = watchdog_pb2.Beat()
@@ -42,6 +43,8 @@ def main():
     parser.add_argument("-r", "--heartrate", default=DEFAULT_HEARTRATE, help="Number of seconds between heartbeats.", type=int)
     parser.add_argument("--dumpdir", default="/tmp", help="Directory to dump state files to upon request.", type=str)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
+    parser.add_argument("--retry", default=MAX_ATTEMPTS, help="Number of times to retry a beat if connection to server fails.", type=int)
+
 
     args = parser.parse_args()
 
@@ -67,7 +70,7 @@ def main():
         except:
             raise
     else:
-        client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate)
+        client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
 
 if __name__ == '__main__':
     main()

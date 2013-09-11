@@ -2,8 +2,6 @@
 
 import socket, watchdog_pb2, os, time, socket, pwd, signal, sys
 
-MAX_ATTEMPTS = 5
-
 def t_wait(time_to_wait):
     end_time = time.time() + time_to_wait
     while time.time() < end_time:
@@ -13,7 +11,7 @@ def t_wait(time_to_wait):
         else:
             time.sleep(1)
 
-def client(server, target_port, command, delay, heartrate):
+def client(server, target_port, command, delay, heartrate, retry):
     try:
         child_pid = os.fork()
     except OSError as e:
@@ -35,7 +33,7 @@ def client(server, target_port, command, delay, heartrate):
                 break
             else:
                 attempts = 0
-                while attempts < MAX_ATTEMPTS:
+                while attempts < retry :
                     try:
                         inet = socket.socket(socket.AF_INET)
                         inet.connect((server, target_port))
@@ -43,9 +41,7 @@ def client(server, target_port, command, delay, heartrate):
                         inet.close()
                         break
                     except:
-                        print("Could not reach server, retrying")
                         attempts = attempts + 1
                         time.sleep(1)
-                if attempts == MAX_ATTEMPTS:
-                    print("Could not reach server after: " + str(MAX_ATTEMPTS) + " attempts, exiting.")
+                if attempts == retry:
                     break
