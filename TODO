@@ -1,5 +1,3 @@
-Serialize current tasks to file in daemon
-Implement daemon restarting
 librarify heartbeat technology
 get wd -d to phone home to another wd
 delete old records
