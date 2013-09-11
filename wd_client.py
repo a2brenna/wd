@@ -25,7 +25,7 @@ def client(server, target_port, command, delay, heartrate, retry):
         for sig in [signal.SIGINT]:
             signal.signal(sig, signal.SIG_IGN)
         time.sleep(delay)
-        signature = pwd.getpwuid( os.getuid() )[ 0 ] + ":" + socket.gethostname() + ":" + command[0] + ":" + str(child_pid)
+        signature = heartbeat.gen_sig(child_pid)
         while True:
             pid = t_wait(heartrate)
             if pid == child_pid:

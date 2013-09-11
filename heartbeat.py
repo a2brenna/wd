@@ -1,6 +1,10 @@
-import watchdog_pb2, socket
+import watchdog_pb2, socket, os, psutil
 
-def beat(signature, server, port):
+def gen_sig(pid=os.getpid()):
+    p = psutil.Process(pid)
+    return p.username + ":" + socket.gethostname() + ":" + p.name + ":" + str(pid)
+
+def beat(signature=gen_sig(), server, port):
     hb = watchdog_pb2.Heartbeat()
     hb.signature = signature
 
