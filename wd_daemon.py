@@ -71,7 +71,10 @@ def daemon(port, dumpdir, wd_server, wd_port):
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
     while True:
-        heartbeat.beat(server=wd_server, port=wd_port)
+        try:
+            heartbeat.beat(server=wd_server, port=wd_port)
+        except:
+            log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
         try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
