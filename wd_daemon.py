@@ -54,7 +54,7 @@ def expiration_notice(t):
     jarvis.send(message.SerializeToString())
     jarvis.close()
 
-def daemon(port, dumpdir):
+def daemon(port, dumpdir, wd_server, wd_port):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
     inet.listen(1)
@@ -71,6 +71,7 @@ def daemon(port, dumpdir):
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
     while True:
+        heartbeat.beat(server=wd_server, port=wd_port)
         try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 

@@ -54,7 +54,7 @@ def main():
                                 pass
 
         with daemon.DaemonContext():
-            exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir)
+            exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
     elif args.signature:
         try:
             heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
