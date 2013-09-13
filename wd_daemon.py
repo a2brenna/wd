@@ -74,7 +74,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
 
     while True:
         try:
-            if (time.time() - beat_time > 1.0):
+            if (time.time() - beat_time > 60.0):
                 heartbeat.beat(server=wd_server, port=wd_port)
                 beat_time = time.time()
         except:
