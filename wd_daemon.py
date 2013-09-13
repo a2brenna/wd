@@ -76,6 +76,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
         try:
             if (time.time() - beat_time > 1.0):
                 heartbeat.beat(server=wd_server, port=wd_port)
+                beat_time = time.time()
         except:
             log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
         try:
