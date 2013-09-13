@@ -107,9 +107,9 @@ def daemon(port, dumpdir, wd_server, wd_port):
                 else:
                     try:
                         expiration_notice(next_expiration)
-                        del tasks[next_expiration.signature]
                     except:
                         log.write(str(time.time()) + ": ERROR: Could not expire: " + str(next_expiration.signature) + "\n")
+                    del tasks[next_expiration.signature]
             try:
                 next_expiration = min(tasks.values(), key=get_exp)
             except:
