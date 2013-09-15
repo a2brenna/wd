@@ -24,7 +24,6 @@ def main():
     signal.signal(signal.SIGTERM, handler)
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
 
-    group = parser.add_mutually_exclusive_group()
     parser.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
     parser.add_argument("-s", "--server", default=DEFAULT_SERVER, help="Hostname of watchdog server to use.")
 
