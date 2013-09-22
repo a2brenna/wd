@@ -4,7 +4,7 @@ import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvi
 
 RECV_BUFF_SIZE=4096
 INTERVALS = 100
-CONFIDENCE = 3.0
+CONFIDENCE = 4.0
 
 tasks = {}
 
