@@ -56,7 +56,7 @@ def main():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
     elif args.query:
         try:
-            query(server=args.server, target_port=args.port)
+            sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
         except:
             raise
 
