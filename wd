@@ -20,13 +20,16 @@ def handler(signum, frame):
     print("exiting")
     sys.exit(0)
 
+def query(server=args.server, target_port=args.port):
+    pass
+
 def main():
     signal.signal(signal.SIGTERM, handler)
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
 
     parser.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
     parser.add_argument("-s", "--server", default=DEFAULT_SERVER, help="Hostname of watchdog server to use.")
-
+    parser.add_argument("-q", "--query", help="Query the watchdog server to return the list of tracked signatures")
     parser.add_argument("COMMAND", nargs=argparse.REMAINDER, help="The command to be watched. Ignored if running daemon.", type=str)
     parser.add_argument("--port", default=DEFAULT_PORT, help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("-p", "--pid", help="Pid of a process to monitor.", type=int)
@@ -55,6 +58,12 @@ def main():
 
         with daemon.DaemonContext():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
+    elif args.query:
+        try:
+            query(server=args.server, target_port=args.port)
+        except:
+            raise
+
     elif args.signature:
         try:
             heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
