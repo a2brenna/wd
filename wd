@@ -20,9 +20,6 @@ def handler(signum, frame):
     print("exiting")
     sys.exit(0)
 
-def query(server, target_port):
-    pass
-
 def main():
     signal.signal(signal.SIGTERM, handler)
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
