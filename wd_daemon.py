@@ -101,7 +101,13 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     try:
                         message.ParseFromString(data)
                     except:
-                        raise BadMessage(message)
+                        try:
+                            #A stab at backwards compatability...
+                            heartbeat = watchdog_pb2.Heartbeat()
+                            heartbeat.ParseFromString(data)
+                            message.heartbeat.CopyFrom(heartbeat)
+                        except:
+                            raise BadMessage(message)
                     if message.IsInitialized():
                         if message.HasField('beat'):
                             sig = message.beat.signature
