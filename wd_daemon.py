@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, heartbeat
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle
+from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
 INTERVALS = 100
@@ -87,7 +88,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
     while True:
         try:
             if (time.time() - beat_time > 60.0):
-                heartbeat.beat(server=wd_server, port=wd_port)
+                beat(server=wd_server, port=wd_port)
                 beat_time = time.time()
         except:
             log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
