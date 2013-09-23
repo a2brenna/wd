@@ -103,8 +103,8 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     except:
                         raise BadMessage(message)
                     if message.IsInitialized():
-                        if not (message.beat == ""):
-                            sig = beat.signature
+                        if message.HasField('beat'):
+                            sig = message.beat.signature
                             try:
                                 t = tasks[sig]
                                 t.beat()
@@ -118,7 +118,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                     pickle.dump(tasks, f)
                             except:
                                 pass
-                        elif not (message.query == ""):
+                        elif message.HasField('query'):
                             log.write(str(time.time()) + ": QUERY\n")
                         else:
                             raise UnhandledMessage(message)
