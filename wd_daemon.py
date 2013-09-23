@@ -147,6 +147,11 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     except:
                         log.write(str(time.time()) + ": ERROR: Could not expire: " + str(next_expiration.signature) + "\n")
                     del tasks[next_expiration.signature]
+                    try:
+                        with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
+                            pickle.dump(tasks, f)
+                    except:
+                        pass
             try:
                 next_expiration = min(tasks.values(), key=get_exp)
             except:
