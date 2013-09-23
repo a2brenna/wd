@@ -8,6 +8,18 @@ CONFIDENCE = 4.0
 
 tasks = {}
 
+class BadMessage(Exception):
+    def __init(self, message):
+        self.message = message
+
+class UninitializedMessage(Exception):
+    def __init(self, message):
+        self.message = message
+
+class UnhandledMessage(Exception):
+    def __init(self, message):
+        self.message = message
+
 class Task():
     def __init__(self, signature):
         self.signature = signature
