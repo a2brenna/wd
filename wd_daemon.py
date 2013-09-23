@@ -119,7 +119,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t = Task(sig)
                                 t.beat()
                                 tasks[sig] = t
-                            log.write(str(time.time()) + ": BEAT: " + str(beat.signature) + "\n")
+                            log.write(str(time.time()) + ": BEAT: " + str(message.beat.signature) + "\n")
                             try:
                                 with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
                                     pickle.dump(tasks, f)
