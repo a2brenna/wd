@@ -20,7 +20,7 @@ def handler(signum, frame):
     print("exiting")
     sys.exit(0)
 
-def query(server=args.server, target_port=args.port):
+def query(server, target_port):
     pass
 
 def main():
