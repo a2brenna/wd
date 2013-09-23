@@ -138,6 +138,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     else:
                         #unparseable message...
                         raise UninitializedMessage(message)
+                    c.close()
             if next_expiration != None:
                 if next_expiration.expiration > time.time():
                     continue
