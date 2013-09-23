@@ -1,5 +1,24 @@
 package watchdog;
 
+message Message{
+    optional Heartbeat beat = 1;
+    optional Query query = 2;
+    optional Response response = 3;
+}
+
 message Heartbeat{
     optional string signature = 1;
+}
+
+message Query{
+    optional string question = 1;
+}
+
+message Response{
+    message Task{
+        optional string signature = 1;
+        optional int32 last = 2;
+        optional int32 expected = 3;
+    }
+    repeated Task task = 1;
 }
