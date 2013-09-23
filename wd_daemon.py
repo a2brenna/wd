@@ -97,23 +97,34 @@ def daemon(port, dumpdir, wd_server, wd_port):
                 if x == inet:
                     c, client_addr = x.accept()
                     data = c.recv(RECV_BUFF_SIZE)
-                    beat = watchdog_pb2.Heartbeat()
-                    beat.ParseFromString(data)
-                    if beat.IsInitialized():
-                        sig = beat.signature
-                        try:
-                            t = tasks[sig]
-                            t.beat()
-                        except KeyError:
-                            t = Task(sig)
-                            t.beat()
-                            tasks[sig] = t
-                        log.write(str(time.time()) + ": BEAT: " + str(beat.signature) + "\n")
-                        try:
-                            with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
-                                pickle.dump(tasks, f)
-                        except:
-                            pass
+                    message = watchdog_pb2.Message()
+                    try:
+                        message.ParseFromString(data)
+                    except:
+                        raise BadMessage(message)
+                    if message.IsInitialized():
+                        if not (message.beat == ""):
+                            sig = beat.signature
+                            try:
+                                t = tasks[sig]
+                                t.beat()
+                            except KeyError:
+                                t = Task(sig)
+                                t.beat()
+                                tasks[sig] = t
+                            log.write(str(time.time()) + ": BEAT: " + str(beat.signature) + "\n")
+                            try:
+                                with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
+                                    pickle.dump(tasks, f)
+                            except:
+                                pass
+                        elif not (message.query == ""):
+                            log.write(str(time.time()) + ": QUERY\n")
+                        else:
+                            raise UnhandledMessage(message)
+                    else:
+                        #unparseable message...
+                        raise UninitializedMessage(message)
             if next_expiration != None:
                 if next_expiration.expiration > time.time():
                     continue
