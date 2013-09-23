@@ -120,6 +120,13 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 pass
                         elif message.HasField('query'):
                             log.write(str(time.time()) + ": QUERY\n")
+                            response = watchdog_pb2.Message()
+                            for s, t in tasks.iteritems():
+                                description = response.response.task.add()
+                                description.signature = s
+                                description.last = int(t.heartbeats[-1])
+                                description.expected = int(t.expiration)
+                            c.send(response.SerializeToString())
                         else:
                             raise UnhandledMessage(message)
                     else:
