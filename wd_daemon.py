@@ -102,6 +102,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     try:
                         message.ParseFromString(data)
                     except:
+                        log.write(str(time.time()) + ": Failed to parse incoming message, Attempting compatability behaviour\n")
                         try:
                             #A stab at backwards compatability...
                             heartbeat = watchdog_pb2.Heartbeat()
@@ -124,7 +125,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
                                     pickle.dump(tasks, f)
                             except:
-                                pass
+                                log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
                         elif message.HasField('query'):
                             log.write(str(time.time()) + ": QUERY\n")
                             response = watchdog_pb2.Message()
@@ -153,9 +154,10 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
                             pickle.dump(tasks, f)
                     except:
-                        pass
+                        log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
             try:
                 next_expiration = min(tasks.values(), key=get_exp)
+                log.write(str(time.time()) + ": INFO: Next expiration is of: " + next_expiration.signature + " at " + str(next_expiration.expiration) + "\n")
             except:
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
