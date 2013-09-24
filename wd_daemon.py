@@ -71,6 +71,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
 
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
+    beat(server=wd_server, port=wd_port)
     beat_time = time.time()
 
     while True:
