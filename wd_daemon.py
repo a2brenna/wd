@@ -131,9 +131,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         raise UninitializedMessage(message)
                     c.close()
             if next_expiration != None:
-                if next_expiration.expiration > time.time():
-                    continue
-                else:
+                if next_expiration.expiration < time.time():
                     try:
                         expiration_notice(next_expiration)
                     except:
