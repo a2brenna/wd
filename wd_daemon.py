@@ -38,18 +38,6 @@ class Task():
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
             return
 
-def dump(tasks, next_expiration):
-    s = ""
-    s += ("Time: " + str(time.time()) + "\n")
-    if next_expiration != None:
-        s += ("Expiration: " + str(next_expiration.expiration) + " : " + next_expiration.signature + "\n")
-    for t in tasks.values():
-        s += ("\tExpiration: " + str(t.expiration) + "\n")
-        s += ("\tHeartbeats: " + str(len(t.heartbeats)) + "\n")
-        s += (pprint.pformat(t.heartbeats) + "\n\n")
-    return s
-
-
 def get_intervals(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
 
@@ -161,6 +149,4 @@ def daemon(port, dumpdir, wd_server, wd_port):
             except:
                 next_expiration = None
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
-            f = open(dumpdir + "/wd." + str(os.getpid()) + "." + str(time.time()), 'w')
-            f.write(dump(tasks, next_expiration))
-            f.close()
+            pass
