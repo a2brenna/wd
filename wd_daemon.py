@@ -24,7 +24,7 @@ class UnhandledMessage(Exception):
 class Task():
     def __init__(self, signature):
         self.signature = signature
-        self.expiration = time.time() + 3600 * 24
+        self.expiration = 2147483646
         self.heartbeats = []
 
     def beat(self):
