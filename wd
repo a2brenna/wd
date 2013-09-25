@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil
+import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil, utils
 from wd_daemon import daemon as exec_daemon
 from wd_client import client
 
@@ -26,13 +26,7 @@ def main():
     args = parser.parse_args()
 
     if args.daemon:
-        #look for already running daemon and kill it
-        for p in psutil.process_iter():
-            if p.name == "wd" and p.pid != os.getpid():
-                for c in p.get_connections():
-                    if c.local_address[1] == args.port:
-                        p.kill() #TODO: Maybe swap this for terminate and graceful shutdown behaviour
-
+        utils.kill_ancestor(args.port)
         with daemon.DaemonContext():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
     elif args.query:
