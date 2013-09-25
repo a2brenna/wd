@@ -64,6 +64,26 @@ def dump_state(tasks):
     except:
         logging.warning("Failed to dump state")
 
+def awake(signum, frame):
+    global next_expiration
+    global tasks
+    logging.debug(next_expiration)
+    if next_expiration != None:
+        if next_expiration.expiration < time.time():
+            try:
+                expiration_notice(next_expiration)
+            except:
+                logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
+            dump_state(tasks)
+    try:
+        current_time = time.time()
+        next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
+        signal.setitimer(signal.ITIMER_REAL, min(next_expiration.expiration - time.time(), beat_time + 60 - time.time()))
+        logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
+    except:
+        next_expiration = None
+        logging.info("No pending expiration")
+
 def daemon(port, dumpdir, wd_server, wd_port):
     global tasks
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
@@ -142,19 +162,6 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         #unparseable message...
                         raise UninitializedMessage(message)
                     c.close()
-            if next_expiration != None:
-                if next_expiration.expiration < time.time():
-                    try:
-                        expiration_notice(next_expiration)
-                    except:
-                        logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
-                    dump_state(tasks)
-            try:
-                current_time = time.time()
-                next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
-                logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
-            except:
-                next_expiration = None
-                logging.info("No pending expiration")
+                awake(signal.SIGALRM, None)
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             pass
