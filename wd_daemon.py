@@ -53,6 +53,13 @@ def expiration_notice(t):
     jarvis.send(message.SerializeToString())
     jarvis.close()
 
+def dump_state()
+    try:
+        with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
+            pickle.dump(tasks, f)
+    except:
+        log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
+
 def daemon(port, dumpdir, wd_server, wd_port):
     inet = socket.socket(socket.AF_INET)
     inet.bind(('', port))
@@ -110,11 +117,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t.beat()
                                 tasks[sig] = t
                             log.write(str(time.time()) + ": BEAT: " + str(message.beat.signature) + "\n")
-                            try:
-                                with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
-                                    pickle.dump(tasks, f)
-                            except:
-                                log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
+                            dump_state()
                         elif message.HasField('query'):
                             log.write(str(time.time()) + ": QUERY\n")
                             response = watchdog_pb2.Message()
@@ -136,11 +139,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         expiration_notice(next_expiration)
                     except:
                         log.write(str(time.time()) + ": ERROR: Could not expire: " + str(next_expiration.signature) + "\n")
-                    try:
-                        with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
-                            pickle.dump(tasks, f)
-                    except:
-                        log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
+                    dump_state()
             try:
                 current_time = time.time()
                 next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
