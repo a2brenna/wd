@@ -36,15 +36,10 @@ def main():
         #look for already running daemon and kill it
 
         for p in psutil.process_iter():
-            if p.name == "wd":
-                if p.pid != os.getpid():
-                    if p.ppid == 1:
-                        for c in p.get_connections():
-                            try:
-                                if c.local_address[1] == args.port:
-                                    p.kill() #TODO: Maybe swap this for terminate and graceful shutdown behaviour
-                            except:
-                                pass
+            if p.name == "wd" and p.pid != os.getpid():
+                for c in p.get_connections():
+                    if c.local_address[1] == args.port:
+                        p.kill() #TODO: Maybe swap this for terminate and graceful shutdown behaviour
 
         with daemon.DaemonContext():
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
