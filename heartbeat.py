@@ -15,7 +15,7 @@ def beat(server, port, signature=gen_sig()):
         s.send(message.SerializeToString())
         s.close
     except:
-        logging.warning("Failed to send beat " + signature + " to " + server + ":" + port)
+        logging.warning("Failed to send beat " + signature + " to " + server + ":" + str(port))
 
 def query(server, port):
     message = watchdog_pb2.Message()
