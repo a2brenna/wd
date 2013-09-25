@@ -11,6 +11,7 @@ global tasks
 tasks = {}
 global next_expiration
 next_expiration = None
+global beat_time
 
 class BadMessage(Exception):
     def __init(self, message):
@@ -67,7 +68,15 @@ def dump_state(tasks):
 def awake(signum, frame):
     global next_expiration
     global tasks
+    global beat_time
     logging.debug(next_expiration)
+    try:
+        if (time.time() - beat_time > 60.0):
+            beat(server=wd_server, port=wd_port, signature='wd:primary')
+            beat_time = time.time()
+    except:
+        logging.warning("Failed to contact wd server")
+
     if next_expiration != None:
         if next_expiration.expiration < time.time():
             try:
@@ -82,10 +91,13 @@ def awake(signum, frame):
         logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
     except:
         next_expiration = None
+        signal.setitimer(beat_time + 60.0 - time.time())
         logging.info("No pending expiration")
 
 def daemon(port, dumpdir, wd_server, wd_port):
     global tasks
+    global beat_time
+
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
 
     try:
