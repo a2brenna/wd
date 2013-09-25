@@ -53,7 +53,7 @@ def expiration_notice(t):
     jarvis.send(message.SerializeToString())
     jarvis.close()
 
-def dump_state()
+def dump_state():
     try:
         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
             pickle.dump(tasks, f)
