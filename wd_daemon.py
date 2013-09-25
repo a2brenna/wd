@@ -53,10 +53,11 @@ def expiration_notice(t):
     jarvis.send(message.SerializeToString())
     jarvis.close()
 
-def dump_state():
+def dump_state(tasks):
     try:
         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
             pickle.dump(tasks, f)
+        logging.debug("Dumped state")
     except:
         logging.warning("Failed to dump state")
 
@@ -123,7 +124,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t.beat()
                                 tasks[sig] = t
                             logging.debug("Received beat: " + str(message.beat.signature))
-                            dump_state()
+                            dump_state(tasks)
                         elif message.HasField('query'):
                             logging.debug("Received query: " + str(message.query.question))
                             response = watchdog_pb2.Message()
@@ -145,7 +146,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         expiration_notice(next_expiration)
                     except:
                         logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
-                    dump_state()
+                    dump_state(tasks)
             try:
                 current_time = time.time()
                 next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
