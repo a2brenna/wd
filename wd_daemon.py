@@ -62,13 +62,6 @@ def dump_state():
 
 def daemon(port, dumpdir, wd_server, wd_port):
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
-    try:
-        inet = socket.socket(socket.AF_INET)
-        inet.bind(('', port))
-        inet.listen(1)
-        logging.debug("Now listening on port " + str(port))
-    except:
-        logging.critical("Failed to open socket.\n")
 
     next_expiration = None
 
@@ -85,6 +78,14 @@ def daemon(port, dumpdir, wd_server, wd_port):
         beat(server=wd_server, port=wd_port, signature='wd:primary')
     except:
         logging.warning("Failed to contact wd server " + wd_server + ":" + str(wd_port))
+
+    try:
+        inet = socket.socket(socket.AF_INET)
+        inet.bind(('', port))
+        inet.listen(1)
+        logging.debug("Now listening on port " + str(port))
+    except:
+        logging.critical("Failed to open socket.\n")
 
     while True:
         try:
