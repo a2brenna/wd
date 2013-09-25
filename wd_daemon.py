@@ -58,7 +58,7 @@ def dump_state():
         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
             pickle.dump(tasks, f)
     except:
-        log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
+        logging.warning("Failed to dump state")
 
 def daemon(port, dumpdir, wd_server, wd_port):
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
