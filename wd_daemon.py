@@ -29,14 +29,12 @@ class Task():
 
     def beat(self):
         self.heartbeats.append(time.time())
-        if len(self.heartbeats) < (INTERVALS + 1):
-            return
-        else:
+        if len(self.heartbeats) > INTERVALS:
             intervals = get_intervals(self.heartbeats[-INTERVALS:])
             mean = numpy.mean(intervals[-INTERVALS:])
             std = numpy.std(intervals[-INTERVALS:])
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
-            return
+        return
 
 def get_intervals(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
@@ -67,7 +65,6 @@ def daemon(port, dumpdir, wd_server, wd_port):
             tasks = dict(pickle.load(f))
     except:
         tasks = {}
-
 
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
