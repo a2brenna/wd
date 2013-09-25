@@ -139,16 +139,17 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         expiration_notice(next_expiration)
                     except:
                         log.write(str(time.time()) + ": ERROR: Could not expire: " + str(next_expiration.signature) + "\n")
-                    del tasks[next_expiration.signature]
                     try:
                         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
                             pickle.dump(tasks, f)
                     except:
                         log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
             try:
-                next_expiration = min(tasks.values(), key=get_exp)
+                current_time = time.time()
+                next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
                 log.write(str(time.time()) + ": INFO: Next expiration is of: " + next_expiration.signature + " at " + str(next_expiration.expiration) + "\n")
             except:
                 next_expiration = None
+                log.write(str(time.time()) + ": INFO: No next expiration\n")
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             pass
