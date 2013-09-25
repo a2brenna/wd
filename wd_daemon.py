@@ -71,13 +71,16 @@ def daemon(port, dumpdir, wd_server, wd_port):
 
     log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
 
-    beat(server=wd_server, port=wd_port)
     beat_time = time.time()
+    try:
+        beat(server=wd_server, port=wd_port, signature='wd:primary')
+    except:
+        log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
 
     while True:
         try:
             if (time.time() - beat_time > 60.0):
-                beat(server=wd_server, port=wd_port)
+                beat(server=wd_server, port=wd_port, signature='wd:primary')
                 beat_time = time.time()
         except:
             log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
