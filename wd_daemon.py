@@ -109,15 +109,15 @@ def daemon(port, dumpdir, wd_server, wd_port):
         tasks = {}
         logging.debug("Could not load state from ~/.wd.state")
 
-    #TODO: investigate why this doesn't work as expected
-    #signal.siginterrupt(signal.SIGALRM, True)
-    signal.signal(signal.SIGALRM, awake)
-
     beat_time = time.time()
     try:
         beat(server=wd_server, port=wd_port, signature='wd:primary')
     except:
         logging.warning("Failed to contact wd server " + wd_server + ":" + str(wd_port))
+
+    #TODO: investigate why this doesn't work as expected
+    #signal.siginterrupt(signal.SIGALRM, True)
+    signal.signal(signal.SIGALRM, awake)
 
     try:
         inet = socket.socket(socket.AF_INET)
