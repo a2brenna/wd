@@ -5,7 +5,7 @@ from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
 INTERVALS = 100
-CONFIDENCE = 4.0
+CONFIDENCE = 5.0
 
 tasks = {}
 
