@@ -75,16 +75,16 @@ def daemon(port, dumpdir, wd_server, wd_port):
     try:
         with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
             tasks = dict(pickle.load(f))
+            logging.debug("Loaded state from ~/.wd.state")
     except:
         tasks = {}
-
-    log = open(os.path.expanduser("~/.wd.log"), 'a', 0)
+        logging.debug("Could not load state from ~/.wd.state")
 
     beat_time = time.time()
     try:
         beat(server=wd_server, port=wd_port, signature='wd:primary')
     except:
-        log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
+        logging.warning("Failed to contact wd server " + wd_server + ":" + str(wd_port))
 
     while True:
         try:
@@ -92,7 +92,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                 beat(server=wd_server, port=wd_port, signature='wd:primary')
                 beat_time = time.time()
         except:
-            log.write(str(time.time()) + ": WARNING: Failed to contact wd server" + wd_server + ":" + str(wd_port) +"\n")
+            logging.warning("Failed to contact wd server" + wd_server + ":" + str(wd_port))
         try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
@@ -103,7 +103,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     try:
                         message.ParseFromString(data)
                     except:
-                        log.write(str(time.time()) + ": Failed to parse incoming message, Attempting compatability behaviour\n")
+                        logging.warning("Failed to parse incoming message, attempting compatability behaviour")
                         try:
                             #A stab at backwards compatability...
                             heartbeat = watchdog_pb2.Heartbeat()
@@ -121,10 +121,10 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t = Task(sig)
                                 t.beat()
                                 tasks[sig] = t
-                            log.write(str(time.time()) + ": BEAT: " + str(message.beat.signature) + "\n")
+                            logging.debug("Received beat: " + str(message.beat.signature))
                             dump_state()
                         elif message.HasField('query'):
-                            log.write(str(time.time()) + ": QUERY\n")
+                            logging.debug("Received query: " + str(message.query.question))
                             response = watchdog_pb2.Message()
                             for s, t in tasks.iteritems():
                                 description = response.response.task.add()
@@ -143,14 +143,14 @@ def daemon(port, dumpdir, wd_server, wd_port):
                     try:
                         expiration_notice(next_expiration)
                     except:
-                        log.write(str(time.time()) + ": ERROR: Could not expire: " + str(next_expiration.signature) + "\n")
+                        logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
                     dump_state()
             try:
                 current_time = time.time()
                 next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
-                log.write(str(time.time()) + ": INFO: Next expiration is of: " + next_expiration.signature + " at " + str(next_expiration.expiration) + "\n")
+                logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
             except:
                 next_expiration = None
-                log.write(str(time.time()) + ": INFO: No next expiration\n")
+                logging.info("No pending expiration")
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             pass
