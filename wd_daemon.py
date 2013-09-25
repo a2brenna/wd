@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -61,9 +61,14 @@ def dump_state():
         log.write(str(time.time()) + ": WARNING: Failed to dump state\n")
 
 def daemon(port, dumpdir, wd_server, wd_port):
-    inet = socket.socket(socket.AF_INET)
-    inet.bind(('', port))
-    inet.listen(1)
+    logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
+    try:
+        inet = socket.socket(socket.AF_INET)
+        inet.bind(('', port))
+        inet.listen(1)
+        logging.debug("Now listening on port " + str(port))
+    except:
+        logging.critical("Failed to open socket.\n")
 
     next_expiration = None
 
