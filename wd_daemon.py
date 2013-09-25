@@ -7,7 +7,10 @@ RECV_BUFF_SIZE=4096
 INTERVALS = 100
 CONFIDENCE = 5.0
 
+global tasks
 tasks = {}
+global next_expiration
+next_expiration = None
 
 class BadMessage(Exception):
     def __init(self, message):
@@ -62,9 +65,8 @@ def dump_state(tasks):
         logging.warning("Failed to dump state")
 
 def daemon(port, dumpdir, wd_server, wd_port):
+    global tasks
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
-
-    next_expiration = None
 
     try:
         with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
