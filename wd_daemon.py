@@ -99,6 +99,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
     global beat_time
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
+    logging.info("Secondary watchdog server: " + wd_server + ":" + str(wd_port))
 
     try:
         with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
