@@ -29,7 +29,7 @@ def query(server, port):
         data = s.recv(4096)
         s.close
     except:
-        loggging.error("Failed to query " + server + ":" + str(port))
+        logging.error("Failed to query " + server + ":" + str(port))
 
     response.ParseFromString(data)
     return response.response
