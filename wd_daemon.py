@@ -95,7 +95,7 @@ def awake(signum, frame):
         logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
     except:
         next_expiration = None
-        signal.setitimer(signal.ITIMER_REAL, beat_time + 60.0 - time.time())
+        signal.setitimer(signal.ITIMER_REAL, max(beat_time + 60.0 - time.time(), 0.001))
         logging.info("No pending expiration")
 
 def daemon(port, dumpdir, wd_server, wd_port):
