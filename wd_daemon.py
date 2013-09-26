@@ -167,6 +167,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t.beat()
                                 tasks[sig] = t
                             logging.debug("Received beat: " + str(message.beat.signature))
+                            awake(signal.SIGALRM, None)
                             dump_state(tasks)
                         elif message.HasField('query'):
                             logging.debug("Received query: " + str(message.query.question))
@@ -183,7 +184,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                         #unparseable message...
                         raise UninitializedMessage(message)
                     c.close()
-                awake(signal.SIGALRM, None)
+                #awake(signal.SIGALRM, None)
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             pass
         except select.error:
