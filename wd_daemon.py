@@ -69,17 +69,21 @@ def awake(signum, frame):
     global next_expiration
     global tasks
     global beat_time
-    logging.debug(next_expiration)
+    logging.debug("Awake")
     try:
         if (time.time() - beat_time > 60.0):
+            logging.debug("Beating")
             beat(server=wd_server, port=wd_port, signature='wd:primary')
             beat_time = time.time()
     except:
         logging.warning("Failed to contact wd server")
 
     if next_expiration != None:
+        logging.debug("Checking next_expiration")
         if next_expiration.expiration < time.time():
+            logging.debug("Task: " + next_expiration.signature + " has expired")
             try:
+                logging.debug("Sending expiration notice")
                 expiration_notice(next_expiration)
             except:
                 logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
