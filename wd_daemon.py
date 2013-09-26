@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging, comm
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -84,7 +84,7 @@ def awake(signum, frame):
             logging.debug("Task: " + next_expiration.signature + " has expired")
             try:
                 logging.debug("Sending expiration notice")
-                expiration_notice(next_expiration)
+                comm.send_jarvis("wd." + socket.gethostname(), pwd.getpwuid( os.getuid() )[ 0 ], next_expiration.signature + " has expired.")
             except:
                 logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
             dump_state(tasks)
