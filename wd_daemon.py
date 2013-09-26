@@ -179,10 +179,10 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 description.expected = int(t.expiration)
                             c.send(response.SerializeToString())
                         else:
-                            raise UnhandledMessage(message)
+                            logging.error("Unhandled Message: " + str(message))
                     else:
                         #unparseable message...
-                        raise UninitializedMessage(message)
+                        logging.error("Uninitialized Message: " + str(message))
                     c.close()
                 #awake(signal.SIGALRM, None)
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
