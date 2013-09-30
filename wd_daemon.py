@@ -4,7 +4,8 @@ import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvi
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
-INTERVALS = 100
+MIN_INTERVALS = 100
+INTERVALS = 10000
 CONFIDENCE = 5.0
 
 global tasks
@@ -33,10 +34,10 @@ class Task():
 
     def beat(self):
         self.heartbeats.append(time.time())
-        if len(self.heartbeats) > INTERVALS:
+        if len(self.heartbeats) > MIN_INTERVALS:
             intervals = get_intervals(self.heartbeats[-INTERVALS:])
-            mean = numpy.mean(intervals[-INTERVALS:])
-            std = numpy.std(intervals[-INTERVALS:])
+            mean = numpy.mean(intervals)
+            std = numpy.std(intervals)
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
         return
 
