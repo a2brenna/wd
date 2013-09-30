@@ -5,6 +5,8 @@ message Response{
         optional string signature = 1;
         optional int32 last = 2;
         optional int32 expected = 3;
+        optional double mean = 4;
+        optional double deviation = 5;
     }
     repeated Task task = 1;
 }

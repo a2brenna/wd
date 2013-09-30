@@ -41,6 +41,23 @@ class Task():
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
         return
 
+    def intervals(self):
+        return get_intervals(self.heartbeats[-INTERVALS:])
+
+    def deviation(self):
+        intervals = self.intervals()
+        if len(intervals) > 2:
+            return numpy.std(intervals)
+        else:
+            return 0
+
+    def mean(self):
+        intervals = self.intervals()
+        if len(intervals) > 2:
+            return numpy.mean(intervals)
+        else:
+            return 0
+
 def get_intervals(t):
     return [t[i+1]-t[i] for i in range(len(t)-1)]
 
@@ -178,6 +195,8 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 description.signature = s
                                 description.last = int(t.heartbeats[-1])
                                 description.expected = int(t.expiration)
+                                description.mean = float(t.mean())
+                                description.deviation = float(t.deviation())
                             c.send(response.SerializeToString())
                         else:
                             logging.error("Unhandled Message: " + str(message))
