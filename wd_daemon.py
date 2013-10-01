@@ -184,7 +184,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 t = Task(sig)
                                 t.beat()
                                 tasks[sig] = t
-                            logging.debug("Received beat: " + str(message.beat.signature))
+                            logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                             awake(signal.SIGALRM, None)
                             dump_state(tasks)
                         elif message.HasField('query'):
