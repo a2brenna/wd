@@ -25,12 +25,16 @@ def main():
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
     parser.add_argument("--retry", default=MAX_ATTEMPTS, help="Number of times to retry a beat if connection to server fails.", type=int)
     parser.add_argument("--forget", help="Number of times to retry a beat if connection to server fails.", type=str)
+    parser.add_argument("-i", "--interactive", default=False, action="store_true", help="Force daemon to execute whilst connected to terminal (useful for debugging).")
     args = parser.parse_args()
 
     if args.daemon:
         utils.kill_ancestor(args.port)
-        with daemon.DaemonContext():
+        if args.interactive:
             exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
+        else:
+            with daemon.DaemonContext():
+                exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
     elif args.query:
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
     elif args.signature:
