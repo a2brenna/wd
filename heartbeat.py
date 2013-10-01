@@ -33,3 +33,17 @@ def query(server, port):
 
     response.ParseFromString(data)
     return response.response
+
+def forget(server, port, signature):
+    message = watchdog_pb2.Message()
+    command = message.orders.add()
+    to_forget = command.to_forget.add()
+    to_forget.signature = signature
+
+    try:
+        s = socket.socket(socket.AF_INET)
+        s.connect((server, port))
+        s.send(message.SerializeToString())
+        s.close
+    except:
+        logging.warning("Failed to send forget: " + signature + " to " + server + ":" + str(port))

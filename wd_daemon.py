@@ -198,6 +198,17 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 description.mean = float(t.mean())
                                 description.deviation = float(t.deviation())
                             c.send(response.SerializeToString())
+                            awake(signal.SIGALRM, None)
+                        elif len(message.orders) > 0:
+                            logging.debug("Received orders")
+                            for cmd in message.orders:
+                                for fgt in cmd.to_forget:
+                                    try:
+                                        del tasks[fgt.signature]
+                                    except:
+                                        logging.warning("Failed to delete: " + fgt.signature)
+                            awake(signal.SIGALRM, None)
+                            dump_state(tasks)
                         else:
                             logging.error("Unhandled Message: " + str(message))
                     else:

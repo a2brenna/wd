@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--dumpdir", default="/tmp", help="Directory to dump state files to upon request.", type=str)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
     parser.add_argument("--retry", default=MAX_ATTEMPTS, help="Number of times to retry a beat if connection to server fails.", type=int)
+    parser.add_argument("--forget", help="Number of times to retry a beat if connection to server fails.", type=str)
     args = parser.parse_args()
 
     if args.daemon:
@@ -35,6 +36,8 @@ def main():
             heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
     elif args.pid:
         pass
+    elif args.forget:
+        heartbeat.forget(args.server, args.port, args.forget)
     else:
         client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
 

@@ -15,6 +15,7 @@ message Message{
     optional Heartbeat beat = 1;
     optional Query query = 2;
     optional Response response = 3;
+    repeated Command orders = 4;
 }
 
 message Heartbeat{
@@ -23,4 +24,11 @@ message Heartbeat{
 
 message Query{
     optional string question = 1;
+}
+
+message Command{
+    message Forget{
+        optional string signature = 1;
+    }
+    repeated Forget to_forget = 1;
 }
