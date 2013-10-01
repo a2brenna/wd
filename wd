@@ -3,6 +3,7 @@
 import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil, utils
 from wd_daemon import daemon as exec_daemon
 from wd_client import client
+from wd_client import client2
 
 #TODO: List of ports to use in succession in case of collisions?
 DEFAULT_PORT = 7877
@@ -35,7 +36,8 @@ def main():
     elif args.signature:
             heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
     elif args.pid:
-        pass
+        with daemon.DaemonContext():
+            client2(server=args.server, target_port=args.port, pid=args.pid, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
     elif args.forget:
         heartbeat.forget(args.server, args.port, args.forget)
     else:
