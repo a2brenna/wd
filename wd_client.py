@@ -34,7 +34,7 @@ def client(server, target_port, command, delay, heartrate, retry):
                 attempts = 0
                 while attempts < retry :
                     try:
-                        heartbeat.beat(signature, server, target_port)
+                        heartbeat.beat(server, target_port, signature)
                         break
                     except:
                         attempts = attempts + 1
