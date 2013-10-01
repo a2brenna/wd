@@ -160,6 +160,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
                 if x == inet:
+                    logging.debug("Incoming connection")
                     c, client_addr = x.accept()
                     data = c.recv(RECV_BUFF_SIZE)
                     message = watchdog_pb2.Message()
