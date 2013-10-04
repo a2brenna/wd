@@ -43,11 +43,13 @@ def client(server, target_port, command, delay, heartrate, retry):
                     break
 
 
-def client2(server, target_port, pid, delay, heartrate, retry):
+def client2(server, target_port, pid, delay, heartrate, retry, signature):
     import psutil
     start_time = psutil.Process(pid).create_time
 
     time.sleep(delay)
+    if signature == None:
+        signature = heartbeat.gen_sig(pid)
     while True:
         try:
             if start_time != psutil.Process(pid).create_time:
@@ -57,7 +59,7 @@ def client2(server, target_port, pid, delay, heartrate, retry):
         attempts = 0
         while attempts < retry :
             try:
-                heartbeat.beat(server, target_port, heartbeat.gen_sig(pid))
+                heartbeat.beat(server, target_port, signature)
                 break
             except:
                 raise

@@ -37,11 +37,11 @@ def main():
                 exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
     elif args.query:
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
-    elif args.signature:
-            heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
     elif args.pid:
         with daemon.DaemonContext():
-            client2(server=args.server, target_port=args.port, pid=args.pid, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
+            client2(server=args.server, target_port=args.port, pid=args.pid, delay=args.delay, heartrate=args.heartrate, retry=args.retry, signature=args.signature)
+    elif args.signature:
+            heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
     elif args.forget:
         heartbeat.forget(args.server, args.port, args.forget)
     else:
