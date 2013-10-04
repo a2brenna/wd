@@ -2,6 +2,7 @@
 
 import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging, comm, traceback
 from heartbeat import beat
+from utils import send_email
 
 RECV_BUFF_SIZE=4096
 MIN_INTERVALS = 100
@@ -118,8 +119,14 @@ def awake(signum, frame):
 
 def log_uncaught(ex_cls, ex, tb):
     logging.critical("Unhandled Exception!")
-    logging.critical(''.join(traceback.format_tb(tb)))
-    logging.critical('{0}: {1}'.format(ex_cls, ex))
+    trace_string = ''.join(traceback.format_tb(tb))
+    logging.critical(trace_string)
+    exception_string = '{0}: {1}'.format(ex_cls, ex)
+    logging.critical(exception_string)
+    msg = "WD on " + socket.gethostname() + " has failed\n"
+    msg = msg + trace_string + "\n"
+    msg = msg + exception_string + "\n"
+    send_email(target='a2brenna@csclub.uwaterloo.ca', subject='WD FAILURE', sender='Watchdog', message=msg)
 
 def daemon(port, dumpdir, wd_server, wd_port):
     global tasks
