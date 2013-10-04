@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging, comm
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pprint, jarvis_pb2, pwd, pickle, logging, comm, traceback
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -116,11 +116,17 @@ def awake(signum, frame):
         signal.setitimer(signal.ITIMER_REAL, max(beat_time + 60.0 - time.time(), 0.001))
         logging.info("No pending expiration")
 
+def log_uncaught(ex_cls, ex, tb):
+    logging.critical("Unhandled Exception!")
+    logging.critical(''.join(traceback.format_tb(tb)))
+    logging.critical('{0}: {1}'.format(ex_cls, ex))
+
 def daemon(port, dumpdir, wd_server, wd_port):
     global tasks
     global beat_time
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
+    sys.excepthook = log_uncaught
     logging.info("Secondary watchdog server: " + wd_server + ":" + str(wd_port))
 
     try:
