@@ -9,6 +9,11 @@ MIN_INTERVALS = 100
 INTERVALS = 10000
 CONFIDENCE = 5.0
 
+global WD_SERVER
+WD_SERVER = ""
+global WD_PORT
+WD_PORT = 0
+
 global tasks
 tasks = {}
 global next_expiration
@@ -94,11 +99,13 @@ def awake(signum, frame):
     global next_expiration
     global tasks
     global beat_time
+    global WD_SERVER
+    global WD_PORT
     logging.debug("Awake")
     try:
         if (time.time() - beat_time > 60.0):
             logging.debug("Beating")
-            beat(server=wd_server, port=wd_port, signature='wd:primary')
+            beat(server=WD_SERVER, port=WD_PORT, signature='wd:primary')
             beat_time = time.time()
     except Exception as e:
         logging.warning("Failed to contact wd server")
@@ -140,6 +147,11 @@ def log_uncaught(ex_cls, ex, tb):
 def daemon(port, dumpdir, wd_server, wd_port):
     global tasks
     global beat_time
+
+    global WD_SERVER
+    WD_SERVER = wd_server
+    global WD_PORT
+    WD_PORT = wd_port
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     sys.excepthook = log_uncaught
