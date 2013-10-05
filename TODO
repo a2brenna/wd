@@ -1,4 +1,7 @@
 librarify heartbeat technology
 get wd -d to phone home to another wd
-delete old records
 delete old jobs
+
+Convert to Daemon
+Get signal driven IO working
+SSL
