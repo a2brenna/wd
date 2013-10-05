@@ -32,8 +32,13 @@ class Task():
         self.signature = signature
         self.expiration = 2147483646
         self.heartbeats = []
+        self.ivals= []
+        self.last = time.time()
 
     def beat(self):
+        current = time.time()
+        self.ivals.append(current - self.last)
+        self.last = current
         self.heartbeats.append(time.time())
         if len(self.heartbeats) > MIN_INTERVALS:
             intervals = get_intervals(self.heartbeats[-INTERVALS:])
