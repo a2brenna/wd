@@ -188,13 +188,6 @@ def daemon(port, dumpdir, wd_server, wd_port):
 
     while True:
         try:
-            if (time.time() - beat_time > 60.0):
-                beat(server=wd_server, port=wd_port, signature='wd:primary')
-                beat_time = time.time()
-        except Exception as e:
-            logging.warning("Failed to contact wd server" + wd_server + ":" + str(wd_port))
-            logging.exception(e)
-        try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
                 if x == inet:
