@@ -195,7 +195,7 @@ class WatchDog():
                 logging.exception(e)
 
 
-def daemon(port, dumpdir, wd_server, wd_port):
+def daemon(port, wd_server, wd_port):
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     sys.excepthook = log_uncaught

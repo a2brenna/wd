@@ -21,7 +21,6 @@ def main():
     parser.add_argument("-p", "--pid", help="Pid of a process to monitor.", type=int)
     parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
     parser.add_argument("-r", "--heartrate", default=DEFAULT_HEARTRATE, help="Number of seconds between heartbeats.", type=int)
-    parser.add_argument("--dumpdir", default="/tmp", help="Directory to dump state files to upon request.", type=str)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
     parser.add_argument("--retry", default=MAX_ATTEMPTS, help="Number of times to retry a beat if connection to server fails.", type=int)
     parser.add_argument("--forget", help="Ask the server to forget about a tracked task with the supplied signature", type=str)
@@ -31,10 +30,10 @@ def main():
     if args.daemon:
         utils.kill_ancestor(args.port)
         if args.interactive:
-            exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
+            exec_daemon(port=DEFAULT_PORT, wd_server=args.server, wd_port=args.port)
         else:
             with daemon.DaemonContext():
-                exec_daemon(port=DEFAULT_PORT, dumpdir=args.dumpdir, wd_server=args.server, wd_port=args.port)
+                exec_daemon(port=DEFAULT_PORT, wd_server=args.server, wd_port=args.port)
     elif args.query:
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
     elif args.pid:
