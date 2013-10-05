@@ -57,7 +57,6 @@ def log_uncaught(ex_cls, ex, tb):
     comm.send_email(target='a2brenna@csclub.uwaterloo.ca', subject='WD FAILURE', sender='Watchdog', message=msg)
 
 class WatchDog():
-
     def __init__(self, port, wd_server, wd_port):
         self.port = port
         self.wd_server = wd_server
@@ -147,11 +146,9 @@ class WatchDog():
                             if message.HasField('beat'):
                                 sig = message.beat.signature
                                 try:
-                                    t = self.tasks[sig]
-                                    t.beat()
+                                    self.tasks[sig].beat()
                                 except KeyError:
-                                    t = Task(sig)
-                                    self.tasks[sig] = t
+                                    self.tasks[sig] = Task(sig)
                                 logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                                 self.awake(signal.SIGALRM, None)
                                 self.dump_state()
@@ -184,7 +181,6 @@ class WatchDog():
                             #unparseable message...
                             logging.error("Uninitialized Message: " + str(message))
                         c.close()
-                    #self.awake(signal.SIGALRM, None)
             except KeyboardInterrupt: #ALSO CATCHES SIGINT
                 pass
             except select.error as e:
@@ -192,7 +188,6 @@ class WatchDog():
             except MessageError as e:
                 logging.warning("Message Error: " + e.error + " on " + e.message)
                 logging.exception(e)
-
 
 def daemon(port, wd_server, wd_port):
 
