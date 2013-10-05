@@ -1,4 +1,4 @@
-#!/usr/bin/python
+!/usr/bin/python
 
 import signal, sys, socket, select, watchdog_pb2, time, numpy, os, jarvis_pb2, pwd, pickle, logging, comm, traceback
 from heartbeat import beat
@@ -59,8 +59,12 @@ def log_uncaught(ex_cls, ex, tb):
 class WatchDog():
     def __init__(self, port, wd_server, wd_port):
         self.port = port
-        self.wd_server = wd_server
-        self.wd_port = wd_port
+        if(socket.getaddrinfo(wd_server, wd_port) == socket.getaddrinfo(socket.gethostname(), port)):
+            self.redundancy = False
+        else:
+            self.redundancy = True
+            self.wd_server = wd_server
+            self.wd_port = wd_port
 
         try:
             with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
@@ -84,14 +88,15 @@ class WatchDog():
 
     def awake(self, signum, frame):
         logging.debug("Awake")
-        try:
-            if (time.time() - self.beat_time > 60.0):
-                logging.debug("Beating")
-                beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
-                self.beat_time = time.time()
-        except Exception as e:
-            logging.warning("Failed to contact wd server")
-            logging.exception(e)
+        if self.redundancy:
+            try:
+                if (time.time() - self.beat_time > 60.0):
+                    logging.debug("Beating")
+                    beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
+                    self.beat_time = time.time()
+            except Exception as e:
+                logging.warning("Failed to contact wd server")
+                logging.exception(e)
 
         if self.next_expiration != None:
             logging.debug("Checking self.next_expiration")
