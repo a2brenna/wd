@@ -29,7 +29,6 @@ class Task():
     def __init__(self, signature):
         self.signature = signature
         self.expiration = 2147483646
-        self.heartbeats = []
         self.ivals= []
         self.last = time.time()
 
@@ -37,33 +36,23 @@ class Task():
         current = time.time()
         self.ivals.append(current - self.last)
         self.last = current
-        self.heartbeats.append(time.time())
-        if len(self.heartbeats) > MIN_INTERVALS:
-            intervals = self.intervals()
-            mean = numpy.mean(intervals)
-            std = numpy.std(intervals)
+        if len(self.ivals) > MIN_INTERVALS:
+            mean = numpy.mean(self.ivals)
+            std = numpy.std(self.ivals)
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
         return
 
-    def intervals(self):
-        return get_intervals(self.heartbeats[-INTERVALS:])
-
     def deviation(self):
-        intervals = self.intervals()
-        if len(intervals) > 2:
-            return numpy.std(intervals)
+        if len(self.ivals) > 2:
+            return numpy.std(self.ivals)
         else:
             return 0
 
     def mean(self):
-        intervals = self.intervals()
-        if len(intervals) > 2:
-            return numpy.mean(intervals)
+        if len(self.ivals) > 2:
+            return numpy.mean(self.ivals)
         else:
             return 0
-
-def get_intervals(t):
-    return [t[i+1]-t[i] for i in range(len(t)-1)]
 
 def get_exp(t):
     return t.expiration
@@ -218,7 +207,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                             for s, t in tasks.iteritems():
                                 description = response.response.task.add()
                                 description.signature = s
-                                description.last = int(t.heartbeats[-1])
+                                description.last = int(t.last)
                                 description.expected = int(t.expiration)
                                 description.mean = float(t.mean())
                                 description.deviation = float(t.deviation())
