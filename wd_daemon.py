@@ -57,17 +57,6 @@ class Task():
 def get_exp(t):
     return t.expiration
 
-def expiration_notice(t):
-    message = jarvis_pb2.Message()
-    message.message = t.signature + " has expired."
-    message.sender = "wd." + socket.gethostname()
-    message.target = pwd.getpwuid( os.getuid() )[ 0 ]
-
-    jarvis = socket.socket(socket.AF_INET)
-    jarvis.connect(('taurine.uwaterloo.ca', 7878))
-    jarvis.send(message.SerializeToString())
-    jarvis.close()
-
 def dump_state(tasks):
     try:
         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
