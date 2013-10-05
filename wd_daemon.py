@@ -251,8 +251,8 @@ def daemon(port, dumpdir, wd_server, wd_port):
                 #awake(signal.SIGALRM, None)
         except KeyboardInterrupt: #ALSO CATCHES SIGINT
             pass
-        except select.error:
-            pass
+        except select.error as e:
+            logging.debug("Select Interrupted")
         except BadMessage as e:
             logging.warning("Received bad message")
             logging.exception(e)
