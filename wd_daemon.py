@@ -81,6 +81,7 @@ class WatchDog():
         except Exception as e:
             logging.critical("Failed to open socket.\n")
             logging.exception(e)
+            raise
 
     def awake(self, signum, frame):
         logging.debug("Awake")
