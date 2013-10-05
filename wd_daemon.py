@@ -19,6 +19,7 @@ tasks = {}
 global next_expiration
 next_expiration = None
 global beat_time
+beat_time = 0
 
 class BadMessage(Exception):
     def __init(self, message):
