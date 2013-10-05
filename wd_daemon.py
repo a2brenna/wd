@@ -86,8 +86,9 @@ def dump_state(tasks):
         with open(os.path.expanduser("~/.wd.state"), 'wb', 0) as f:
             pickle.dump(tasks, f)
         logging.debug("Dumped state")
-    except:
+    except Exception as e:
         logging.warning("Failed to dump state")
+        logging.exception(e)
 
 def awake(signum, frame):
     global next_expiration
@@ -99,8 +100,9 @@ def awake(signum, frame):
             logging.debug("Beating")
             beat(server=wd_server, port=wd_port, signature='wd:primary')
             beat_time = time.time()
-    except:
+    except Exception as e:
         logging.warning("Failed to contact wd server")
+        logging.exception(e)
 
     if next_expiration != None:
         logging.debug("Checking next_expiration")
@@ -109,18 +111,20 @@ def awake(signum, frame):
             try:
                 logging.debug("Sending expiration notice")
                 comm.send_jarvis("wd." + socket.gethostname(), pwd.getpwuid( os.getuid() )[ 0 ], next_expiration.signature + " has expired.")
-            except:
+            except Exception as e:
                 logging.error("Failed to send expiration notice for " + str(next_expiration.signature))
+                logging.exception(e)
             dump_state(tasks)
     try:
         current_time = time.time()
         next_expiration = min([t for t in tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
         signal.setitimer(signal.ITIMER_REAL, min(next_expiration.expiration - time.time(), beat_time + 60 - time.time()))
         logging.info("Next expiration is " + next_expiration.signature + " @ " + str(next_expiration.expiration))
-    except:
+    except Exception as e:
         next_expiration = None
         signal.setitimer(signal.ITIMER_REAL, max(beat_time + 60.0 - time.time(), 0.001))
         logging.info("No pending expiration")
+        logging.exception(e)
 
 def log_uncaught(ex_cls, ex, tb):
     logging.critical("Unhandled Exception!")
@@ -145,15 +149,17 @@ def daemon(port, dumpdir, wd_server, wd_port):
         with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
             tasks = dict(pickle.load(f))
             logging.debug("Loaded state from ~/.wd.state")
-    except:
+    except Exception as e:
         tasks = {}
         logging.debug("Could not load state from ~/.wd.state")
+        logging.exception(e)
 
     beat_time = time.time()
     try:
         beat(server=wd_server, port=wd_port, signature='wd:primary')
-    except:
+    except Exception as e:
         logging.warning("Failed to contact wd server " + wd_server + ":" + str(wd_port))
+        logging.exception(e)
 
     #TODO: investigate why this doesn't work as expected
     #signal.siginterrupt(signal.SIGALRM, True)
@@ -164,16 +170,18 @@ def daemon(port, dumpdir, wd_server, wd_port):
         inet.bind(('', port))
         inet.listen(1)
         logging.debug("Now listening on port " + str(port))
-    except:
+    except Exception as e:
         logging.critical("Failed to open socket.\n")
+        logging.exception(e)
 
     while True:
         try:
             if (time.time() - beat_time > 60.0):
                 beat(server=wd_server, port=wd_port, signature='wd:primary')
                 beat_time = time.time()
-        except:
+        except Exception as e:
             logging.warning("Failed to contact wd server" + wd_server + ":" + str(wd_port))
+            logging.exception(e)
         try:
             for x in select.select([inet],[],[],1)[0]: #Readable sockets returned by select
 
@@ -224,8 +232,9 @@ def daemon(port, dumpdir, wd_server, wd_port):
                                 for fgt in cmd.to_forget:
                                     try:
                                         del tasks[fgt.signature]
-                                    except:
+                                    except Exception as e:
                                         logging.warning("Failed to delete: " + fgt.signature)
+                                        logging.exception(e)
                             awake(signal.SIGALRM, None)
                             dump_state(tasks)
                         else:
@@ -239,3 +248,6 @@ def daemon(port, dumpdir, wd_server, wd_port):
             pass
         except select.error:
             pass
+        except BadMessage as e:
+            logging.warning("Received bad message")
+            logging.exception(e)
