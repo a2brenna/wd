@@ -142,14 +142,7 @@ class WatchDog():
                         try:
                             message.ParseFromString(data)
                         except:
-                            logging.warning("Failed to parse incoming message, attempting compatability behaviour")
-                            try:
-                                #A stab at backwards compatability...
-                                heartbeat = watchdog_pb2.Heartbeat()
-                                heartbeat.ParseFromString(data)
-                                message.heartbeat.CopyFrom(heartbeat)
-                            except:
-                                raise MessageError(message, "Bad Message")
+                            logging.warning("Failed to parse incoming message.")
                         if message.IsInitialized():
                             if message.HasField('beat'):
                                 sig = message.beat.signature
