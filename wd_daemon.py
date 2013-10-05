@@ -63,10 +63,6 @@ class WatchDog():
         self.wd_server = wd_server
         self.wd_port = wd_port
 
-        logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
-        sys.excepthook = log_uncaught
-        logging.info("Secondary watchdog server: " + self.wd_server + ":" + str(self.wd_port))
-
         try:
             with open(os.path.expanduser("~/.wd.state"), 'rb', 0) as f:
                 self.tasks = dict(pickle.load(f))
