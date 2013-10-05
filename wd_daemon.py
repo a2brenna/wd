@@ -128,7 +128,7 @@ class WatchDog():
     def run(self):
         self.sock.listen(1)
         logging.debug("Now listening on port " + str(self.port))
-        self.awake()
+        self.awake(signal.SIGALRM, None)
 
         while True:
             try:
@@ -151,7 +151,6 @@ class WatchDog():
                                     t.beat()
                                 except KeyError:
                                     t = Task(sig)
-                                    t.beat()
                                     self.tasks[sig] = t
                                 logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                                 self.awake(signal.SIGALRM, None)
