@@ -150,8 +150,6 @@ class WatchDog():
                                 except KeyError:
                                     self.tasks[sig] = Task(sig)
                                 logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
-                                self.awake(signal.SIGALRM, None)
-                                self.dump_state()
                             elif message.HasField('query'):
                                 logging.debug("Received query: " + str(message.query.question))
                                 response = watchdog_pb2.Message()
@@ -163,7 +161,6 @@ class WatchDog():
                                     description.mean = float(t.mean())
                                     description.deviation = float(t.deviation())
                                 c.send(response.SerializeToString())
-                                self.awake(signal.SIGALRM, None)
                             elif len(message.orders) > 0:
                                 logging.debug("Received orders")
                                 for cmd in message.orders:
@@ -173,10 +170,9 @@ class WatchDog():
                                         except Exception as e:
                                             logging.warning("Failed to delete: " + fgt.signature)
                                             logging.exception(e)
-                                self.awake(signal.SIGALRM, None)
-                                self.dump_state()
                             else:
                                 logging.error("Unhandled Message: " + str(message))
+                            self.awake(signal.SIGALRM, None)
                         else:
                             #unparseable message...
                             logging.error("Uninitialized Message: " + str(message))
