@@ -41,7 +41,7 @@ class Task():
         self.last = current
         self.heartbeats.append(time.time())
         if len(self.heartbeats) > MIN_INTERVALS:
-            intervals = get_intervals(self.heartbeats[-INTERVALS:])
+            intervals = self.intervals()
             mean = numpy.mean(intervals)
             std = numpy.std(intervals)
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
