@@ -37,8 +37,8 @@ class Task():
         self.ivals.append(current - self.last)
         self.last = current
         if len(self.ivals) > MIN_INTERVALS:
-            mean = numpy.mean(self.ivals)
-            std = numpy.std(self.ivals)
+            mean = self.mean()
+            std = self.deviation()
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
         return
 
