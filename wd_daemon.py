@@ -72,14 +72,7 @@ class WatchDog():
             logging.debug("Could not load state from ~/.wd.state")
             logging.exception(e)
 
-        try:
-            beat(server=wd_server, port=wd_port, signature='wd:primary')
-            self.beat_time = time.time()
-        except Exception as e:
-            logging.warning("Failed to contact wd server " + wd_server + ":" + str(wd_port))
-            logging.exception(e)
-            self.beat_time = 0
-
+        self.beat_time = 0
         self.next_expiration = None
 
         try:
@@ -134,6 +127,7 @@ class WatchDog():
     def run(self):
         self.sock.listen(1)
         logging.debug("Now listening on port " + str(self.port))
+        self.awake()
 
         while True:
             try:
