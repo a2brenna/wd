@@ -20,17 +20,10 @@ next_expiration = None
 global beat_time
 beat_time = 0
 
-class BadMessage(Exception):
-    def __init(self, message):
+class MessageError(Exception):
+    def __init__(self, message, error):
         self.message = message
-
-class UninitializedMessage(Exception):
-    def __init(self, message):
-        self.message = message
-
-class UnhandledMessage(Exception):
-    def __init(self, message):
-        self.message = message
+        self.error = error
 
 class Task():
     def __init__(self, signature):
@@ -205,7 +198,7 @@ def daemon(port, dumpdir, wd_server, wd_port):
                             heartbeat.ParseFromString(data)
                             message.heartbeat.CopyFrom(heartbeat)
                         except:
-                            raise BadMessage(message)
+                            raise MessageError(message, "Bad Message")
                     if message.IsInitialized():
                         if message.HasField('beat'):
                             sig = message.beat.signature
@@ -253,6 +246,6 @@ def daemon(port, dumpdir, wd_server, wd_port):
             pass
         except select.error as e:
             logging.debug("Select Interrupted")
-        except BadMessage as e:
-            logging.warning("Received bad message")
+        except MessageError as e:
+            logging.warning("Message Error: " + e.error + " on " + e.message)
             logging.exception(e)
