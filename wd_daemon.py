@@ -22,12 +22,13 @@ class Task():
 
     def beat(self):
         current = time.time()
-        self.ivals.append(current - self.last)
-        self.last = current
+        if self.last != None:
+            self.ivals.append(current - self.last)
         if len(self.ivals) > MIN_INTERVALS:
             mean = self.mean()
             std = self.deviation()
             self.expiration = (time.time() + mean + (CONFIDENCE * std))
+        self.last = current
         return
 
     def deviation(self):
