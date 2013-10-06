@@ -86,8 +86,11 @@ class WatchDog():
         logging.debug("Awake")
         try:
             if (time.time() - self.beat_time > 60.0):
-                logging.debug("Beating")
-                beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
+                if(socket.getaddrinfo(socket.gethostname(), self.port) != socket.getaddrinfo(self.wd_server, self.wd_port)):
+                    logging.debug("Beating")
+                    beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
+                else:
+                    logging.debug("Not beating to self")
                 self.beat_time = time.time()
         except Exception as e:
             logging.warning("Failed to contact wd server")
