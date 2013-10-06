@@ -106,7 +106,6 @@ class WatchDog():
                 except Exception as e:
                     logging.error("Failed to send expiration notice for " + str(self.next_expiration.signature))
                     logging.exception(e)
-                self.dump_state()
         try:
             current_time = time.time()
             self.next_expiration = min([t for t in self.tasks.values() if (get_exp(t) > current_time)] , key=get_exp)
@@ -117,6 +116,7 @@ class WatchDog():
             signal.setitimer(signal.ITIMER_REAL, max(self.beat_time + 60.0 - time.time(), 0.001))
             logging.info("No pending expiration")
             logging.exception(e)
+        self.dump_state()
 
     def dump_state(self):
         try:
