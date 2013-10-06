@@ -83,7 +83,7 @@ class WatchDog():
             logging.debug("Could not load state from ~/.wd.state")
             logging.exception(e)
 
-        for t in self.tasks:
+        for t in self.tasks.values():
             t.last = None
             if t.expiration > time.time():
                 t.expiration = min(t.expiration, t.get_expiration())
