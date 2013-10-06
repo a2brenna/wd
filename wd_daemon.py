@@ -48,6 +48,12 @@ class Task():
         else:
             return 2147483646
 
+    def get_last(self):
+        if self.last == None:
+            return 0.0
+        else:
+            return self.last
+
 def get_exp(t):
     return t.expiration
 
@@ -170,7 +176,7 @@ class WatchDog():
                                 for s, t in self.tasks.iteritems():
                                     description = response.response.task.add()
                                     description.signature = s
-                                    description.last = int(t.last)
+                                    description.last = int(t.get_last())
                                     description.expected = int(t.expiration)
                                     description.mean = float(t.mean())
                                     description.deviation = float(t.deviation())
