@@ -24,10 +24,7 @@ class Task():
         current = time.time()
         if self.last != None:
             self.ivals.append(current - self.last)
-        if len(self.ivals) > MIN_INTERVALS:
-            mean = self.mean()
-            std = self.deviation()
-            self.expiration = (time.time() + mean + (CONFIDENCE * std))
+        self.expiration = self.get_expiration()
         self.last = current
         return
 
@@ -42,6 +39,14 @@ class Task():
             return numpy.mean(self.ivals)
         else:
             return 0
+
+    def get_expiration(self):
+        if len(self.ivals) > MIN_INTERVALS:
+            mean = self.mean()
+            std = self.deviation()
+            return (time.time() + mean + (CONFIDENCE * std))
+        else:
+            return 2147483646
 
 def get_exp(t):
     return t.expiration
@@ -75,7 +80,7 @@ class WatchDog():
         for t in self.tasks:
             t.last = None
             if t.expiration > time.time():
-                t.expiration = min(t.expiration, (time.time() + t.mean() + (CONFIDENCE * t.deviation())))
+                t.expiration = min(t.expiration, t.get_expiration())
 
         self.beat_time = 0
         self.next_expiration = None
