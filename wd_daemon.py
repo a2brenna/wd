@@ -188,6 +188,19 @@ class WatchDog():
                 logging.warning("Message Error: " + e.error + " on " + e.message)
                 logging.exception(e)
 
+    def shutdown(self, signum, frame):
+        logging.debug("Shutting Down")
+        try:
+            self.dump_state()
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
+        except Exception as e:
+            logging.warning("Graceful shutdown failed")
+            logging.exception(e)
+            sys.exit(1)
+        sys.exit(0)
+
+
 def daemon(port, wd_server, wd_port):
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
@@ -196,5 +209,6 @@ def daemon(port, wd_server, wd_port):
 
     wd = WatchDog(port, wd_server, wd_port)
     signal.signal(signal.SIGALRM, wd.awake)
+    signal.signal(signal.SIGTERM, wd.shutdown)
 
     wd.run()
