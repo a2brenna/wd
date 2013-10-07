@@ -120,7 +120,7 @@ class WatchDog():
                 logging.debug("Task: " + self.next_expiration.signature + " has expired")
                 try:
                     logging.debug("Sending expiration notice")
-                    comm.send_jarvis("wd." + socket.gethostname(), pwd.getpwuid( os.getuid() )[ 0 ], self.next_expiration.signature + " has expired.")
+                    comm.send_jarvis("wd:" + socket.gethostname(), "a2brenna", self.next_expiration.signature + " has expired.")
                 except Exception as e:
                     logging.error("Failed to send expiration notice for " + str(self.next_expiration.signature))
                     logging.exception(e)
