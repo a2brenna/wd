@@ -10,9 +10,7 @@ def beat(server, port, signature=gen_sig()):
     message.beat.signature = signature
 
     try:
-        s = socket.socket(socket.AF_INET)
-        #TODO SSL
-        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server,port))
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
@@ -25,9 +23,7 @@ def query(server, port):
     message.query.question = "Status"
 
     try:
-        s = socket.socket(socket.AF_INET)
-        #TODO SSL
-        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server,port))
         s.send(message.SerializeToString())
         response = watchdog_pb2.Message()
@@ -47,9 +43,7 @@ def forget(server, port, signature):
     to_forget.signature = signature
 
     try:
-        s = socket.socket(socket.AF_INET)
-        #TODO SSL
-        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server, port))
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
