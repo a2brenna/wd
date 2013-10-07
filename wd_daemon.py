@@ -92,8 +92,7 @@ class WatchDog():
         self.next_expiration = None
 
         try:
-            sock = socket.socket(socket.AF_INET)
-            self.sock = ssl.wrap_socket(sock, server_side=True, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"), cert_reqs=ssl.CERT_REQUIRED)
+            self.sock = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=True, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"), cert_reqs=ssl.CERT_REQUIRED)
             self.sock.bind(('', port))
         except Exception as e:
             logging.critical("Failed to open socket.\n")
