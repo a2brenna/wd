@@ -166,12 +166,14 @@ class WatchDog():
                                 logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                             elif message.HasField('query'):
                                 logging.debug("Received query: " + str(message.query.question))
+                                current_time = time.time()
                                 response = watchdog_pb2.Message()
                                 for s, t in self.tasks.iteritems():
                                     description = response.response.task.add()
                                     description.signature = s
                                     description.last = int(t.get_last())
                                     description.expected = int(t.expiration)
+                                    description.time_to_expiration = int(t.expiration - current_time)
                                     description.mean = float(t.mean())
                                     description.deviation = float(t.deviation())
                                 c.send(response.SerializeToString())

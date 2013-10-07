@@ -7,6 +7,7 @@ message Response{
         optional int32 expected = 3;
         optional double mean = 4;
         optional double deviation = 5;
+        optional int32 time_to_expiration = 6;
     }
     repeated Task task = 1;
 }
