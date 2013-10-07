@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, jarvis_pb2, pwd, pickle, logging, comm, traceback, ssl
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, jarvis_pb2, pwd, pickle, logging, comm, traceback, ssl, utils
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -56,17 +56,6 @@ class Task():
 
 def get_exp(t):
     return t.expiration
-
-def log_uncaught(ex_cls, ex, tb):
-    logging.critical("Unhandled Exception!")
-    trace_string = ''.join(traceback.format_tb(tb))
-    logging.critical(trace_string)
-    exception_string = '{0}: {1}'.format(ex_cls, ex)
-    logging.critical(exception_string)
-    msg = "WD on " + socket.gethostname() + " has failed\n"
-    msg = msg + trace_string + "\n"
-    msg = msg + exception_string + "\n"
-    comm.send_email(target='a2brenna@csclub.uwaterloo.ca', subject='WD FAILURE', sender='Watchdog', message=msg)
 
 class WatchDog():
     def __init__(self, port, wd_server, wd_port):
@@ -228,7 +217,7 @@ class WatchDog():
 def daemon(port, wd_server, wd_port):
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
-    sys.excepthook = log_uncaught
+    sys.excepthook = utils.log_uncaught
     logging.info("Secondary watchdog server: " + wd_server + ":" + str(wd_port))
 
     wd = WatchDog(port, wd_server, wd_port)
