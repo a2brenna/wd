@@ -1,4 +1,4 @@
-import watchdog_pb2, socket, os, psutil, logging
+import watchdog_pb2, socket, os, psutil, logging, ssl
 
 def gen_sig(pid=os.getpid()):
     p = psutil.Process(pid)
@@ -11,6 +11,8 @@ def beat(server, port, signature=gen_sig()):
 
     try:
         s = socket.socket(socket.AF_INET)
+        #TODO SSL
+        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server,port))
         s.send(message.SerializeToString())
         s.close
@@ -23,6 +25,8 @@ def query(server, port):
 
     try:
         s = socket.socket(socket.AF_INET)
+        #TODO SSL
+        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server,port))
         s.send(message.SerializeToString())
         response = watchdog_pb2.Message()
@@ -42,6 +46,8 @@ def forget(server, port, signature):
 
     try:
         s = socket.socket(socket.AF_INET)
+        #TODO SSL
+        s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server, port))
         s.send(message.SerializeToString())
         s.close

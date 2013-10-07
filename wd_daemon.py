@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, jarvis_pb2, pwd, pickle, logging, comm, traceback
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, jarvis_pb2, pwd, pickle, logging, comm, traceback, ssl
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -92,7 +92,8 @@ class WatchDog():
         self.next_expiration = None
 
         try:
-            self.sock = socket.socket(socket.AF_INET)
+            sock = socket.socket(socket.AF_INET)
+            self.sock = ssl.wrap_socket(sock, server_side=True, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"), cert_reqs=ssl.CERT_REQUIRED)
             self.sock.bind(('', port))
         except Exception as e:
             logging.critical("Failed to open socket.\n")
