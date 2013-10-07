@@ -156,8 +156,13 @@ class WatchDog():
 
                     if x == self.sock:
                         logging.debug("Incoming connection")
-                        c, client_addr = x.accept()
-                        data = c.recv(RECV_BUFF_SIZE)
+                        try:
+                            c, client_addr = x.accept()
+                            data = c.recv(RECV_BUFF_SIZE)
+                        except Exception as e:
+                            logging.error("Failed to establish connection")
+                            logging.exception(e)
+                            continue
                         message = watchdog_pb2.Message()
                         try:
                             message.ParseFromString(data)
