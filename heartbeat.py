@@ -15,6 +15,7 @@ def beat(server, port, signature=gen_sig()):
         s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server,port))
         s.send(message.SerializeToString())
+        s.shutdown(socket.SHUT_RDWR)
         s.close
     except:
         logging.warning("Failed to send beat " + signature + " to " + server + ":" + str(port))
@@ -31,6 +32,7 @@ def query(server, port):
         s.send(message.SerializeToString())
         response = watchdog_pb2.Message()
         data = s.recv(4096)
+        s.shutdown(socket.SHUT_RDWR)
         s.close
     except:
         logging.error("Failed to query " + server + ":" + str(port))
@@ -50,6 +52,7 @@ def forget(server, port, signature):
         s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
         s.connect((server, port))
         s.send(message.SerializeToString())
+        s.shutdown(socket.SHUT_RDWR)
         s.close
     except:
         logging.warning("Failed to send forget: " + signature + " to " + server + ":" + str(port))

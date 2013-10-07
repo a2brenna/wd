@@ -197,6 +197,7 @@ class WatchDog():
                         else:
                             #unparseable message...
                             logging.error("Uninitialized Message: " + str(message))
+                        c.shutdown(socket.SHUT_RDWR)
                         c.close()
             except KeyboardInterrupt: #ALSO CATCHES SIGINT
                 pass
