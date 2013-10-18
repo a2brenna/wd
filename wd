@@ -7,8 +7,12 @@ from wd_client import client2
 
 def main():
     config = ConfigParser.SafeConfigParser()
+    config.add_section("client")
+    config.set("client", "SERVER", 'taurine.csclub.uwaterloo.ca')
+    config.set("client", "PORT", str(7877))
+    config.set("client", "HEARTRATE", str(60))
+    config.set("client", "MAX_ATTEMPTS", str(5))
     config.read(["/etc/wd.conf", os.path.expanduser("~/.wd.conf")])
-
 
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
     parser.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
