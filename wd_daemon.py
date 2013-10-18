@@ -176,7 +176,10 @@ class WatchDog():
                                     description.time_to_expiration = int(t.expiration - current_time)
                                     description.mean = float(t.mean())
                                     description.deviation = float(t.deviation())
-                                c.send(response.SerializeToString())
+                                try:
+                                    c.send(response.SerializeToString())
+                                except Exception as e:
+                                    logging.exception(e)
                             elif len(message.orders) > 0:
                                 logging.debug("Received orders")
                                 for cmd in message.orders:
