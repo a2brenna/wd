@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil, utils
+import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil, utils, ConfigParser
 from wd_daemon import daemon as exec_daemon
 from wd_client import client
 from wd_client import client2
@@ -12,17 +12,21 @@ DEFAULT_HEARTRATE = 60
 MAX_ATTEMPTS = 5
 
 def main():
+    config = ConfigParser.SafeConfigParser()
+    config.read(["/etc/wd.conf", os.path.expanduser("~/.wd.conf")])
+
+
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
     parser.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
-    parser.add_argument("-s", "--server", default=DEFAULT_SERVER, help="Hostname of watchdog server to use.")
+    parser.add_argument("-s", "--server", default=config.get("client", "SERVER"), help="Hostname of watchdog server to use.")
     parser.add_argument("-q", "--query", action="store_true", help="Query the watchdog server to return the list of tracked signatures")
     parser.add_argument("COMMAND", nargs=argparse.REMAINDER, help="The command to be watched. Ignored if running daemon.", type=str)
-    parser.add_argument("--port", default=DEFAULT_PORT, help="Port to target on server, or in the case of server, port to listen on.", type=int)
+    parser.add_argument("--port", default=config.getint("client", "PORT"), help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("-p", "--pid", help="Pid of a process to monitor.", type=int)
     parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
-    parser.add_argument("-r", "--heartrate", default=DEFAULT_HEARTRATE, help="Number of seconds between heartbeats.", type=int)
+    parser.add_argument("-r", "--heartrate", default=config.get("client", "HEARTRATE"), help="Number of seconds between heartbeats.", type=int)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
-    parser.add_argument("--retry", default=MAX_ATTEMPTS, help="Number of times to retry a beat if connection to server fails.", type=int)
+    parser.add_argument("--retry", default=config.getint("client", "MAX_ATTEMPTS"), help="Number of times to retry a beat if connection to server fails.", type=int)
     parser.add_argument("--forget", help="Ask the server to forget about a tracked task with the supplied signature", type=str)
     parser.add_argument("-i", "--interactive", default=False, action="store_true", help="Force daemon to execute whilst connected to terminal (useful for debugging).")
     args = parser.parse_args()
