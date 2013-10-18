@@ -5,12 +5,6 @@ from wd_daemon import daemon as exec_daemon
 from wd_client import client
 from wd_client import client2
 
-#TODO: List of ports to use in succession in case of collisions?
-DEFAULT_PORT = 7877
-DEFAULT_SERVER = "taurine.csclub.uwaterloo.ca"
-DEFAULT_HEARTRATE = 60
-MAX_ATTEMPTS = 5
-
 def main():
     config = ConfigParser.SafeConfigParser()
     config.read(["/etc/wd.conf", os.path.expanduser("~/.wd.conf")])
@@ -34,10 +28,10 @@ def main():
     if args.daemon:
         utils.kill_ancestor(args.port)
         if args.interactive:
-            exec_daemon(port=DEFAULT_PORT, wd_server=args.server, wd_port=args.port)
+            exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
         else:
             with daemon.DaemonContext():
-                exec_daemon(port=DEFAULT_PORT, wd_server=args.server, wd_port=args.port)
+                exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
     elif args.query:
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
     elif args.pid:
