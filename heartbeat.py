@@ -11,7 +11,9 @@ def beat(server, port, signature=gen_sig()):
 
     try:
         s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        logging.debug("Attempting SSL Connection")
         s.connect((server,port))
+        logging.debug("SSL Handshake complete")
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
         s.close
@@ -24,7 +26,9 @@ def query(server, port):
 
     try:
         s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        logging.debug("Attempting SSL Connection")
         s.connect((server,port))
+        logging.debug("SSL Handshake complete")
         s.send(message.SerializeToString())
         response = watchdog_pb2.Message()
         data = s.recv(4096)
@@ -44,7 +48,9 @@ def forget(server, port, signature):
 
     try:
         s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        logging.debug("Attempting SSL Connection")
         s.connect((server, port))
+        logging.debug("SSL Handshake complete")
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
         s.close
