@@ -147,56 +147,56 @@ class WatchDog():
                         try:
                             c, client_addr = x.accept()
                             data = c.recv(RECV_BUFF_SIZE)
+                            message = watchdog_pb2.Message()
+                            try:
+                                message.ParseFromString(data)
+                            except:
+                                logging.warning("Failed to parse incoming message.")
+                            if message.IsInitialized():
+                                if message.HasField('beat'):
+                                    sig = message.beat.signature
+                                    try:
+                                        self.tasks[sig].beat()
+                                    except KeyError:
+                                        self.tasks[sig] = Task(sig)
+                                    logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
+                                elif message.HasField('query'):
+                                    logging.debug("Received query: " + str(message.query.question))
+                                    current_time = time.time()
+                                    response = watchdog_pb2.Message()
+                                    for s, t in self.tasks.iteritems():
+                                        description = response.response.task.add()
+                                        description.signature = s
+                                        description.last = int(t.get_last())
+                                        description.expected = int(t.expiration)
+                                        description.time_to_expiration = int(t.expiration - current_time)
+                                        description.mean = float(t.mean())
+                                        description.deviation = float(t.deviation())
+                                    try:
+                                        c.send(response.SerializeToString())
+                                    except Exception as e:
+                                        logging.exception(e)
+                                elif len(message.orders) > 0:
+                                    logging.debug("Received orders")
+                                    for cmd in message.orders:
+                                        for fgt in cmd.to_forget:
+                                            try:
+                                                del self.tasks[fgt.signature]
+                                            except Exception as e:
+                                                logging.warning("Failed to delete: " + fgt.signature)
+                                                logging.exception(e)
+                                else:
+                                    logging.error("Unhandled Message: " + str(message))
+                                self.awake(signal.SIGALRM, None)
+                            else:
+                                #unparseable message...
+                                logging.error("Uninitialized Message: " + str(message))
+                            c.shutdown(socket.SHUT_RDWR)
+                            c.close()
                         except Exception as e:
                             logging.error("Failed to establish connection")
                             logging.exception(e)
                             continue
-                        message = watchdog_pb2.Message()
-                        try:
-                            message.ParseFromString(data)
-                        except:
-                            logging.warning("Failed to parse incoming message.")
-                        if message.IsInitialized():
-                            if message.HasField('beat'):
-                                sig = message.beat.signature
-                                try:
-                                    self.tasks[sig].beat()
-                                except KeyError:
-                                    self.tasks[sig] = Task(sig)
-                                logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
-                            elif message.HasField('query'):
-                                logging.debug("Received query: " + str(message.query.question))
-                                current_time = time.time()
-                                response = watchdog_pb2.Message()
-                                for s, t in self.tasks.iteritems():
-                                    description = response.response.task.add()
-                                    description.signature = s
-                                    description.last = int(t.get_last())
-                                    description.expected = int(t.expiration)
-                                    description.time_to_expiration = int(t.expiration - current_time)
-                                    description.mean = float(t.mean())
-                                    description.deviation = float(t.deviation())
-                                try:
-                                    c.send(response.SerializeToString())
-                                except Exception as e:
-                                    logging.exception(e)
-                            elif len(message.orders) > 0:
-                                logging.debug("Received orders")
-                                for cmd in message.orders:
-                                    for fgt in cmd.to_forget:
-                                        try:
-                                            del self.tasks[fgt.signature]
-                                        except Exception as e:
-                                            logging.warning("Failed to delete: " + fgt.signature)
-                                            logging.exception(e)
-                            else:
-                                logging.error("Unhandled Message: " + str(message))
-                            self.awake(signal.SIGALRM, None)
-                        else:
-                            #unparseable message...
-                            logging.error("Uninitialized Message: " + str(message))
-                        c.shutdown(socket.SHUT_RDWR)
-                        c.close()
             except KeyboardInterrupt: #ALSO CATCHES SIGINT
                 pass
             except select.error as e:
