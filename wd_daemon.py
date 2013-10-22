@@ -145,7 +145,9 @@ class WatchDog():
                     if x == self.sock:
                         logging.debug("Incoming connection")
                         try:
+                            logging.debug("Initiating SSL Handshake")
                             c, client_addr = x.accept()
+                            logging.debug("SSL Handshake Complete")
                             data = c.recv(RECV_BUFF_SIZE)
                             message = watchdog_pb2.Message()
                             try:
