@@ -37,7 +37,10 @@ def main():
             with daemon.DaemonContext():
                 exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
     elif args.query:
+        try:
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
+        except Exception as e:
+            print(str(e))
     elif args.pid:
         with daemon.DaemonContext():
             client2(server=args.server, target_port=args.port, pid=args.pid, delay=args.delay, heartrate=args.heartrate, retry=args.retry, signature=args.signature)
