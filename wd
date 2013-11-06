@@ -49,7 +49,11 @@ def main():
     elif args.forget:
         heartbeat.forget(args.server, args.port, args.forget)
     else:
-        client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
+        if (args.COMMAND == []):
+            sys.stderr.write("You must specify a command...\n")
+            sys.exit(1)
+        else:
+            client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
 
 if __name__ == '__main__':
     main()
