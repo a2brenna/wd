@@ -36,6 +36,7 @@ def query(server, port):
         s.close
     except:
         logging.error("Failed to query " + server + ":" + str(port))
+        raise
 
     response.ParseFromString(data)
     return response.response
