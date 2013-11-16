@@ -2,6 +2,9 @@
 
 import socket, os, time, socket, pwd, signal, sys, heartbeat
 
+BACKOFF=0.01
+RETRY=10
+
 def t_wait(time_to_wait):
     end_time = time.time() + time_to_wait
     while time.time() < end_time:
@@ -11,7 +14,7 @@ def t_wait(time_to_wait):
         else:
             time.sleep(1)
 
-def client(server, target_port, command, delay, heartrate, retry):
+def client(server, target_port, command, delay, heartrate, retry=RETRY):
     try:
         child_pid = os.fork()
     except OSError as e:
@@ -37,13 +40,14 @@ def client(server, target_port, command, delay, heartrate, retry):
                         heartbeat.beat(server, target_port, signature)
                         break
                     except:
+                        logging.error("Failed to beat")
+                        time.sleep(BACKOFF * 2**attempts)
                         attempts = attempts + 1
-                        time.sleep(1)
                 if attempts == retry:
                     break
 
 
-def client2(server, target_port, pid, delay, heartrate, retry, signature):
+def client2(server, target_port, pid, delay, heartrate, retry=RETRY, signature):
     import psutil
     start_time = psutil.Process(pid).create_time
 
@@ -62,9 +66,9 @@ def client2(server, target_port, pid, delay, heartrate, retry, signature):
                 heartbeat.beat(server, target_port, signature)
                 break
             except:
-                raise
+                logging.error("Failed to beat")
+                time.sleep(BACKOFF * 2**attempts)
                 attempts = attempts + 1
-                time.sleep(1)
         if attempts == retry:
             break
         time.sleep(heartrate)
