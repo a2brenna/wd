@@ -48,7 +48,7 @@ def client(server, target_port, command, delay, heartrate, retry):
 
 
 def client2(server, target_port, pid, delay, heartrate, retry, signature):
-    logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
+    logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: ' + str(os.getpid()) + ': %(levelname)s: %(message)s')
     import psutil
     start_time = psutil.Process(pid).create_time
 
