@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import socket, os, time, socket, pwd, signal, sys, heartbeat
+import socket, os, time, socket, pwd, signal, sys, heartbeat, logging
 
 BACKOFF=0.01
 
