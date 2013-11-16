@@ -5,7 +5,6 @@ from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
 MIN_INTERVALS = 100
-INTERVALS = 10000
 CONFIDENCE = 5.0
 
 class MessageError(Exception):
