@@ -3,7 +3,6 @@
 import socket, os, time, socket, pwd, signal, sys, heartbeat
 
 BACKOFF=0.01
-RETRY=10
 
 def t_wait(time_to_wait):
     end_time = time.time() + time_to_wait
@@ -14,7 +13,7 @@ def t_wait(time_to_wait):
         else:
             time.sleep(1)
 
-def client(server, target_port, command, delay, heartrate, retry=RETRY):
+def client(server, target_port, command, delay, heartrate, retry):
     try:
         child_pid = os.fork()
     except OSError as e:
@@ -47,7 +46,7 @@ def client(server, target_port, command, delay, heartrate, retry=RETRY):
                     break
 
 
-def client2(server, target_port, pid, delay, heartrate, retry=RETRY, signature):
+def client2(server, target_port, pid, delay, heartrate, retry, signature):
     import psutil
     start_time = psutil.Process(pid).create_time
 
