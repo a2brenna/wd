@@ -173,6 +173,7 @@ class WatchDog():
                                         description.time_to_expiration = int(t.expiration - current_time)
                                         description.mean = float(t.mean())
                                         description.deviation = float(t.deviation())
+                                        description.beats = int(len(t.ivals) + 1)
                                     try:
                                         c.send(response.SerializeToString())
                                     except Exception as e:
