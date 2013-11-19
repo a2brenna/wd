@@ -10,7 +10,11 @@ message Response{
         optional int32 time_to_expiration = 6;
         optional int32 beats = 7;
     }
+    message Export{
+        repeated double interval = 1;
+    }
     repeated Task task = 1;
+    optional Export export = 2;
 }
 
 message Message{
@@ -26,6 +30,7 @@ message Heartbeat{
 
 message Query{
     optional string question = 1;
+    optional string signature = 2;
 }
 
 message Command{
