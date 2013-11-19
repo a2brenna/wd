@@ -21,6 +21,7 @@ def beat(server, port, signature=gen_sig()):
         logging.warning("Failed to send beat " + signature + " to " + server + ":" + str(port))
 
 def query(server, port):
+    logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     message = watchdog_pb2.Message()
     message.query.question = "Status"
 
@@ -42,6 +43,7 @@ def query(server, port):
     return response.response
 
 def forget(server, port, signature):
+    logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     message = watchdog_pb2.Message()
     command = message.orders.add()
     to_forget = command.to_forget.add()
