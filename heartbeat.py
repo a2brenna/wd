@@ -16,7 +16,6 @@ def beat(server, port, signature=gen_sig()):
         logging.debug("SSL Handshake complete")
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
-        s.close
     except:
         logging.warning("Failed to send beat " + signature + " to " + server + ":" + str(port))
 
@@ -34,7 +33,6 @@ def query(server, port):
         response = watchdog_pb2.Message()
         data = s.recv(4096)
         s.shutdown(socket.SHUT_RDWR)
-        s.close
     except:
         logging.error("Failed to query " + server + ":" + str(port))
         raise
@@ -56,6 +54,5 @@ def forget(server, port, signature):
         logging.debug("SSL Handshake complete")
         s.send(message.SerializeToString())
         s.shutdown(socket.SHUT_RDWR)
-        s.close
     except:
         logging.warning("Failed to send forget: " + signature + " to " + server + ":" + str(port))
