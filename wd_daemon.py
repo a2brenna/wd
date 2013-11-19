@@ -163,21 +163,35 @@ class WatchDog():
                                     logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                                 elif message.HasField('query'):
                                     logging.debug("Received query: " + str(message.query.question))
-                                    current_time = time.time()
-                                    response = watchdog_pb2.Message()
-                                    for s, t in self.tasks.iteritems():
-                                        description = response.response.task.add()
-                                        description.signature = s
-                                        description.last = int(t.get_last())
-                                        description.expected = int(t.expiration)
-                                        description.time_to_expiration = int(t.expiration - current_time)
-                                        description.mean = float(t.mean())
-                                        description.deviation = float(t.deviation())
-                                        description.beats = int(len(t.ivals) + 1)
-                                    try:
-                                        c.send(response.SerializeToString())
-                                    except Exception as e:
-                                        logging.exception(e)
+                                    if (message.query.question == "Export"):
+                                        try:
+                                            t_sig = message.query.signature
+                                            response = watchdog_pb2.Message()
+                                            response.response.export
+                                            export = response.response.export
+                                            for interval in self.tasks[sig].ivals:
+                                                logging.debug("Appending interval: " + str(float(interval)))
+                                                export.interval.append(float(interval))
+                                            logging.debug("Serialization complete")
+                                            c.send(response.SerializeToString())
+                                        except Exception as e:
+                                            logging.exception(e)
+                                    elif (message.query.question == "Status"):
+                                        current_time = time.time()
+                                        response = watchdog_pb2.Message()
+                                        for s, t in self.tasks.iteritems():
+                                            description = response.response.task.add()
+                                            description.signature = s
+                                            description.last = int(t.get_last())
+                                            description.expected = int(t.expiration)
+                                            description.time_to_expiration = int(t.expiration - current_time)
+                                            description.mean = float(t.mean())
+                                            description.deviation = float(t.deviation())
+                                            description.beats = int(len(t.ivals) + 1)
+                                        try:
+                                            c.send(response.SerializeToString())
+                                        except Exception as e:
+                                            logging.exception(e)
                                 elif len(message.orders) > 0:
                                     logging.debug("Received orders")
                                     for cmd in message.orders:
