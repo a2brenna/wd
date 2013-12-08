@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pwd, pickle, logging, traceback, ssl, utils
+import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pwd, pickle, logging, traceback, ssl
+from hatguy import utils
 from hatcomm import jarvis_pb2, comm
 from heartbeat import beat
 
