@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-import argparse, signal, sys,daemon, socket, heartbeat, pwd, os, psutil, ConfigParser
+import argparse, signal, sys,daemon, socket, pwd, os, psutil, ConfigParser
 from hatguy import utils
+from watchdog import heartbeat
 from watchdog.daemon import daemon as exec_daemon
 from watchdog.client import client
 from watchdog.client import client2
