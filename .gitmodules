@@ -1,6 +1,3 @@
-[submodule "jarvis"]
-	path = jarvis
-	url = csclub.uwaterloo.ca:git/jarvisd.git
 [submodule "hg-pyutils"]
 	path = hg-pyutils
 	url = csclub.uwaterloo.ca:git/hg-pyutils.git
