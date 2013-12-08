@@ -4,5 +4,5 @@ setup(name='wd',
       author='Anthony Brennan',
       author_email='a2brenna@csclub.uwaterloo.ca',
       url='http://csclub.uwaterloo.ca/~a2brenna/wd.html',
-      py_modules=['wd'],
+      py_modules=['watchdog.heartbeat','watchdog.client','watchdog.daemon','watchdog.watchdog_pb2'],
       )
