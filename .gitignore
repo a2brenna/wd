@@ -1,6 +1,7 @@
-*.swp
 __pycache__/
 *_pb2.py
 *.pyc
 state.out
 build/
+*.pb.h
+*.pb.cc
