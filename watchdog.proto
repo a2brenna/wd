@@ -14,7 +14,7 @@ message Response{
         repeated double interval = 1;
     }
     repeated Task task = 1;
-    optional Export export = 2;
+    optional Export dump= 2;
 }
 
 message Message{

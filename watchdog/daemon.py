@@ -165,15 +165,15 @@ class WatchDog():
                                     logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                                 elif message.HasField('query'):
                                     logging.debug("Received query: " + str(message.query.question))
-                                    if (message.query.question == "Export"):
+                                    if (message.query.question == "Dump"):
                                         try:
                                             t_sig = message.query.signature
                                             response = watchdog_pb2.Message()
-                                            response.response.export
-                                            export = response.response.export
+                                            response.response.dump
+                                            dump = response.response.dump
                                             for interval in self.tasks[sig].ivals:
                                                 logging.debug("Appending interval: " + str(float(interval)))
-                                                export.interval.append(float(interval))
+                                                dump.interval.append(float(interval))
                                             logging.debug("Serialization complete")
                                             c.send(response.SerializeToString())
                                         except Exception as e:

@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--retry", default=config.getint("client", "MAX_ATTEMPTS"), help="Number of times to retry a beat if connection to server fails.", type=int)
     parser.add_argument("--forget", help="Ask the server to forget about a tracked task with the supplied signature", type=str)
     parser.add_argument("-i", "--interactive", default=False, action="store_true", help="Force daemon to execute whilst connected to terminal (useful for debugging).")
-    parser.add_argument("--export", help="Signature of a task to dump", type=str)
+    parser.add_argument("--dump", help="Signature of a task to dump", type=str)
     args = parser.parse_args()
 
     if args.daemon:
@@ -44,9 +44,9 @@ def main():
             sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
         except Exception as e:
             print(str(e))
-    elif args.export:
+    elif args.dump:
         try:
-            out = str(heartbeat.export(server=args.server, port=args.port, export=args.export))
+            out = str(heartbeat.dump(server=args.server, port=args.port, export=args.dump))
             print(out)
         except Exception as e:
             print("Caught Exception!")
