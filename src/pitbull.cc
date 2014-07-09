@@ -1,5 +1,7 @@
 #include "pitbull.h"
+#include "watchdog.pb.h"
 #include <hgutil/time.h>
+#include <hgutil/network.h>
 
 void Task_Data::beat(){
     int s = ivals.size();
@@ -24,6 +26,24 @@ void Task_Data::beat(){
 
 void Pitbull::handle(Task *t){
     if(Incoming_Connection *i = dynamic_cast<Incoming_Connection *>(t)){
+        std::string request;
+        recv_string(i->sockfd, request);
+
+        watchdog::Message m;
+        m.ParseFromString(request);
+
+        if(m.has_beat()){
+
+        }
+        else if(m.has_query()){
+
+        }
+        else if(m.orders_size() > 0){
+
+        }
+        else{
+            throw Handler_Exception("Bad Request");
+        }
 
     }
     else{

@@ -7,8 +7,8 @@ PREFIX=/usr/
 
 all: watchdog/watchdog_pb2.py pb
 
-pb: src/pb.cc pitbull.o
-	${CXX} ${CXXFLAGS} src/pb.cc pitbull.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil
+pb: src/pb.cc src/watchdog.pb.cc src/watchdog.pb.h pitbull.o
+	${CXX} ${CXXFLAGS} src/pb.cc src/watchdog.pb.cc pitbull.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil
 
 pitbull.o: src/pitbull.cc src/pitbull.h
 	${CXX} ${CXXFLAGS} -c src/pitbull.cc -o pitbull.o
