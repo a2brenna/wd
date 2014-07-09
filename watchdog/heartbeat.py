@@ -40,11 +40,11 @@ def query(server, port):
     response.ParseFromString(data)
     return response.response
 
-def export(server, port, export):
+def dump(server, port, dump):
     logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     message = watchdog_pb2.Message()
-    message.query.question = "Export"
-    message.query.signature = export
+    message.query.question = "Dump"
+    message.query.signature = dump
 
     try:
         s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
@@ -62,7 +62,7 @@ def export(server, port, export):
                 data = data + more
         s.shutdown(socket.SHUT_RDWR)
     except:
-        logging.error("Failed to export " + export + " from " + server + ":" + str(port))
+        logging.error("Failed to dump " + dump + " from " + server + ":" + str(port))
         raise
 
     response.ParseFromString(data)
