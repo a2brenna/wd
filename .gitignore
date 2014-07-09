@@ -5,3 +5,4 @@ state.out
 build/
 *.pb.h
 *.pb.cc
+pb
