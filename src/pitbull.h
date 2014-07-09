@@ -26,7 +26,7 @@ class Task_Data {
 
 class Pitbull : public Handler{
     private:
-        std::map<std::string, Lockable<Task_Data>> tracked_tasks;
+        Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
     public:
         void handle(Task *t);
 };

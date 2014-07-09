@@ -1,5 +1,6 @@
 #include "pitbull.h"
 #include "watchdog.pb.h"
+#include <mutex>
 #include <hgutil/time.h>
 #include <hgutil/network.h>
 
@@ -33,7 +34,14 @@ void Pitbull::handle(Task *t){
         m.ParseFromString(request);
 
         if(m.has_beat()){
+            Lockable<Task_Data> *task;
+            {
+                std::lock_guard<std::recursive_mutex> t(tracked_tasks.lock);
+                task = &(tracked_tasks.data[m.beat().signature()]);
+            }
 
+            std::lock_guard<std::recursive_mutex> t(task->lock);
+            task->data.beat();
         }
         else if(m.has_query()){
 
