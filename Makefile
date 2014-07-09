@@ -7,8 +7,11 @@ PREFIX=/usr/
 
 all: watchdog/watchdog_pb2.py pb
 
-pb: src/pb.cc
-	${CXX} ${CXXFLAGS} src/pb.cc -o pb -lprotobuf -lpthread -lstdc++
+pb: src/pb.cc pitbull.o
+	${CXX} ${CXXFLAGS} src/pb.cc pitbull.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil
+
+pitbull.o: src/pitbull.cc src/pitbull.h
+	${CXX} ${CXXFLAGS} -c src/pitbull.cc -o pitbull.o
 
 proto: watchdog.proto
 	mkdir -p src
@@ -27,4 +30,5 @@ clean:
 	rm -f src/watchdog.pb.cc
 	rm -f src/watchdog.pb.h
 	rm -f pb
+	rm -f pitbull.o
 
