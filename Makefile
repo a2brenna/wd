@@ -1,7 +1,10 @@
-CXX=clang++
-CXXFLAGS=-O2 -g -std=c++11 -fPIC -Wall -Wextra
+INCLUDE_DIR=$(shell echo ~)/local/include
+LIBRARY_DIR=$(shell echo ~)/local/lib
 DESTDIR=/
 PREFIX=/usr/
+
+CXX=clang++
+CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 .PHONY: proto
 
