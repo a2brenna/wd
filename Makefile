@@ -11,7 +11,7 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 all: watchdog/watchdog_pb2.py pb
 
 pb: src/pb.cc src/watchdog.pb.cc src/watchdog.pb.h pitbull.o
-	${CXX} ${CXXFLAGS} src/pb.cc src/watchdog.pb.cc pitbull.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil
+	${CXX} ${CXXFLAGS} src/pb.cc src/watchdog.pb.cc pitbull.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls
 
 pitbull.o: src/pitbull.cc src/pitbull.h
 	${CXX} ${CXXFLAGS} -c src/pitbull.cc -o pitbull.o
