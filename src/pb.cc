@@ -16,7 +16,7 @@ int main(){
     gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE, CERTFILE, CAFILE);
 
     Connection_Factory ears{};
-    int port1 = listen_on("/tmp/pb.sock", false);
+    int port1 = listen_on(PORT, false);
     ears.add_socket(port1);
 
     Pitbull p{};

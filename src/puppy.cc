@@ -16,7 +16,7 @@ int main(){
 
     try{
         gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE, CERTFILE, CAFILE);
-        Unix_Domain_Address server_address("/tmp/pb.sock", false);
+        INET_Address server_address("127.0.0.1", 7877, false);
         server = new Secure_Socket(connect_to(&server_address), false, x509_cred);
     }
     catch(Network_Error e){
