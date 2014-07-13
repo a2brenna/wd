@@ -28,7 +28,8 @@ void Task_Data::beat(){
 void Pitbull::handle(Task *t){
     if(Incoming_Connection *i = dynamic_cast<Incoming_Connection *>(t)){
         std::string request;
-        recv_string(i->sockfd, request);
+        //TODO: can't just recv_string off plain socket... TLS magic needs to happen first
+        //recv_string(i->sockfd, request);
 
         watchdog::Message m;
         m.ParseFromString(request);
