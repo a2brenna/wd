@@ -4,27 +4,34 @@
 #include <hgutil/time.h>
 #include <hgutil/socket.h>
 #include <hgutil/fd.h>
+#include <hgutil/math.h>
 #include <iostream>
+#include <sys/time.h>
 
-void Task_Data::beat(){
+double Task_Data::beat(){
     int s = ivals.size();
     while( s > (max_ivals - 1) ){
         ivals.pop_back();
     }
 
-    auto current = milli_time() / 1000.0;
+    double current = milli_time() / 1000.0;
 
     if (last != -1 ){
         ivals.push_front(current - last);
     }
 
     last = current;
+    expiration = last + mean(ivals.begin(), ivals.end()) * 2; //zomg do a better job than this
 
-    //calculate expiration
-    //
-    ///update itimer for expiration wakeup
+    return expiration;
+}
 
-    return;
+bool Task_Data::expired(){
+    double current = milli_time() / 1000.0;
+    if(current > expiration){
+        return true;
+    }
+    return false;
 }
 
 int Task_Data::num_beats(){
@@ -51,8 +58,20 @@ void Pitbull::handle(Task *t){
                     }
 
                     std::lock_guard<std::recursive_mutex> t(task->lock);
-                    task->data.beat();
+                    double exp = task->data.beat();
                     std::cout << "Task: " << m.beat().signature() << " has " << task->data.num_beats() << std::endl;
+
+                    std::lock_guard<std::recursive_mutex> time_lock(timelock);
+                    struct itimerval current_expiration;
+                    getitimer(ITIMER_REAL, &current_expiration);
+
+                    struct timeval tasks_expiration = seconds_to_timeval(exp - milli_time());
+
+                    if(current_expiration.it_value < tasks_expiration){
+                        struct itimerval next;
+                        next.it_interval = tasks_expiration;
+                        setitimer(ITIMER_REAL, &next, NULL);
+                    }
                 }
                 else if(m.has_query()){
 

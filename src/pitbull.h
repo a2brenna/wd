@@ -20,17 +20,22 @@ class Task_Data {
         std::deque<double> ivals;
     public:
         double last = -1;
-        double mean = 0;
         double deviation = 0;
+        double expiration = 0;
 
         int num_beats();
-        void beat();
+        double beat();
+        bool expired();
 };
 
 class Pitbull : public Handler{
     private:
-        Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
+        struct timeval next_expiration;
     public:
+        Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
+        std::recursive_mutex timelock;
+
+        Pitbull(){ next_expiration.tv_sec = 0; next_expiration.tv_usec = 0; };
         void handle(Task *t);
 };
 
