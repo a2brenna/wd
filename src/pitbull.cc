@@ -27,6 +27,10 @@ void Task_Data::beat(){
     return;
 }
 
+int Task_Data::num_beats(){
+    return ivals.size();
+}
+
 void Pitbull::handle(Task *t){
     std::cerr << "Got incoming client" << std::endl;
     if(Incoming_Connection *i = dynamic_cast<Incoming_Connection *>(t)){
