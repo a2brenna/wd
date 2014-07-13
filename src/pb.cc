@@ -1,4 +1,3 @@
-#include "watchdog.pb.h"
 #include "pitbull.h"
 #include <hgutil/network.h>
 #include <memory>
