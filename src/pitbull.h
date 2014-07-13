@@ -1,6 +1,7 @@
 #ifndef __PITBULL_H__
 
 #include <hgutil/server.h>
+#include <hgutil/socket.h>
 #include <string>
 #include <map>
 #include <deque>
@@ -9,8 +10,9 @@ const int max_ivals = 10000;
 
 class Incoming_Connection : public Task{
     public:
-        int sockfd;
-        Incoming_Connection(int s) { sockfd = s; };
+        Socket *sock;
+        Incoming_Connection(Socket *s) { sock = s; };
+        ~Incoming_Connection() { delete sock; };
 };
 
 class Task_Data {
