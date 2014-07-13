@@ -6,6 +6,8 @@
 #include <map>
 #include <deque>
 
+#include "watchdog.pb.h"
+
 const int max_ivals = 10000;
 
 class Incoming_Connection : public Task{
@@ -31,6 +33,8 @@ class Task_Data {
 class Pitbull : public Handler{
     private:
         struct timeval next_expiration;
+
+        void handle_beat(watchdog::Message m);
     public:
         Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
         std::recursive_mutex timelock;

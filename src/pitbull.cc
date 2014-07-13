@@ -38,6 +38,31 @@ int Task_Data::num_beats(){
     return ivals.size();
 }
 
+void Pitbull::handle_beat(watchdog::Message m){
+    std::cerr << "Parsed incoming beat" << std::endl;
+    Lockable<Task_Data> *task;
+    {
+        std::lock_guard<std::recursive_mutex> t(tracked_tasks.lock);
+        task = &(tracked_tasks.data[m.beat().signature()]);
+    }
+
+    std::lock_guard<std::recursive_mutex> t(task->lock);
+    double exp = task->data.beat();
+    std::cout << "Task: " << m.beat().signature() << " has " << task->data.num_beats() << std::endl;
+
+    std::lock_guard<std::recursive_mutex> time_lock(timelock);
+    struct itimerval current_expiration;
+    getitimer(ITIMER_REAL, &current_expiration);
+
+    struct timeval tasks_expiration = seconds_to_timeval(exp - milli_time());
+
+    if(current_expiration.it_value < tasks_expiration){
+        struct itimerval next;
+        next.it_interval = tasks_expiration;
+        setitimer(ITIMER_REAL, &next, NULL);
+    }
+}
+
 void Pitbull::handle(Task *t){
     std::cerr << "Got incoming client" << std::endl;
     if(Incoming_Connection *i = dynamic_cast<Incoming_Connection *>(t)){
@@ -50,28 +75,7 @@ void Pitbull::handle(Task *t){
                 m.ParseFromString(request);
 
                 if(m.has_beat()){
-                    std::cerr << "Parsed incoming beat" << std::endl;
-                    Lockable<Task_Data> *task;
-                    {
-                        std::lock_guard<std::recursive_mutex> t(tracked_tasks.lock);
-                        task = &(tracked_tasks.data[m.beat().signature()]);
-                    }
-
-                    std::lock_guard<std::recursive_mutex> t(task->lock);
-                    double exp = task->data.beat();
-                    std::cout << "Task: " << m.beat().signature() << " has " << task->data.num_beats() << std::endl;
-
-                    std::lock_guard<std::recursive_mutex> time_lock(timelock);
-                    struct itimerval current_expiration;
-                    getitimer(ITIMER_REAL, &current_expiration);
-
-                    struct timeval tasks_expiration = seconds_to_timeval(exp - milli_time());
-
-                    if(current_expiration.it_value < tasks_expiration){
-                        struct itimerval next;
-                        next.it_interval = tasks_expiration;
-                        setitimer(ITIMER_REAL, &next, NULL);
-                    }
+                    handle_beat(m);
                 }
                 else if(m.has_query()){
 
