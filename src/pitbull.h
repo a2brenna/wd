@@ -23,6 +23,7 @@ class Task_Data {
         double mean = 0;
         double deviation = 0;
 
+        int num_beats();
         void beat();
 };
 
