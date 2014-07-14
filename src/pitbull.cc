@@ -63,7 +63,7 @@ void Pitbull::reset_expiration(){
 
     std::chrono::nanoseconds ns(countdown);
 
-    set_nano_timer(ns.count());
+    set_timer(ns);
 }
 
 void Pitbull::handle_beat(watchdog::Message m){
