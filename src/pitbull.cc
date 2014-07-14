@@ -24,10 +24,10 @@ void Pitbull::handle(Task *t){
                         handle_beat(m);
                     }
                     else if(m.has_query()){
-
+                        handle_query(m, i);
                     }
                     else if(m.orders_size() > 0){
-
+                        handle_orders(m, i);
                     }
                     else{
                         throw Handler_Exception("Bad Request");
@@ -86,4 +86,12 @@ void Pitbull::handle_beat(watchdog::Message m){
 
     std::lock_guard<std::recursive_mutex> time_lock(timelock);
     reset_expiration();
+}
+
+void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
+
+}
+
+void Pitbull::handle_orders(watchdog::Message m, Incoming_Connection *i){
+
 }
