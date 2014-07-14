@@ -27,6 +27,7 @@ void expiration(int sig){
     for(auto t: p.tracked_tasks.data){
         std::lock_guard<std::recursive_mutex> lock_individual(t.second.lock);
         if(t.second.data.expired()){
+            std::cerr << "Task: " << t.first << " has expired" << std::endl;
             syslog(LOG_WARNING, "Task: %s has expired", t.first.c_str());
         }
     }
