@@ -37,6 +37,29 @@ int Task_Data::num_beats(){
     return ivals.size();
 }
 
+void Pitbull::reset_expiration(){
+
+    std::pair<std::string, double> next_expiration;
+    next_expiration.second = std::numeric_limits<double>::max();
+
+    {
+        std::lock_guard<std::recursive_mutex> t(tracked_tasks.lock);
+        for(auto &t: tracked_tasks.data){
+            std::lock_guard<std::recursive_mutex> t_lock(t.second.lock);
+            if(t.second.data.expiration < next_expiration.second){
+                next_expiration.first = t.first;
+                next_expiration.second = t.second.data.expiration;
+            }
+        }
+    }
+
+    auto countdown = next_expiration.second - (milli_time() / 1000);
+
+    next = next_expiration.first;
+
+    std::cerr << "Setting countdown for " << next_expiration.first << " " << set_itimer_countdown(countdown) << std::endl;
+}
+
 void Pitbull::handle_beat(watchdog::Message m){
     std::cerr << "Parsed incoming beat" << std::endl;
     Lockable<Task_Data> *task;
