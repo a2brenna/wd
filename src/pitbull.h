@@ -7,27 +7,14 @@
 #include <deque>
 #include <chrono>
 
+#include "task.h"
 #include "watchdog.pb.h"
-
-const int max_intervals = 10000;
 
 class Incoming_Connection : public Task{
     public:
         Socket *sock;
         Incoming_Connection(Socket *s) { sock = s; };
         ~Incoming_Connection() { delete sock; };
-};
-
-class Task_Data {
-    private:
-        std::deque<std::chrono::high_resolution_clock::duration> intervals;
-    public:
-        std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
-        std::chrono::high_resolution_clock::time_point e;
-
-        int num_beats();
-        double beat();
-        bool expired();
 };
 
 class Pitbull : public Handler{
