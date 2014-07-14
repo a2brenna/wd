@@ -1,12 +1,15 @@
 #include "pitbull.h"
 #include <hgutil/socket.h>
 #include <hgutil/fd.h>
+#include <hgutil/time.h>
 #include <memory>
 #include <gnutls/gnutls.h>
 #include <iostream>
 #include <signal.h>
 #include <mutex>
 #include <syslog.h>
+#include <limits.h>
+#include <sys/time.h>
 
 const int PORT = 7877;
 
@@ -42,10 +45,11 @@ int main(){
 
     signal(SIGALRM, expiration);
 
+    set_itimer_countdown(3600.0 * 24 * 7 );
+
     for(;;){
         try{
             int next = ears.next_connection();
-            std::cerr << "Got incoming" << std::endl;
             std::shared_ptr<Task> t(new Incoming_Connection(new Secure_Socket(next, true, x509_cred)));
             p.queue_task(t);
             p.handle_next();
