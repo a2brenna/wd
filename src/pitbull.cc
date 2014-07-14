@@ -6,7 +6,6 @@
 #include <hgutil/fd.h>
 #include <hgutil/math.h>
 #include <iostream>
-#include <sys/time.h>
 
 double Task_Data::beat(){
     int s = ivals.size();
