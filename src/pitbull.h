@@ -5,10 +5,11 @@
 #include <string>
 #include <map>
 #include <deque>
+#include <chrono>
 
 #include "watchdog.pb.h"
 
-const int max_ivals = 10000;
+const int max_intervals = 10000;
 
 class Incoming_Connection : public Task{
     public:
@@ -19,10 +20,10 @@ class Incoming_Connection : public Task{
 
 class Task_Data {
     private:
-        std::deque<double> ivals;
+        std::deque<std::chrono::high_resolution_clock::duration> intervals;
     public:
-        double last = -1;
-        double expiration = std::numeric_limits<double>::max();
+        std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
+        std::chrono::high_resolution_clock::time_point e;
 
         int num_beats();
         double beat();

@@ -46,7 +46,7 @@ int main(){
 
     signal(SIGALRM, expiration);
 
-    set_itimer_countdown(3600.0 * 24 * 7 );
+    set_timer(3600.0 * 24 * 7);
 
     for(;;){
         try{

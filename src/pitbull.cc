@@ -6,58 +6,64 @@
 #include <hgutil/fd.h>
 #include <hgutil/math.h>
 #include <iostream>
+#include <chrono>
 
 double Task_Data::beat(){
-    int s = ivals.size();
-    while( s > (max_ivals - 1) ){
-        ivals.pop_back();
+    int s = intervals.size();
+    while( s > (max_intervals - 1) ){
+        intervals.pop_back();
     }
 
-    double current = milli_time() / 1000.0;
+    std::chrono::high_resolution_clock::time_point c = std::chrono::high_resolution_clock::now();
 
-    if (last != -1 ){
-        ivals.push_front(current - last);
+    if(l != std::chrono::high_resolution_clock::time_point::min()){
+        intervals.push_front(c - l);
     }
 
-    last = current;
-    expiration = last + mean(ivals.begin(), ivals.end()) * 2; //zomg do a better job than this
+    l = c;
 
-    return expiration;
+    if(intervals.size() > 2){
+        e = l + (intervals.front() * 2);
+        return 0;
+    }
+
+    return -1;
+
 }
 
 bool Task_Data::expired(){
-    double current = milli_time() / 1000.0;
-    if(current > expiration){
+    if(std::chrono::high_resolution_clock::now() > e){
         return true;
     }
     return false;
 }
 
 int Task_Data::num_beats(){
-    return ivals.size();
+    return intervals.size();
 }
 
 void Pitbull::reset_expiration(){
 
-    std::pair<std::string, double> next_expiration;
-    next_expiration.second = std::numeric_limits<double>::max();
+    std::pair<std::string, std::chrono::high_resolution_clock::time_point> next_expiration;
+    next_expiration.second = std::chrono::high_resolution_clock::time_point::max();
 
     {
         std::lock_guard<std::recursive_mutex> t(tracked_tasks.lock);
         for(auto &t: tracked_tasks.data){
             std::lock_guard<std::recursive_mutex> t_lock(t.second.lock);
-            if(t.second.data.expiration < next_expiration.second){
+            if(t.second.data.e < next_expiration.second){
                 next_expiration.first = t.first;
-                next_expiration.second = t.second.data.expiration;
+                next_expiration.second = t.second.data.e;
             }
         }
     }
 
-    auto countdown = next_expiration.second - (milli_time() / 1000);
-
+    std::chrono::high_resolution_clock::duration countdown = next_expiration.second - std::chrono::high_resolution_clock::now();
     next = next_expiration.first;
 
-    std::cerr << "Setting countdown for " << next_expiration.first << " " << set_itimer_countdown(countdown) << std::endl;
+    std::chrono::nanoseconds ns(countdown);
+
+    set_nano_timer(ns.count());
 }
 
 void Pitbull::handle_beat(watchdog::Message m){
@@ -69,8 +75,7 @@ void Pitbull::handle_beat(watchdog::Message m){
     }
 
     std::lock_guard<std::recursive_mutex> t(task->lock);
-    double task_expiration = task->data.beat();
-    std::cout << "Task: " << signature << " has " << task->data.num_beats() << std::endl;
+    task->data.beat();
 
     std::lock_guard<std::recursive_mutex> time_lock(timelock);
     reset_expiration();
