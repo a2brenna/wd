@@ -22,8 +22,7 @@ class Task_Data {
         std::deque<double> ivals;
     public:
         double last = -1;
-        double deviation = 0;
-        double expiration = 0;
+        double expiration = std::numeric_limits<double>::max();
 
         int num_beats();
         double beat();
@@ -33,8 +32,10 @@ class Task_Data {
 class Pitbull : public Handler{
     private:
         struct timeval next_expiration;
+        std::string next;
 
         void handle_beat(watchdog::Message m);
+        void reset_expiration();
     public:
         Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
         std::recursive_mutex timelock;
