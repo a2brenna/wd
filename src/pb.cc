@@ -13,6 +13,7 @@
 
 const int PORT = 7877;
 
+//TODO: Some sort of global configuration?
 auto CERTFILE = "/home/a2brenna/.ssl/cert.pem";
 auto KEYFILE = "/home/a2brenna/.ssl/key.pem";
 auto CAFILE = "/home/a2brenna/.ssl/ca-cert.pem";
