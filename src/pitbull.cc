@@ -89,7 +89,49 @@ void Pitbull::handle_beat(watchdog::Message m){
 }
 
 void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
+    auto r = watchdog::Message();
+    auto response = r.mutable_response();
+    auto query = m.query();
+    if( query.question() == "Dump" ){
+        auto t_sig = query.signature();
+        try{
+            auto dump_data = response->mutable_dump();
+            Lockable<Task_Data> *task_data;
+            {
+                std::lock_guard<std::recursive_mutex> tasks_lock(tracked_tasks.lock);
+                task_data = &(tracked_tasks.data.at(t_sig));
+            }
+            std::lock_guard<std::recursive_mutex> task_lock(task_data->lock);
+            for(auto &d: task_data->data.intervals){
+                double seconds = to_seconds(d);
+                dump_data->add_interval(seconds);
+            }
+        }
+        catch(std::out_of_range e){
+            syslog(LOG_ERR, "No such task: %s", t_sig.c_str());
+        }
+    }
+    else if( m.query().question() == "Status" ){
+        double current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
+        std::lock_guard<std::recursive_mutex> tasks_lock(tracked_tasks.lock);
+        for (auto &t: tracked_tasks.data){
+            auto task = response->mutable_task();
+            std::lock_guard<std::recursive_mutex> task_lock(t.second.lock);
+            /*
+            task.set_signature();
+            task.set_last();
+            task.set_expected();
+            task.set_mean();
+            task.set_deviation();
+            task.set_time_to_expiration();
+            task.set_beats();
+            */
+        }
+    }
 
+    std::string response_string;
+    r.SerializeToString(&response_string);
+    send_string(i->sock, response_string);
 }
 
 void Pitbull::handle_orders(watchdog::Message m, Incoming_Connection *i){
