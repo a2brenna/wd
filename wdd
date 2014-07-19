@@ -4,66 +4,27 @@ import argparse, signal, sys,daemon, socket, pwd, os, psutil, ConfigParser
 from hatguy import utils
 from watchdog import heartbeat
 from watchdog.daemon import daemon as exec_daemon
-from watchdog.client import client
-from watchdog.client import client2
 
 def main():
     config = ConfigParser.SafeConfigParser()
-    config.add_section("client")
-    config.set("client", "SERVER", 'taurine.csclub.uwaterloo.ca')
-    config.set("client", "PORT", str(7877))
-    config.set("client", "HEARTRATE", str(60))
-    config.set("client", "MAX_ATTEMPTS", str(5))
     config.read(["/etc/wd.conf", os.path.expanduser("~/.wd.conf")])
 
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
-    parser.add_argument("-d", "--daemon", action="store_true", help="Run watchdog daemon.")
     parser.add_argument("-s", "--server", default=config.get("client", "SERVER"), help="Hostname of watchdog server to use.")
-    parser.add_argument("-q", "--query", action="store_true", help="Query the watchdog server to return the list of tracked signatures")
-    parser.add_argument("COMMAND", nargs=argparse.REMAINDER, help="The command to be watched. Ignored if running daemon.", type=str)
     parser.add_argument("--port", default=config.getint("client", "PORT"), help="Port to target on server, or in the case of server, port to listen on.", type=int)
-    parser.add_argument("-p", "--pid", help="Pid of a process to monitor.", type=int)
     parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
     parser.add_argument("-r", "--heartrate", default=config.get("client", "HEARTRATE"), help="Number of seconds between heartbeats.", type=int)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
     parser.add_argument("--retry", default=config.getint("client", "MAX_ATTEMPTS"), help="Number of times to retry a beat if connection to server fails.", type=int)
-    parser.add_argument("--forget", help="Ask the server to forget about a tracked task with the supplied signature", type=str)
     parser.add_argument("-i", "--interactive", default=False, action="store_true", help="Force daemon to execute whilst connected to terminal (useful for debugging).")
-    parser.add_argument("--dump", help="Signature of a task to dump", type=str)
     args = parser.parse_args()
 
-    if args.daemon:
-        utils.kill_ancestor(args.port)
-        if args.interactive:
-            exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
-        else:
-            with daemon.DaemonContext():
-                exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
-    elif args.query:
-        try:
-            sys.stdout.write(str(heartbeat.query(server=args.server, port=args.port)))
-        except Exception as e:
-            print(str(e))
-    elif args.dump:
-        try:
-            out = str(heartbeat.dump(server=args.server, port=args.port, export=args.dump))
-            print(out)
-        except Exception as e:
-            print("Caught Exception!")
-            print(str(e))
-    elif args.pid:
-        with daemon.DaemonContext():
-            client2(server=args.server, target_port=args.port, pid=args.pid, delay=args.delay, heartrate=args.heartrate, retry=args.retry, signature=args.signature)
-    elif args.signature:
-            heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
-    elif args.forget:
-        heartbeat.forget(args.server, args.port, args.forget)
+    utils.kill_ancestor(args.port)
+    if args.interactive:
+        exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
     else:
-        if (args.COMMAND == []):
-            sys.stderr.write("You must specify a command...\n")
-            sys.exit(1)
-        else:
-            client(server=args.server, target_port=args.port, command=args.COMMAND, delay=args.delay, heartrate=args.heartrate, retry=args.retry)
+        with daemon.DaemonContext():
+            exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
 
 if __name__ == '__main__':
     main()

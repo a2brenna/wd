@@ -1,8 +1,8 @@
-import watchdog_pb2, socket, os, psutil, logging, ssl
+import watchdog_pb2, socket, os, psutil, logging, ssl, psutil
 
 def gen_sig(pid=os.getpid()):
     p = psutil.Process(pid)
-    return p.username + ":" + socket.gethostname() + ":" + p.name + ":" + str(pid)
+    return (p.username + ":" + socket.gethostname() + ":" + p.name + ":" + str(pid))
 
 def beat(server, port, signature=gen_sig()):
     logging.info("Sending beat with signature " + signature)
