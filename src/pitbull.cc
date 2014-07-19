@@ -115,17 +115,15 @@ void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
         double current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
         std::lock_guard<std::recursive_mutex> tasks_lock(tracked_tasks.lock);
         for (auto &t: tracked_tasks.data){
-            auto task = response->mutable_task();
+            auto task = response->add_task();
             std::lock_guard<std::recursive_mutex> task_lock(t.second.lock);
-            /*
-            task.set_signature();
-            task.set_last();
-            task.set_expected();
-            task.set_mean();
-            task.set_deviation();
-            task.set_time_to_expiration();
-            task.set_beats();
-            */
+            task->set_signature(t.first);
+            task->set_last(t.second.data.last());
+            task->set_expected(t.second.data.expected());
+            task->set_mean(t.second.data.mean());
+            task->set_deviation(t.second.data.deviation());
+            task->set_time_to_expiration(t.second.data.time_to_expiration());
+            task->set_beats(t.second.data.num_beats());
         }
     }
 
