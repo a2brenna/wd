@@ -3,11 +3,11 @@ package watchdog;
 message Response{
     message Task{
         optional string signature = 1;
-        optional int32 last = 2;
-        optional int32 expected = 3;
+        optional double last = 2;
+        optional double expected = 3;
         optional double mean = 4;
         optional double deviation = 5;
-        optional int32 time_to_expiration = 6;
+        optional double time_to_expiration = 6;
         optional int32 beats = 7;
     }
     message Export{
