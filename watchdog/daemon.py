@@ -184,9 +184,9 @@ class WatchDog():
                                         for s, t in self.tasks.iteritems():
                                             description = response.response.task.add()
                                             description.signature = s
-                                            description.last = int(t.get_last())
-                                            description.expected = int(t.expiration)
-                                            description.time_to_expiration = int(t.expiration - current_time)
+                                            description.last = t.get_last()
+                                            description.expected = t.expiration
+                                            description.time_to_expiration = (t.expiration - current_time)
                                             description.mean = float(t.mean())
                                             description.deviation = float(t.deviation())
                                             description.beats = int(len(t.ivals) + 1)
