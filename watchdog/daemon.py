@@ -2,7 +2,6 @@
 
 import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pwd, pickle, logging, traceback, ssl
 from hatguy import utils
-from hatcomm import jarvis_pb2, comm
 from heartbeat import beat
 
 RECV_BUFF_SIZE=4096
@@ -97,7 +96,7 @@ class WatchDog():
                 logging.debug("Task: " + self.next_expiration.signature + " has expired")
                 try:
                     logging.debug("Sending expiration notice")
-                    comm.send_jarvis("wd:" + socket.gethostname(), "a2brenna", self.next_expiration.signature + " has expired.")
+                    #comm.send_jarvis("wd:" + socket.gethostname(), "a2brenna", self.next_expiration.signature + " has expired.")
                 except Exception as e:
                     logging.error("Failed to send expiration notice for " + str(self.next_expiration.signature))
                     logging.exception(e)
