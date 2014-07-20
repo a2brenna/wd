@@ -10,8 +10,7 @@ def main():
     config.read(["/etc/wd.conf", os.path.expanduser("~/.wd.conf")])
 
     parser = argparse.ArgumentParser("Seamlessly monitor processes...")
-    parser.add_argument("-s", "--server", default=config.get("client", "SERVER"), help="Hostname of watchdog server to use.")
-    parser.add_argument("--port", default=config.getint("client", "PORT"), help="Port to target on server, or in the case of server, port to listen on.", type=int)
+    parser.add_argument("--port", default=config.getint("daemon", "PORT"), help="Port to target on server, or in the case of server, port to listen on.", type=int)
     parser.add_argument("--delay", default=0, help="Number of seconds to wait before initially contacting watchdog server.", type=int)
     parser.add_argument("-r", "--heartrate", default=config.get("client", "HEARTRATE"), help="Number of seconds between heartbeats.", type=int)
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
@@ -21,10 +20,10 @@ def main():
 
     utils.kill_ancestor(args.port)
     if args.interactive:
-        exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
+        exec_daemon(port=args.port, wd_port=args.port)
     else:
         with daemon.DaemonContext():
-            exec_daemon(port=args.port, wd_server=args.server, wd_port=args.port)
+            exec_daemon(port=args.port, wd_port=args.port)
 
 if __name__ == '__main__':
     main()

@@ -59,9 +59,8 @@ def get_exp(t):
     return t.expiration
 
 class WatchDog():
-    def __init__(self, port, wd_server, wd_port):
+    def __init__(self, port, wd_port):
         self.port = port
-        self.wd_server = wd_server
         self.wd_port = wd_port
 
         try:
@@ -91,17 +90,6 @@ class WatchDog():
 
     def awake(self, signum, frame):
         logging.debug("Awake")
-        try:
-            if (time.time() - self.beat_time > 60.0):
-                if(socket.getaddrinfo(socket.gethostname(), self.port) != socket.getaddrinfo(self.wd_server, self.wd_port)):
-                    logging.debug("Beating")
-                    beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
-                else:
-                    logging.debug("Not beating to self")
-                self.beat_time = time.time()
-        except Exception as e:
-            logging.warning("Failed to contact wd server")
-            logging.exception(e)
 
         if self.next_expiration != None:
             logging.debug("Checking self.next_expiration")
@@ -236,13 +224,12 @@ class WatchDog():
         sys.exit(0)
 
 
-def daemon(port, wd_server, wd_port):
+def daemon(port, wd_port):
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     sys.excepthook = utils.log_uncaught
-    logging.info("Secondary watchdog server: " + wd_server + ":" + str(wd_port))
 
-    wd = WatchDog(port, wd_server, wd_port)
+    wd = WatchDog(port, wd_port)
     signal.signal(signal.SIGALRM, wd.awake)
     signal.signal(signal.SIGTERM, wd.shutdown)
 
