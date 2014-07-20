@@ -27,7 +27,7 @@ double t_deviation (std::deque<nanos>::iterator start, std::deque<nanos>::iterat
     return result;
 }
 
-double Task_Data::beat(){
+void Task_Data::beat(){
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
         intervals.pop_back();
@@ -43,11 +43,7 @@ double Task_Data::beat(){
 
     if(intervals.size() > 2){
         e = l + (intervals.front() * 2);
-        return 0;
     }
-
-    return -1;
-
 }
 
 bool Task_Data::expired(){
@@ -72,8 +68,7 @@ std::chrono::high_resolution_clock::time_point Task_Data::_expected(){
 
 
 double Task_Data::expected(){
-    auto expected = _expected();
-    return to_seconds(expected.time_since_epoch());
+    return to_seconds(e.time_since_epoch());
 }
 
 double Task_Data::mean(){

@@ -14,7 +14,7 @@ class Task_Data {
         std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
         std::chrono::high_resolution_clock::time_point e;
 
-        double beat();
+        void beat();
 
         double last();
         double expected();
