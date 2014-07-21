@@ -10,6 +10,7 @@
 #include <syslog.h>
 #include <limits.h>
 #include <sys/time.h>
+#include <chrono>
 
 const int PORT = 7877;
 
@@ -47,7 +48,7 @@ int main(){
 
     signal(SIGALRM, expiration);
 
-    set_timer(3600.0 * 24 * 7);
+    set_timer(std::chrono::nanoseconds::max());
 
     for(;;){
         try{
