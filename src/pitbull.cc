@@ -144,5 +144,12 @@ void Pitbull::handle_orders(watchdog::Message m){
 
 void Pitbull::forget(std::string to_forget){
     std::lock_guard<std::recursive_mutex> l(tracked_tasks.lock);
+
     tracked_tasks.data.erase(to_forget);
+
+    //if we're forgetting the thing that was next to expire we need to reset the expiration counter or we'll get a spurious wakeup (rendered harmless by f803b5946e87bdd5aa4498f2e6d8427ba7792e9a)
+    if(next == f.signature()){
+        next.clear();
+        reset_expiration();
+    }
 }
