@@ -8,6 +8,7 @@ const int max_intervals = 10000;
 
 class Task_Data {
     private:
+        std::deque<long> _intervals;
         std::chrono::high_resolution_clock::time_point _expected();
     public:
         std::deque<std::chrono::high_resolution_clock::duration> intervals;
