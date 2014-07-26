@@ -24,8 +24,9 @@ class Pitbull : public Handler{
 
         void handle_beat(watchdog::Message m);
         void handle_query(watchdog::Message m, Incoming_Connection *i);
-        void handle_orders(watchdog::Message m, Incoming_Connection *i);
+        void handle_orders(watchdog::Message m);
         void reset_expiration();
+        void forget(std::string to_forget);
     public:
         Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
         std::recursive_mutex timelock;

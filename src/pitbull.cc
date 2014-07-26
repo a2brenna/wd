@@ -27,7 +27,7 @@ void Pitbull::handle(Task *t){
                         handle_query(m, i);
                     }
                     else if(m.orders_size() > 0){
-                        handle_orders(m, i);
+                        handle_orders(m);
                     }
                     else{
                         throw Handler_Exception("Bad Request");
@@ -131,6 +131,18 @@ void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
     send_string(i->sock, response_string);
 }
 
-void Pitbull::handle_orders(watchdog::Message m, Incoming_Connection *i){
+void Pitbull::handle_orders(watchdog::Message m){
+    std::cerr << "Received orders" << std::endl;
+    for( int i = 0; i < m.orders_size(); i++){
+        const watchdog::Command &o = m.orders(i);
+        for( int j = 0; j < o.to_forget_size(); j++){
+            const watchdog::Command::Forget &f = o.to_forget(j);
+            forget(f.signature());
+        }
+    }
+}
 
+void Pitbull::forget(std::string to_forget){
+    std::lock_guard<std::recursive_mutex> l(tracked_tasks.lock);
+    tracked_tasks.data.erase(to_forget);
 }
