@@ -112,7 +112,6 @@ void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
         }
     }
     else if( m.query().question() == "Status" ){
-        double current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
         std::lock_guard<std::recursive_mutex> tasks_lock(tracked_tasks.lock);
         for (auto &t: tracked_tasks.data){
             auto task = response->add_task();
