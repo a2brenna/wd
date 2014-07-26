@@ -1,31 +1,6 @@
 #include "task.h"
+#include <hgutil/math.h>
 #include <cmath>
-
-typedef std::chrono::high_resolution_clock::duration nanos;
-
-nanos t_mean(std::deque<nanos>::iterator start, std::deque<nanos>::iterator end){
-    nanos accumulator;
-    int count = 0;
-    for(std::deque<nanos>::iterator i = start; i != end; i++){
-        accumulator = accumulator + (*i);
-        count++;
-    }
-
-    auto result = accumulator / count;
-    return result;
-}
-
-double t_deviation (std::deque<nanos>::iterator start, std::deque<nanos>::iterator end, nanos m){
-    int count = 0;
-    std::deque<nanos> variances;
-    for(std::deque<nanos>::iterator i = start; i != end; i++){
-        variances.push_back( (*i - m) * (*i - m).count() );
-        count++;
-    }
-
-    auto result = sqrt((t_mean(variances.begin(), variances.end())).count());
-    return result;
-}
 
 void Task_Data::beat(){
     int s = intervals.size();
@@ -33,16 +8,32 @@ void Task_Data::beat(){
         intervals.pop_back();
     }
 
+    int s2 = _intervals.size();
+    while( s2 > (max_intervals - 1) ){
+        _intervals.pop_back();
+    }
+
     std::chrono::high_resolution_clock::time_point c = std::chrono::high_resolution_clock::now();
 
     if(l != std::chrono::high_resolution_clock::time_point::min()){
-        intervals.push_front(c - l);
+        auto t = c - l;
+        intervals.push_front(t);
+        _intervals.push_front(t.count());
     }
 
     l = c;
 
     if(intervals.size() > 2){
-        e = l + (intervals.front() * 2);
+        auto m = ::mean(_intervals, (long)0);
+        for(auto x: _intervals){
+            std::cerr << "Elem: " << x << std::endl;
+        }
+        std::cerr << "mean " << m << std::endl;
+        auto d = stdev(m, _intervals, (long)0);
+        std::cerr << "deviation " << stdev(m, _intervals, (long)0);
+        e = l + std::chrono::nanoseconds(m + d * 3);
+        std::cerr << "Mean seconds " << mean() << std::endl;
+        std::cerr << "Deviation seconds " << deviation() << std::endl;
     }
 }
 
@@ -62,21 +53,22 @@ double Task_Data::last(){
     return to_seconds(last);
 }
 
-std::chrono::high_resolution_clock::time_point Task_Data::_expected(){
-    return l + (intervals.back() * 2);
-}
-
-
 double Task_Data::expected(){
     return to_seconds(e.time_since_epoch());
 }
 
 double Task_Data::mean(){
-    return to_seconds(t_mean(intervals.begin(), intervals.end()));
+    long mean_nanos = ::mean(_intervals, (long)0);
+    std::chrono::nanoseconds ns(mean_nanos);
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
+    return ms.count() / 1000.0;
 }
 
 double Task_Data::deviation(){
-    return t_deviation(intervals.begin(), intervals.end(), t_mean(intervals.begin(), intervals.end()));
+    long deviation_nanos = ::stdev(::mean(_intervals, (long)0), _intervals, (long)0);
+    std::chrono::nanoseconds ns(deviation_nanos);
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
+    return ms.count() / 1000.0;
 }
 
 double Task_Data::time_to_expiration(){
