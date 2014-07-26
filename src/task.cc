@@ -25,15 +25,8 @@ void Task_Data::beat(){
 
     if(intervals.size() > 2){
         auto m = ::mean(_intervals, (long)0);
-        for(auto x: _intervals){
-            std::cerr << "Elem: " << x << std::endl;
-        }
-        std::cerr << "mean " << m << std::endl;
         auto d = stdev(m, _intervals, (long)0);
-        std::cerr << "deviation " << stdev(m, _intervals, (long)0);
         e = l + std::chrono::nanoseconds(m + d * 3);
-        std::cerr << "Mean seconds " << mean() << std::endl;
-        std::cerr << "Deviation seconds " << deviation() << std::endl;
     }
 }
 
