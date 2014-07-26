@@ -12,7 +12,7 @@ class Task_Data {
     public:
         std::deque<std::chrono::high_resolution_clock::duration> intervals;
         std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
-        std::chrono::high_resolution_clock::time_point e;
+        std::chrono::high_resolution_clock::time_point e = std::chrono::high_resolution_clock::time_point::max();
 
         void beat();
 
