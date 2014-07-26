@@ -26,7 +26,7 @@ void Task_Data::beat(){
     if(intervals.size() > 2){
         auto m = ::mean(_intervals, (long)0);
         auto d = stdev(m, _intervals, (long)0);
-        e = l + std::chrono::nanoseconds(m + d * 3);
+        e = l + std::chrono::nanoseconds(m + d * 3); //If actually normal, this gives us 99.7% chance of NOT getting a false positive
     }
 }
 
