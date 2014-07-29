@@ -36,4 +36,5 @@ clean:
 	rm -f src/watchdog.pb.cc
 	rm -f src/watchdog.pb.h
 	rm -f pb
+	rm -f puppy
 	rm -f *.o
