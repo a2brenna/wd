@@ -3,13 +3,13 @@
 
 #include<string>
 #include<fstream>
+#include<stdlib.h>
 
 #include<boost/program_options.hpp>
 
 namespace po = boost::program_options;
 
 std::string global_config_file = "/etc/wd.conf";
-std::string user_config_file = "/home/a2brenna/.wd.conf";
 
 int PORT = 7877;
 
@@ -28,6 +28,7 @@ void get_config(int ac, char *av[]){
         ;
 
     std::ifstream global(global_config_file, std::ios_base::in);
+    std::string user_config_file = getenv("HOME");
     std::ifstream user(user_config_file, std::ios_base::in);
 
     po::variables_map vm;
