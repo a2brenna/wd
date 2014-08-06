@@ -2,10 +2,14 @@
 #define __CONFIG_H__
 
 #include<string>
+#include<fstream>
 
 #include<boost/program_options.hpp>
 
 namespace po = boost::program_options;
+
+std::string global_config_file = "/etc/wd.conf";
+std::string user_config_file = "/home/a2brenna/.wd.conf";
 
 int PORT = 7877;
 
@@ -23,7 +27,12 @@ void get_config(int ac, char *av[]){
         ("port", po::value<int>(&PORT), "port number")
         ;
 
+    std::ifstream global(global_config_file, std::ios_base::in);
+    std::ifstream user(user_config_file, std::ios_base::in);
+
     po::variables_map vm;
+    po::store(po::parse_config_file(global, desc), vm);
+    po::store(po::parse_config_file(user, desc), vm);
     po::store(po::parse_command_line(ac, av, desc), vm);
     po::notify(vm);
 
