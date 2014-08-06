@@ -1,4 +1,5 @@
 #include "pitbull.h"
+#include "config.h"
 #include <hgutil/socket.h>
 #include <hgutil/fd.h>
 #include <hgutil/time.h>
@@ -11,13 +12,6 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <chrono>
-
-const int PORT = 7877;
-
-//TODO: Some sort of global configuration?
-auto CERTFILE = "/home/a2brenna/.ssl/cert.pem";
-auto KEYFILE = "/home/a2brenna/.ssl/key.pem";
-auto CAFILE = "/home/a2brenna/.ssl/ca-cert.pem";
 
 Pitbull p;
 
@@ -35,12 +29,13 @@ void expiration(int sig){
     }
 }
 
-int main(){
+int main(int argc, char *argv[]){
+    get_config(argc, argv);
     openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     setlogmask(LOG_UPTO(LOG_INFO));
     syslog(LOG_INFO, "Watchdog starting...");
 
-    gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE, CERTFILE, CAFILE);
+    gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE.c_str(), CERTFILE.c_str(), CAFILE.c_str());
 
     Connection_Factory ears{};
     int port1 = listen_on(PORT, false);

@@ -8,8 +8,8 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: watchdog/watchdog_pb2.py pb puppy
 
-pb: src/pb.cc src/pitbull.cc src/pitbull.h watchdog.pb.o task.o
-	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls
+pb: src/pb.cc src/pitbull.cc src/pitbull.h src/config.h watchdog.pb.o task.o
+	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options
 
 puppy: src/puppy.cc client.o watchdog.pb.o
 	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls
