@@ -1,7 +1,11 @@
 #include "task.h"
 #include <hgutil/math.h>
 #include <cmath>
+#include <iostream>
 
+
+//WARNING: For some reason, the first recorded interval seems to be much smaller than subsequent ones
+//This leads to an exagerated deviation... not sure why
 void Task_Data::beat(){
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
@@ -27,6 +31,7 @@ void Task_Data::beat(){
         auto m = ::mean(_intervals, (long)0);
         auto d = stdev(m, _intervals, (long)0);
         e = l + std::chrono::nanoseconds(m + d * 3); //If actually normal, this gives us 99.7% chance of NOT getting a false positive
+        std::cerr << "Mean: " << m << " Deviation: " << d << std::endl;
     }
 }
 

@@ -5,7 +5,6 @@
 #include <hgutil/socket.h>
 #include <hgutil/fd.h>
 #include <hgutil/math.h>
-#include <iostream>
 #include <chrono>
 #include <syslog.h>
 
@@ -132,7 +131,6 @@ void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
 }
 
 void Pitbull::handle_orders(watchdog::Message m){
-    std::cerr << "Received orders" << std::endl;
     for( int i = 0; i < m.orders_size(); i++){
         const watchdog::Command &o = m.orders(i);
         for( int j = 0; j < o.to_forget_size(); j++){
