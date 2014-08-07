@@ -3,9 +3,16 @@
 #include <cmath>
 #include <iostream>
 
-
-//WARNING: For some reason, the first recorded interval seems to be much smaller than subsequent ones
-//This leads to an exagerated deviation... not sure why
+/*
+WARNING: For some reason, the first recorded interval seems to be noticably
+smaller than subsequent ones.  This leads to an exagerated deviation...I'm
+reasonably sure that this is because of the additional one time cost of
+queueing the new Task, spawning a thread, popping the Task, performing the
+dynamic cast and then entering the for loop.  Reasonably sure that the client
+considers the beat() sent epsilon after the connection is estabilished, but
+the previously mentioned operations mean that the server does not record the
+beat time until noticably later.
+*/
 void Task_Data::beat(){
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
