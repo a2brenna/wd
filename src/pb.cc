@@ -37,9 +37,9 @@ int main(int argc, char *argv[]){
 
     gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE.c_str(), CERTFILE.c_str(), CAFILE.c_str());
 
-    Connection_Factory ears{};
+    Connection_Factory ears(x509_cred);
     int port1 = listen_on(PORT, false);
-    ears.add_socket(port1);
+    ears.add_secure_socket(port1);
 
     signal(SIGALRM, expiration);
 
@@ -47,8 +47,7 @@ int main(int argc, char *argv[]){
 
     for(;;){
         try{
-            int next = ears.next_connection();
-            std::shared_ptr<Task> t(new Incoming_Connection(new Secure_Socket(next, true, x509_cred)));
+            std::shared_ptr<Task> t(new Incoming_Connection(ears.next_connection()));
             p.queue_task(t);
             p.handle_next();
         }
