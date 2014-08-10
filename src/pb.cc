@@ -38,8 +38,10 @@ int main(int argc, char *argv[]){
     gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE.c_str(), CERTFILE.c_str(), CAFILE.c_str());
 
     Connection_Factory ears(x509_cred);
-    int port1 = listen_on(PORT, false);
+    int port1 = listen_on(SECURE_PORT, false);
+    int port2 = listen_on(INSECURE_PORT, false);
     ears.add_secure_socket(port1);
+    ears.add_socket(port2);
 
     signal(SIGALRM, expiration);
 
