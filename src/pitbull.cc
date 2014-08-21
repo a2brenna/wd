@@ -137,6 +137,10 @@ void Pitbull::handle_orders(watchdog::Message m){
             const watchdog::Command::Forget &f = o.to_forget(j);
             forget(f.signature());
         }
+        for( int j = 0; j < o.to_fail_size(); j++){
+            const watchdog::Command::Mark_as_Failed &f = o.to_fail(j);
+            fail(f.signature());
+        }
     }
 }
 
@@ -147,6 +151,30 @@ void Pitbull::forget(std::string to_forget){
 
     //if we're forgetting the thing that was next to expire we need to reset the expiration counter or we'll get a spurious wakeup (rendered harmless by f803b5946e87bdd5aa4498f2e6d8427ba7792e9a)
     if(next == to_forget){
+        next.clear();
+        reset_expiration();
+    }
+}
+
+void Pitbull::fail(std::string to_fail){
+    std::lock_guard<std::recursive_mutex> l(tracked_tasks.lock);
+
+    Lockable<Task_Data> *t;
+    try{
+        t = &(tracked_tasks.data.at(to_fail));
+    }
+    catch (std::out_of_range o){
+        syslog(LOG_ERR, "Tried to fail nonexistent Task: %s", to_fail.c_str());
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> l(t->lock);
+        t->data.mark_as_failed();
+    }
+
+    //TODO: Not sure if this is necessary here... might be a good idea to do it whenever we mutate state
+    //if we're forgetting the thing that was next to expire we need to reset the expiration counter or we'll get a spurious wakeup (rendered harmless by f803b5946e87bdd5aa4498f2e6d8427ba7792e9a)
+    if(next == to_fail ){
         next.clear();
         reset_expiration();
     }

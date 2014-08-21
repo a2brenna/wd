@@ -80,3 +80,8 @@ double Task_Data::time_to_expiration(){
     auto n = to_seconds(std::chrono::high_resolution_clock::now().time_since_epoch());
     return expected() - n;
 }
+
+void Task_Data::mark_as_failed(){
+    l = std::chrono::high_resolution_clock::time_point::min();
+    e = std::chrono::high_resolution_clock::time_point::max();
+}

@@ -16,6 +16,7 @@ class Task_Data {
         std::chrono::high_resolution_clock::time_point e = std::chrono::high_resolution_clock::time_point::max();
 
         void beat();
+        void mark_as_failed();
 
         double last();
         double expected();
