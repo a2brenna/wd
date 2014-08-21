@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--signature", help="Force use of a particular signature string.", type=str)
     parser.add_argument("--retry", default=config.getint("client", "MAX_ATTEMPTS"), help="Number of times to retry a beat if connection to server fails.", type=int)
     parser.add_argument("--forget", help="Ask the server to forget about a tracked task with the supplied signature", type=str)
+    parser.add_argument("--fail", help="Ask the server to mark a tracked task as failed", type=str)
     parser.add_argument("--dump", help="Signature of a task to dump", type=str)
     args = parser.parse_args()
 
@@ -48,6 +49,8 @@ def main():
             heartbeat.beat(signature=args.signature, server=args.server, port=args.port)
     elif args.forget:
         heartbeat.forget(args.server, args.port, args.forget)
+    elif args.fail:
+        heartbeat.fail(args.server, args.port, args.fail)
     else:
         if (args.COMMAND == []):
             sys.stderr.write("You must specify a command...\n")
