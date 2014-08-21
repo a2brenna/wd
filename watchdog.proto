@@ -37,5 +37,9 @@ message Command{
     message Forget{
         optional string signature = 1;
     }
+    message Mark_as_Failed{
+        optional string signature = 1;
+    }
     repeated Forget to_forget = 1;
+    repeated Mark_as_Failed to_fail = 2;
 }
