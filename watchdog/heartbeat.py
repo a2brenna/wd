@@ -80,3 +80,20 @@ def forget(server, port, signature):
         s.shutdown(socket.SHUT_RDWR)
     except:
         logging.warning("Failed to send forget: " + signature + " to " + server + ":" + str(port))
+
+def fail(server, port, signature):
+    logging.basicConfig(filename=os.path.expanduser("~/.wdclient.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
+    message = watchdog_pb2.Message()
+    command = message.orders.add()
+    to_forget = command.to_fail.add()
+    to_forget.signature = signature
+
+    try:
+        s = ssl.wrap_socket(socket.socket(socket.AF_INET), server_side=False, cert_reqs=ssl.CERT_REQUIRED, certfile=os.path.expanduser("~/.ssl/key-cert.pem"), ca_certs=os.path.expanduser("~/.ssl/cacert.pem"))
+        logging.debug("Attempting SSL Connection")
+        s.connect((server, port))
+        logging.debug("SSL Handshake complete")
+        utils.send_string(s, message.SerializeToString())
+        s.shutdown(socket.SHUT_RDWR)
+    except:
+        logging.warning("Failed to send forget: " + signature + " to " + server + ":" + str(port))
