@@ -138,7 +138,7 @@ void Pitbull::handle_orders(watchdog::Message m){
             forget(f.signature());
         }
         for( int j = 0; j < o.to_fail_size(); j++){
-            const watchdog::Command::Mark_as_Failed &f = o.to_fail(j);
+            const watchdog::Command::Fail &f = o.to_fail(j);
             fail(f.signature());
         }
     }
