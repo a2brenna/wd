@@ -8,8 +8,8 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: watchdog/watchdog_pb2.py pb puppy
 
-pb: src/pb.cc src/pitbull.cc src/pitbull.h src/config.h watchdog.pb.o task.o
-	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options
+pb: src/pb.cc src/pitbull.cc src/pitbull.h src/config.h watchdog.pb.o task.o config.o
+	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options
 
 puppy: src/puppy.cc client.o watchdog.pb.o
 	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls
@@ -19,6 +19,9 @@ client.o: src/client.cc src/client.h
 
 task.o: src/task.cc src/task.h
 	${CXX} ${CXXFLAGS} -c src/task.cc -o task.o
+
+config.o: src/config.cc src/config.h
+	${CXX} ${CXXFLAGS} -c src/config.cc -o config.o
 
 watchdog.pb.o: watchdog.proto
 	mkdir -p src/
