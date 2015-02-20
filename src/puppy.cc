@@ -14,8 +14,7 @@ int main(){
     Socket *server;
 
     try{
-        gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE, CERTFILE, CAFILE);
-        std::shared_ptr<Address> server_address(new INET_Address("127.0.0.1", 7877, false));
+        std::shared_ptr<Address> server_address(new INET_Address("127.0.0.1", 7876, false));
         server = new Raw_Socket(server_address);
     }
     catch(Network_Error e){
