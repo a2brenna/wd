@@ -3,7 +3,6 @@
 #include <mutex>
 #include <hgutil/time.h>
 #include <hgutil/socket.h>
-#include <hgutil/fd.h>
 #include <hgutil/math.h>
 #include <iostream>
 #include <chrono>
