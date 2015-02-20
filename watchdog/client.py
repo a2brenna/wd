@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import socket, os, time, socket, pwd, signal, sys, heartbeat, logging
+from hatguy import utils
 
 BACKOFF=0.01
 

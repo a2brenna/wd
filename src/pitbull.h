@@ -23,7 +23,11 @@ class Pitbull : public Handler{
         std::string next;
 
         void handle_beat(watchdog::Message m);
+        void handle_query(watchdog::Message m, Incoming_Connection *i);
+        void handle_orders(watchdog::Message m);
         void reset_expiration();
+        void forget(std::string to_forget);
+        void fail(std::string to_fail);
     public:
         Lockable< std::map<std::string, Lockable<Task_Data>> > tracked_tasks;
         std::recursive_mutex timelock;

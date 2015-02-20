@@ -2,10 +2,8 @@
 
 import signal, sys, socket, select, watchdog_pb2, time, numpy, os, pwd, pickle, logging, traceback, ssl
 from hatguy import utils
-from hatcomm import jarvis_pb2, comm
 from heartbeat import beat
 
-RECV_BUFF_SIZE=4096
 MIN_INTERVALS = 100
 CONFIDENCE = 5.0
 
@@ -59,9 +57,8 @@ def get_exp(t):
     return t.expiration
 
 class WatchDog():
-    def __init__(self, port, wd_server, wd_port):
+    def __init__(self, port, wd_port):
         self.port = port
-        self.wd_server = wd_server
         self.wd_port = wd_port
 
         try:
@@ -91,17 +88,6 @@ class WatchDog():
 
     def awake(self, signum, frame):
         logging.debug("Awake")
-        try:
-            if (time.time() - self.beat_time > 60.0):
-                if(socket.getaddrinfo(socket.gethostname(), self.port) != socket.getaddrinfo(self.wd_server, self.wd_port)):
-                    logging.debug("Beating")
-                    beat(server=self.wd_server, port=self.wd_port, signature='wd:primary')
-                else:
-                    logging.debug("Not beating to self")
-                self.beat_time = time.time()
-        except Exception as e:
-            logging.warning("Failed to contact wd server")
-            logging.exception(e)
 
         if self.next_expiration != None:
             logging.debug("Checking self.next_expiration")
@@ -109,7 +95,7 @@ class WatchDog():
                 logging.debug("Task: " + self.next_expiration.signature + " has expired")
                 try:
                     logging.debug("Sending expiration notice")
-                    comm.send_jarvis("wd:" + socket.gethostname(), "a2brenna", self.next_expiration.signature + " has expired.")
+                    #comm.send_jarvis("wd:" + socket.gethostname(), "a2brenna", self.next_expiration.signature + " has expired.")
                 except Exception as e:
                     logging.error("Failed to send expiration notice for " + str(self.next_expiration.signature))
                     logging.exception(e)
@@ -149,7 +135,7 @@ class WatchDog():
                             logging.debug("Initiating SSL Handshake")
                             c, client_addr = x.accept()
                             logging.debug("SSL Handshake Complete")
-                            data = c.recv(RECV_BUFF_SIZE)
+                            data = utils.recv_string(c)
                             message = watchdog_pb2.Message()
                             try:
                                 message.ParseFromString(data)
@@ -164,36 +150,31 @@ class WatchDog():
                                         self.tasks[sig] = Task(sig)
                                     logging.debug("Received beat: " + str(message.beat.signature) + "from: " + str(client_addr))
                                 elif message.HasField('query'):
-                                    logging.debug("Received query: " + str(message.query.question))
-                                    if (message.query.question == "Dump"):
-                                        try:
-                                            t_sig = message.query.signature
-                                            response = watchdog_pb2.Message()
-                                            response.response.dump
-                                            dump = response.response.dump
-                                            for interval in self.tasks[sig].ivals:
-                                                logging.debug("Appending interval: " + str(float(interval)))
-                                                dump.interval.append(float(interval))
-                                            logging.debug("Serialization complete")
-                                            c.send(response.SerializeToString())
-                                        except Exception as e:
-                                            logging.exception(e)
-                                    elif (message.query.question == "Status"):
-                                        current_time = time.time()
+                                    try:
+                                        logging.debug("Received query: " + str(message.query.question))
                                         response = watchdog_pb2.Message()
-                                        for s, t in self.tasks.iteritems():
-                                            description = response.response.task.add()
-                                            description.signature = s
-                                            description.last = int(t.get_last())
-                                            description.expected = int(t.expiration)
-                                            description.time_to_expiration = int(t.expiration - current_time)
-                                            description.mean = float(t.mean())
-                                            description.deviation = float(t.deviation())
-                                            description.beats = int(len(t.ivals) + 1)
-                                        try:
-                                            c.send(response.SerializeToString())
-                                        except Exception as e:
-                                            logging.exception(e)
+                                        if (message.query.question == "Dump"):
+                                                t_sig = message.query.signature
+                                                response.response.dump
+                                                dump = response.response.dump
+                                                for interval in self.tasks[sig].ivals:
+                                                    logging.debug("Appending interval: " + str(float(interval)))
+                                                    dump.interval.append(float(interval))
+                                                logging.debug("Serialization complete")
+                                        elif (message.query.question == "Status"):
+                                            current_time = time.time()
+                                            for s, t in self.tasks.iteritems():
+                                                description = response.response.task.add()
+                                                description.signature = s
+                                                description.last = t.get_last()
+                                                description.expected = t.expiration
+                                                description.time_to_expiration = (t.expiration - current_time)
+                                                description.mean = float(t.mean())
+                                                description.deviation = float(t.deviation())
+                                                description.beats = int(len(t.ivals) + 1)
+                                        utils.send_string(c, response.SerializeToString())
+                                    except Exception as e:
+                                        logging.exception(e)
                                 elif len(message.orders) > 0:
                                     logging.debug("Received orders")
                                     for cmd in message.orders:
@@ -236,13 +217,12 @@ class WatchDog():
         sys.exit(0)
 
 
-def daemon(port, wd_server, wd_port):
+def daemon(port, wd_port):
 
     logging.basicConfig(filename=os.path.expanduser("~/.wd.log"), level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s')
     sys.excepthook = utils.log_uncaught
-    logging.info("Secondary watchdog server: " + wd_server + ":" + str(wd_port))
 
-    wd = WatchDog(port, wd_server, wd_port)
+    wd = WatchDog(port, wd_port)
     signal.signal(signal.SIGALRM, wd.awake)
     signal.signal(signal.SIGTERM, wd.shutdown)
 
