@@ -1,7 +1,7 @@
 #include "pitbull.h"
 #include <hgutil/socket.h>
-#include <hgutil/fd.h>
 #include <hgutil/time.h>
+#include <hgutil/fd.h>
 #include <memory>
 #include <gnutls/gnutls.h>
 #include <iostream>
@@ -40,7 +40,7 @@ int main(){
 
     gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE, CERTFILE, CAFILE);
 
-    Connection_Factory ears{};
+    Connection_Factory ears(x509_cred);
     int port1 = listen_on(PORT, false);
     ears.add_socket(port1);
 
@@ -50,8 +50,7 @@ int main(){
 
     for(;;){
         try{
-            int next = ears.next_connection();
-            std::shared_ptr<Task> t(new Incoming_Connection(new Secure_Socket(next, true, x509_cred)));
+            std::shared_ptr<Task> t(new Incoming_Connection(ears.next_connection()));
             p.queue_task(t);
             p.handle_next();
         }
