@@ -10,22 +10,13 @@ namespace po = boost::program_options;
 
 std::string global_config_file = "/etc/wd.conf";
 
-int SECURE_PORT = 7877;
-int INSECURE_PORT = 7876;
-
-std::string CERTFILE = "/home/a2brenna/.ssl/cert.pem";
-std::string KEYFILE = "/home/a2brenna/.ssl/key.pem";
-std::string CAFILE = "/home/a2brenna/.ssl/ca-cert.pem";
+int CONFIG_INSECURE_PORT = 7876;
 
 void get_config(int ac, char *av[]){
 
     po::options_description desc("Options");
     desc.add_options()
-        ("certfile", po::value<std::string>(&CERTFILE), "specify certificate file")
-        ("keyfile", po::value<std::string>(&KEYFILE), "specify key file")
-        ("cafile", po::value<std::string>(&CAFILE), "specify ca certificate file")
-        ("secure_port", po::value<int>(&SECURE_PORT), "port number")
-        ("insecure_port", po::value<int>(&INSECURE_PORT), "port number")
+        ("insecure_port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
         ;
 
     std::ifstream global(global_config_file, std::ios_base::in);
