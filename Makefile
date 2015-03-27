@@ -6,7 +6,7 @@ PREFIX=/usr/
 CXX=clang++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
-all: watchdog/watchdog_pb2.py pb puppy
+all: pb puppy
 
 pb: src/pb.cc src/pitbull.cc src/pitbull.h src/config.h watchdog.pb.o task.o config.o
 	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl
@@ -27,10 +27,6 @@ watchdog.pb.o: watchdog.proto
 	mkdir -p src/
 	protoc --cpp_out='src/' watchdog.proto
 	${CXX} ${CXXFLAGS} -c src/watchdog.pb.cc -o watchdog.pb.o
-
-watchdog/watchdog_pb2.py: watchdog.proto
-	mkdir -p watchdog
-	protoc --python_out='watchdog/' watchdog.proto
 
 clean:
 	rm -f watchdog/watchdog_pb2.py
