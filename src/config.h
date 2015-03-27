@@ -4,11 +4,7 @@
 #include<string>
 
 extern std::string global_config_file;
-extern int SECURE_PORT;
-extern int INSECURE_PORT;
-extern std::string CERTFILE;
-extern std::string KEYFILE;
-extern std::string CAFILE;
+extern int CONFIG_INSECURE_PORT;
 extern void get_config(int ac, char *av[]);
 
 #endif
