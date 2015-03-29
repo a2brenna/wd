@@ -8,11 +8,11 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: pb puppy
 
-pb: src/pb.cc src/pitbull.cc src/pitbull.h src/config.h watchdog.pb.o task.o config.o
-	${CXX} ${CXXFLAGS} src/pb.cc src/pitbull.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl
+pb: src/pb.cc src/config.h watchdog.pb.o task.o config.o
+	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket
 
 puppy: src/puppy.cc client.o watchdog.pb.o
-	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp
+	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket
 
 client.o: src/client.cc src/client.h
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o
