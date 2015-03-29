@@ -1,16 +1,21 @@
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
 
-#include <hgutil/socket.h>
+#include <memory>
+#include <string>
+#include <smpl.h>
 
 class Heart {
     private:
-        Socket *server;
-        std::string id;
+
+        std::shared_ptr<smpl::Channel> _server;
+        std::string _id;
+
     public:
-        Heart(Socket *s, std::string i) { server = s; id = i; };
-        ~Heart() { delete server; };
+
+        Heart(std::shared_ptr<smpl::Channel> server, const std::string id) { _server = server; _id = id; };
         void beat();
+
 };
 
 #endif

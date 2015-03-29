@@ -1,31 +1,22 @@
 #include "client.h"
-#include <hgutil/time.h>
-#include <hgutil/socket.h>
-#include <hgutil/address.h>
+#include <smpl.h>
+#include <smplsocket.h>
+#include <thread>
+#include <chrono>
 
 #include <iostream>
 
-auto CERTFILE = "/home/a2brenna/.ssl/cert.pem";
-auto KEYFILE = "/home/a2brenna/.ssl/key.pem";
-auto CAFILE = "/home/a2brenna/.ssl/ca-cert.pem";
-
 int main(){
 
-    Socket *server;
-
-    try{
-        std::shared_ptr<Address> server_address(new INET_Address("127.0.0.1", 7876, false));
-        server = new Raw_Socket(server_address);
-    }
-    catch(Network_Error e){
-        std::cerr << "Initial Network Error: " << e.msg << std::endl;
-        return 1;
-    }
+    std::unique_ptr<smpl::Remote_Address> server_address(new Remote_Port("127.0.0.1", 7876));
+    std::shared_ptr<smpl::Channel> server(server_address->connect());
+    std::cerr << "Connected..." << std::endl;
 
     Heart h(server, "Test");
     for(;;){
         h.beat();
-        sleep(1.0);
+        std::cerr << "Beat sent" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return 0;
 }

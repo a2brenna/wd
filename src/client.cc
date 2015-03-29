@@ -3,10 +3,10 @@
 
 void Heart::beat(){
     watchdog::Message m;
-    m.mutable_beat()->set_signature(id);
+    m.mutable_beat()->set_signature(_id);
 
     std::string message;
     m.SerializeToString(&message);
 
-    send_string(server, message);
+    _server->send(message);
 }
