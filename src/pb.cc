@@ -1,60 +1,167 @@
-#include "pitbull.h"
 #include "config.h"
-#include <hgutil/socket.h>
 #include <hgutil/time.h>
-#include <hgutil/fd.h>
+#include <sys/time.h>
+
+#include <chrono>
+#include <syslog.h>
 #include <memory>
-#include <gnutls/gnutls.h>
+#include <mutex>
+#include <map>
 #include <iostream>
 #include <signal.h>
-#include <mutex>
-#include <syslog.h>
-#include <limits.h>
-#include <sys/time.h>
-#include <chrono>
 
-Pitbull p;
+#include <smpl.h>
+#include <smplsocket.h>
+#include <thread>
+#include <functional>
+#include <cassert>
+#include "task.h"
+#include "watchdog.pb.h"
 
-void expiration(int sig){
-    //assuming we're woken up by an alarm
-    (void)sig;
-    std::lock_guard<std::recursive_mutex> t_lock(p.timelock);
-    std::lock_guard<std::recursive_mutex> lock_all(p.tracked_tasks.lock);
-    for(auto t: p.tracked_tasks.data){
-        std::lock_guard<std::recursive_mutex> lock_individual(t.second.lock);
-        if(t.second.data.expired()){
-            std::cerr << "Task: " << t.first << " has expired" << std::endl;
-            syslog(LOG_WARNING, "Task: %s has expired", t.first.c_str());
+typedef std::string Task_Signature;
+
+std::mutex tasks_lock;
+std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
+
+std::mutex expiration_lock;
+std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_expiration;
+
+void reset_expiration(){
+    std::unique_lock<std::mutex> l(tasks_lock);
+    std::pair<Task_Signature, std::shared_ptr<Task_Data>> next;
+    if(tasks.empty()){
+        return;
+    }
+    else{
+        next = *(tasks.begin());
+        for(const auto &t: tasks){
+            if( next.second->expected() > t.second->expected() ){
+                next = t;
+            }
+        }
+    }
+    assert(next.second != nullptr);
+    {
+        std::unique_lock<std::mutex> l(expiration_lock);
+        next_expiration.first = next.first;
+        next_expiration.second= next.second->expected();
+        if ( next_expiration.second > std::chrono::high_resolution_clock::now()){
+            set_timer(next_expiration.second - std::chrono::high_resolution_clock::now());
+        }
+        else{
+            set_timer(std::chrono::high_resolution_clock::duration(0));
         }
     }
 }
 
+void expiration(int sig){
+    (void)sig; //assume we've been woken up by alarm
+    {
+        std::unique_lock<std::mutex> l(expiration_lock);
+        const auto current_time = std::chrono::high_resolution_clock::now();
+
+        if( current_time > next_expiration.second ){
+            syslog(LOG_INFO, "Task: %s expired", next_expiration.first.c_str());
+        }
+        else{
+            syslog(LOG_ERR, "Woke up too soon!!");
+        }
+    }
+    reset_expiration();
+}
+
+void handle_beat(const watchdog::Message &request){
+    std::shared_ptr<Task_Data> task;
+    const Task_Signature sig = request.beat().signature();
+
+    {
+        std::unique_lock<std::mutex> l(tasks_lock);
+        try{
+            task = tasks.at(sig);
+        }
+        catch(std::out_of_range o){
+            task = std::shared_ptr<Task_Data>(new Task_Data);
+        }
+    }
+
+    {
+        std::unique_lock<std::mutex> l(task->lock);
+        task->beat();
+    }
+
+    reset_expiration();
+    std::cerr << "Beat handled" << std::endl;
+
+}
+
+void handle_query(const watchdog::Message &request){
+
+}
+
+void handle_orders(const watchdog::Message &request){
+
+}
+
+void handle(std::shared_ptr<smpl::Channel> client){
+    for(;;){
+
+        std::string incoming;
+        try{
+            incoming = client->recv();
+        }
+        catch(smpl::Error e){
+            break;
+        }
+
+        watchdog::Message request;
+        request.ParseFromString(incoming);
+
+        if(request.IsInitialized()){
+
+            if(request.has_beat()){
+                handle_beat(request);
+            }
+            else if(request.has_query()){
+                handle_query(request);
+            }
+            else if(request.orders_size() > 0){
+                handle_orders(request);
+            }
+            else{
+                syslog(LOG_ERR, "Unhandled Request: %s", request.DebugString().c_str());
+            }
+
+        }
+        else{
+            syslog(LOG_ERR, "Uninitialized Message: %s", request.DebugString().c_str());
+            break;
+        }
+
+    }
+
+}
+
 int main(int argc, char *argv[]){
     get_config(argc, argv);
+
     openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     setlogmask(LOG_UPTO(LOG_INFO));
     syslog(LOG_INFO, "Watchdog starting...");
 
-    //gnutls_certificate_credentials_t x509_cred = tls_init(KEYFILE.c_str(), CERTFILE.c_str(), CAFILE.c_str());
-
-    Connection_Factory ears;
-    //int port1 = listen_on(SECURE_PORT, false);
-    int port2 = listen_on(INSECURE_PORT, false);
-    //ears.add_secure_socket(port1);
-    ears.add_socket(port2);
-
     signal(SIGALRM, expiration);
-
     set_timer(std::chrono::nanoseconds::max());
+
+    std::unique_ptr<smpl::Local_Address> incoming(new Local_Port("127.0.0.1", CONFIG_INSECURE_PORT));
 
     for(;;){
         try{
-            std::shared_ptr<Task> t(new Incoming_Connection(ears.next_connection()));
-            p.queue_task(t);
-            p.handle_next();
+            std::shared_ptr<smpl::Channel> client(incoming->listen());
+            std::function<void()> handler = std::bind(handle, client);
+            auto h = std::thread(handler);
+            h.detach();
         }
-        catch(Network_Error e){
-            std::cerr << "Network_Error: " << e.msg << std::endl;
+        catch(...){
+            std::cerr << "Error accepting connection" << std::endl;
         }
     }
 
