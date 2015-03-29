@@ -11,10 +11,10 @@ class Task_Data {
     private:
         std::deque<std::chrono::high_resolution_clock::duration> intervals;
         std::deque<std::chrono::high_resolution_clock::time_point> beats;
-    public:
-        std::mutex lock;
         std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
         std::chrono::high_resolution_clock::time_point e = std::chrono::high_resolution_clock::time_point::max();
+    public:
+        std::mutex lock;
 
         void beat();
         std::chrono::high_resolution_clock::time_point last() const;
