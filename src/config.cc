@@ -9,6 +9,7 @@
 namespace po = boost::program_options;
 
 std::string global_config_file = "/etc/wd.conf";
+std::string CONFIG_REPORT_FILE = "/tmp/wd.report";
 
 int CONFIG_INSECURE_PORT = 7876;
 
@@ -17,6 +18,7 @@ void get_config(int ac, char *av[]){
     po::options_description desc("Options");
     desc.add_options()
         ("insecure_port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
+        ("report_file", po::value<std::string>(&CONFIG_REPORT_FILE), "path to dump reports to upon receiving SIGUSR1")
         ;
 
     std::ifstream global(global_config_file, std::ios_base::in);
