@@ -88,7 +88,6 @@ void expiration(int sig){
             {
                 std::stringstream s;
                 s << task->last().time_since_epoch().count();
-                std::cout << task->last().time_since_epoch().count() << std::endl;
                 last = s.str();
             }
 
@@ -96,7 +95,6 @@ void expiration(int sig){
             {
                 std::stringstream s;
                 s << task->num_beats();
-                std::cout << task->num_beats() << std::endl;
                 num_beats = s.str();
             }
 
@@ -104,7 +102,6 @@ void expiration(int sig){
             {
                 std::stringstream s;
                 s << task->expected().time_since_epoch().count();
-                std::cout << task->expected().time_since_epoch().count() << std::endl;
                 expected= s.str();
             }
 
