@@ -7,7 +7,6 @@
 #include <memory>
 #include <mutex>
 #include <map>
-#include <iostream>
 #include <signal.h>
 
 #include <smpl.h>
@@ -90,7 +89,6 @@ void handle_beat(const watchdog::Message &request){
     }
 
     reset_expiration();
-    std::cerr << "Beat handled" << std::endl;
 
 }
 
