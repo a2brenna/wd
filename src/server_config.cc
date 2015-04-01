@@ -8,10 +8,7 @@
 
 namespace po = boost::program_options;
 
-std::string global_config_file = "/etc/wd.conf";
 std::string CONFIG_REPORT_FILE = "/tmp/wd.report";
-
-int CONFIG_INSECURE_PORT = 7876;
 
 void get_config(int ac, char *av[]){
 
