@@ -1,4 +1,4 @@
-#include "config.h"
+#include "server_config.h"
 
 #include<string>
 #include<fstream>
