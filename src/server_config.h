@@ -1,11 +1,10 @@
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __SERVER_CONFIG_H__
+#define __SERVER_CONFIG_H__
 
-#include<string>
+#include <string>
+#include "common_config.h"
 
-extern std::string global_config_file;
 extern std::string CONFIG_REPORT_FILE;
-extern int CONFIG_INSECURE_PORT;
 extern void get_config(int ac, char *av[]);
 
 #endif
