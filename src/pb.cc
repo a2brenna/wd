@@ -80,6 +80,7 @@ void handle_beat(const watchdog::Message &request){
         }
         catch(std::out_of_range o){
             task = std::shared_ptr<Task_Data>(new Task_Data);
+            tasks[sig] = task;
         }
     }
 
