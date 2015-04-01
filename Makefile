@@ -8,8 +8,8 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: pb test
 
-pb: src/pb.cc src/config.h watchdog.pb.o task.o config.o
-	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
+pb: src/pb.cc src/server_config.h watchdog.pb.o task.o server_config.o
+	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o server_config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
 
 test: src/test.cc client.o watchdog.pb.o
 	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o -o test -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket
@@ -20,8 +20,8 @@ client.o: src/client.cc src/client.h
 task.o: src/task.cc src/task.h
 	${CXX} ${CXXFLAGS} -c src/task.cc -o task.o
 
-config.o: src/config.cc src/config.h
-	${CXX} ${CXXFLAGS} -c src/config.cc -o config.o
+server_config.o: src/server_config.cc src/server_config.h
+	${CXX} ${CXXFLAGS} -c src/server_config.cc -o server_config.o
 
 watchdog.pb.o: watchdog.proto
 	mkdir -p src/
