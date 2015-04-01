@@ -14,8 +14,13 @@
 #include <thread>
 #include <functional>
 #include <cassert>
+#include <fstream>
+#include <sstream>
+#include <txtable.h>
 #include "task.h"
 #include "watchdog.pb.h"
+
+#include <iostream>
 
 typedef std::string Task_Signature;
 
@@ -54,19 +59,70 @@ void reset_expiration(){
 }
 
 void expiration(int sig){
-    (void)sig; //assume we've been woken up by alarm
-    {
-        std::unique_lock<std::mutex> l(expiration_lock);
-        const auto current_time = std::chrono::high_resolution_clock::now();
 
-        if( current_time > next_expiration.second ){
-            syslog(LOG_INFO, "Task: %s expired", next_expiration.first.c_str());
+    if (sig == SIGALRM){
+        //handle potential expiration
+        {
+            std::unique_lock<std::mutex> l(expiration_lock);
+            const auto current_time = std::chrono::high_resolution_clock::now();
+
+            if( current_time > next_expiration.second ){
+                syslog(LOG_INFO, "Task: %s expired", next_expiration.first.c_str());
+            }
+            else{
+                syslog(LOG_ERR, "Woke up too soon!!");
+            }
         }
-        else{
-            syslog(LOG_ERR, "Woke up too soon!!");
-        }
+        reset_expiration();
     }
-    reset_expiration();
+    else if (sig == SIGUSR1){
+        //dump report to file
+        std::unique_lock<std::mutex> l(tasks_lock);
+        std::vector<std::string> report_header = { "Signature", "Last", "Beats", "Expected" };
+        Table report(report_header);
+        for(const auto &t: tasks){
+            const std::string sig = t.first;
+            const std::shared_ptr<Task_Data> task = t.second;
+
+            std::string last;
+            {
+                std::stringstream s;
+                s << task->last().time_since_epoch().count();
+                std::cout << task->last().time_since_epoch().count() << std::endl;
+                last = s.str();
+            }
+
+            std::string num_beats;
+            {
+                std::stringstream s;
+                s << task->num_beats();
+                std::cout << task->num_beats() << std::endl;
+                num_beats = s.str();
+            }
+
+            std::string expected;
+            {
+                std::stringstream s;
+                s << task->expected().time_since_epoch().count();
+                std::cout << task->expected().time_since_epoch().count() << std::endl;
+                expected= s.str();
+            }
+
+            std::vector<std::string> row = { sig, last, num_beats, expected };
+
+            report.add_row(row);
+
+        }
+
+        std::fstream fs;
+        fs.open (CONFIG_REPORT_FILE, std::fstream::out | std::fstream::trunc);
+
+        fs << report;
+
+    }
+    else{
+        syslog(LOG_ERR, "Unhandled signal %d", sig);
+    }
 }
 
 void handle_beat(const watchdog::Message &request){
@@ -148,6 +204,7 @@ int main(int argc, char *argv[]){
     syslog(LOG_INFO, "Watchdog starting...");
 
     signal(SIGALRM, expiration);
+    signal(SIGUSR1, expiration);
     set_timer(std::chrono::nanoseconds::max());
 
     std::unique_ptr<smpl::Local_Address> incoming(new Local_Port("127.0.0.1", CONFIG_INSECURE_PORT));
