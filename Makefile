@@ -6,13 +6,13 @@ PREFIX=/usr/
 CXX=clang++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
-all: pb puppy
+all: pb test
 
 pb: src/pb.cc src/config.h watchdog.pb.o task.o config.o
 	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
 
-puppy: src/puppy.cc client.o watchdog.pb.o
-	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket
+test: src/test.cc client.o watchdog.pb.o
+	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o -o test -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket
 
 client.o: src/client.cc src/client.h
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o
@@ -35,5 +35,6 @@ clean:
 	rm -f src/watchdog.pb.cc
 	rm -f src/watchdog.pb.h
 	rm -f pb
+	rm -f test
 	rm -f puppy
 	rm -f *.o
