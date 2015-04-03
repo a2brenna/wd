@@ -6,7 +6,18 @@ PREFIX=/usr/
 CXX=clang++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
-all: pb test puppy
+all: pb test puppy libraries headers
+
+install: pb puppy libraries headers
+	mkdir -p ${DESTDIR}/${PREFIX}/lib
+	mkdir -p ${DESTDIR}/${PREFIX}/bin
+	mkdir -p ${DESTDIR}/${PREFIX}/include/watchdog
+	cp *.a ${DESTDIR}/${PREFIX}/lib
+	cp *.so ${DESTDIR}/${PREFIX}/lib
+	cp src/client.h ${DESTDIR}/${PREFIX}/include/watchdog/
+	cp pb ${DESTDIR}/${PREFIX}/bin
+	cp puppy ${DESTDIR}/${PREFIX}/bin
+	ln -sv ${DESTDIR}/${PREFIX}/bin/pb ${DESTDIR}/${PREFIX}/bin/wd
 
 pb: src/pb.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o server_config.o common_config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
@@ -16,6 +27,16 @@ test: src/test.cc client.o watchdog.pb.o common_config.o client_config.o
 
 puppy: src/puppy.cc client.o watchdog.pb.o common_config.o client_config.o
 	${CXX} ${CXXFLAGS} src/puppy.cc client.o watchdog.pb.o common_config.o client_config.o -o puppy -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
+
+headers: src/client.h
+
+libraries: libwatchdog.so libwatchdog.a
+
+libwatchdog.so: client.o
+	${CXX} ${CXXFLAGS} -shared -Wl,-soname,libwatchdog.so -o libwatchdog.so client.o
+
+libwatchdog.a: client.o
+	ar rcs libwatchdog.a client.o
 
 client.o: src/client.cc src/client.h
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o

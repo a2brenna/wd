@@ -8,3 +8,5 @@ state.out
 pb
 puppy
 test
+*.so
+*.a
