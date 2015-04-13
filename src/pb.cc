@@ -204,11 +204,9 @@ int main(int argc, char *argv[]){
     signal(SIGUSR1, expiration);
     set_timer(std::chrono::nanoseconds::max());
 
-    std::unique_ptr<smpl::Local_Address> incoming(new smpl::Local_Port("127.0.0.1", CONFIG_INSECURE_PORT));
-
     for(;;){
         try{
-            std::shared_ptr<smpl::Channel> client(incoming->listen());
+            std::shared_ptr<smpl::Channel> client(server_address->listen());
             std::function<void()> handler = std::bind(handle, client);
             auto h = std::thread(handler);
             h.detach();
