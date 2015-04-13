@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 #include <smpl.h>
 #include <smplsocket.h>
+#include <iostream>
 
 namespace po = boost::program_options;
 
@@ -21,8 +22,8 @@ void get_config(int ac, char *av[]){
     po::store(po::parse_command_line(ac, av, desc), vm);
     po::notify(vm);
 
-
     if(CONFIG_SIGNATURE == ""){
+        std::cout << "Need to supply a signature" << std::endl;
         throw Config_Error();
     }
 

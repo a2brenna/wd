@@ -6,7 +6,12 @@
 
 int main(int argc, char *argv[]){
 
-    get_config(argc, argv);
+    try{
+        get_config(argc, argv);
+    }
+    catch(Config_Error e){
+        return 1;
+    }
 
     std::shared_ptr<smpl::Channel> server(server_address->connect());
     Heart h(server, CONFIG_SIGNATURE);
