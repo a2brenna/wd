@@ -9,7 +9,7 @@
 namespace po = boost::program_options;
 
 std::string CONFIG_SIGNATURE = "";
-std::unique_ptr<smpl::Remote_Address> server_address(new Remote_Port("happiestface.convextech.ca", CONFIG_INSECURE_PORT));
+std::unique_ptr<smpl::Remote_Address> server_address(new smpl::Remote_Port("happiestface.convextech.ca", CONFIG_INSECURE_PORT));
 
 void get_config(int ac, char *av[]){
     po::options_description desc("Options");

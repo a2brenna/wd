@@ -204,7 +204,7 @@ int main(int argc, char *argv[]){
     signal(SIGUSR1, expiration);
     set_timer(std::chrono::nanoseconds::max());
 
-    std::unique_ptr<smpl::Local_Address> incoming(new Local_Port("127.0.0.1", CONFIG_INSECURE_PORT));
+    std::unique_ptr<smpl::Local_Address> incoming(new smpl::Local_Port("127.0.0.1", CONFIG_INSECURE_PORT));
 
     for(;;){
         try{
