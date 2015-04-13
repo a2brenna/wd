@@ -17,7 +17,7 @@ install: pb puppy libraries headers
 	cp src/client.h ${DESTDIR}/${PREFIX}/include/watchdog/
 	cp pb ${DESTDIR}/${PREFIX}/bin
 	cp puppy ${DESTDIR}/${PREFIX}/bin
-	ln -sv ${DESTDIR}/${PREFIX}/bin/pb ${DESTDIR}/${PREFIX}/bin/wd
+	ln -f -sv ${DESTDIR}/${PREFIX}/bin/pb ${DESTDIR}/${PREFIX}/bin/wd
 
 pb: src/pb.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o server_config.o common_config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
