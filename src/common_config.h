@@ -7,6 +7,7 @@
 class Config_Error {};
 
 extern std::string global_config_file;
+extern std::string CONFIG_SERVER_ADDRESS;
 extern int CONFIG_INSECURE_PORT;
 
 #endif
