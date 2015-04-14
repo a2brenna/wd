@@ -3,6 +3,19 @@
 #include <cmath>
 #include <iostream>
 
+std::chrono::high_resolution_clock::duration _deviation(std::chrono::high_resolution_clock::duration m, typename std::deque<std::chrono::high_resolution_clock::duration> data){
+    std::vector<unsigned long long> diff;
+    for(const auto &d: data){
+        diff.push_back( (d - m).count() * (d - m).count() );
+    }
+    unsigned long long sq_sum = 0;
+    for(const auto &x: diff){
+        sq_sum = sq_sum + x;
+    }
+    std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round(std::sqrt(sq_sum / data.size())));
+    return stdev;
+}
+
 /*
 WARNING: For some reason, the first recorded interval seems to be noticably
 smaller than subsequent ones.  This leads to an exagerated deviation...I'm
@@ -29,11 +42,9 @@ void Task_Data::beat(){
     l = c;
 
     if(intervals.size() > 2){
-        /*
         auto m = ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
-        e = l + std::chrono::nanoseconds(m + d * 3); //If actually normal, this gives us 99.7% chance of NOT getting a false positive
-        std::cerr << "Mean: " << m << " Deviation: " << d << std::endl;
-        */
+        auto d = _deviation(m, intervals);
+        e = l + std::chrono::nanoseconds(m + d * 3);
     }
 }
 
@@ -55,3 +66,16 @@ std::chrono::high_resolution_clock::time_point Task_Data::last() const{
 std::chrono::high_resolution_clock::time_point Task_Data::expected() const{
     return e;
 }
+
+std::chrono::high_resolution_clock::duration Task_Data::to_expiration() const{
+    return e - std::chrono::high_resolution_clock::now();
+}
+
+std::chrono::high_resolution_clock::duration Task_Data::mean() const{
+    return ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
+}
+
+std::chrono::high_resolution_clock::duration Task_Data::deviation() const{
+    return _deviation(mean(), intervals);
+}
+
