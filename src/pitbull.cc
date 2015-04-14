@@ -4,8 +4,14 @@
 #include <hgutil/time.h>
 #include <hgutil/socket.h>
 #include <hgutil/math.h>
+#include <hgutil/log.h>
 #include <chrono>
 #include <syslog.h>
+
+Log CRITICAL(std::shared_ptr<Char_Stream>(new Syslog(kLogCrit, std::string("Watchdog "))));
+Log ERROR(std::shared_ptr<Char_Stream>(new Syslog(kLogErr, std::string("Watchdog "))));
+Log INFO(std::shared_ptr<Char_Stream>(new Syslog(kLogInfo, std::string("Watchdog "))));
+Log DEBUG(std::shared_ptr<Char_Stream>(new Syslog(kLogDebug, std::string("Watchdog "))));
 
 void Pitbull::handle(Task *t){
     if(Incoming_Connection *i = dynamic_cast<Incoming_Connection *>(t)){
@@ -32,7 +38,7 @@ void Pitbull::handle(Task *t){
                     }
                 }
                 else{
-                    syslog(LOG_ERR, "Uninitialized Message: %s", m.DebugString().c_str());
+                    ERROR << "Uninitialized Message: " << m.DebugString() << std::endl;
                     break;
                 }
             }
@@ -106,7 +112,7 @@ void Pitbull::handle_query(watchdog::Message m, Incoming_Connection *i){
             }
         }
         catch(std::out_of_range e){
-            syslog(LOG_ERR, "No such task: %s", t_sig.c_str());
+            ERROR << "No such task: " << t_sig << std::endl;
         }
     }
     else if( m.query().question() == "Status" ){
@@ -163,7 +169,7 @@ void Pitbull::fail(std::string to_fail){
         t = &(tracked_tasks.data.at(to_fail));
     }
     catch (std::out_of_range o){
-        syslog(LOG_ERR, "Tried to fail nonexistent Task: %s", to_fail.c_str());
+        ERROR << "Tried to fail nonexistent Task: " << to_fail << std::endl;
     }
 
     {
