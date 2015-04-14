@@ -9,7 +9,6 @@
 
 namespace po = boost::program_options;
 
-std::string CONFIG_REPORT_FILE = "/tmp/wd.report";
 std::shared_ptr<smpl::Local_Address> server_address;
 
 void get_config(int ac, char *av[]){
@@ -17,7 +16,6 @@ void get_config(int ac, char *av[]){
     po::options_description desc("Options");
     desc.add_options()
         ("insecure_port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
-        ("report_file", po::value<std::string>(&CONFIG_REPORT_FILE), "path to dump reports to upon receiving SIGUSR1")
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to listen for connections on")
         ;
 

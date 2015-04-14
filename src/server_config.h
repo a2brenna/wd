@@ -6,7 +6,6 @@
 #include <memory>
 #include "common_config.h"
 
-extern std::string CONFIG_REPORT_FILE;
 extern void get_config(int ac, char *av[]);
 extern std::shared_ptr<smpl::Local_Address> server_address;
 

@@ -75,48 +75,6 @@ void expiration(int sig){
         }
         reset_expiration();
     }
-    else if (sig == SIGUSR1){
-        //dump report to file
-        std::unique_lock<std::mutex> l(tasks_lock);
-        std::vector<std::string> report_header = { "Signature", "Last", "Beats", "Expected" };
-        Table report(report_header);
-        for(const auto &t: tasks){
-            const std::string sig = t.first;
-            const std::shared_ptr<Task_Data> task = t.second;
-
-            std::string last;
-            {
-                std::stringstream s;
-                s << task->last().time_since_epoch().count();
-                last = s.str();
-            }
-
-            std::string num_beats;
-            {
-                std::stringstream s;
-                s << task->num_beats();
-                num_beats = s.str();
-            }
-
-            std::string expected;
-            {
-                std::stringstream s;
-                s << task->expected().time_since_epoch().count();
-                expected= s.str();
-            }
-
-            std::vector<std::string> row = { sig, last, num_beats, expected };
-
-            report.add_row(row);
-
-        }
-
-        std::fstream fs;
-        fs.open (CONFIG_REPORT_FILE, std::fstream::out | std::fstream::trunc);
-
-        fs << report;
-
-    }
     else{
         syslog(LOG_ERR, "Unhandled signal %d", sig);
     }
@@ -248,7 +206,6 @@ int main(int argc, char *argv[]){
     syslog(LOG_INFO, "Watchdog starting...");
 
     signal(SIGALRM, expiration);
-    signal(SIGUSR1, expiration);
     set_timer(std::chrono::nanoseconds::max());
 
     for(;;){
