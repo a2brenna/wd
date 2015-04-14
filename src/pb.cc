@@ -1,5 +1,6 @@
 #include "server_config.h"
 #include <hgutil/time.h>
+#include <hgutil/log.h>
 #include <sys/time.h>
 
 #include <chrono>
@@ -21,6 +22,14 @@
 #include "watchdog.pb.h"
 
 #include <iostream>
+
+#include <utility>
+
+std::pair<std::ofstream, std::mutex> log;
+Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&log, std::string("Critical: "))));
+Log ERROR(std::shared_ptr<Char_Stream>(new File(&log, std::string("Error: "))));
+Log INFO(std::shared_ptr<Char_Stream>(new File(&log, std::string("Info: "))));
+Log DEBUG(std::shared_ptr<Char_Stream>(new File(&log, std::string("Debug: "))));
 
 typedef std::string Task_Signature;
 
@@ -67,16 +76,16 @@ void expiration(int sig){
             const auto current_time = std::chrono::high_resolution_clock::now();
 
             if( current_time > next_expiration.second ){
-                syslog(LOG_INFO, "Task: %s expired", next_expiration.first.c_str());
+                INFO << "Task: " << next_expiration.first << " expired" << std::endl;
             }
             else{
-                syslog(LOG_ERR, "Woke up too soon!!");
+                ERROR << "Woke up too soon!!" << std::endl;
             }
         }
         reset_expiration();
     }
     else{
-        syslog(LOG_ERR, "Unhandled signal %d", sig);
+        ERROR << "Unhandled signal " << sig << std::endl;
     }
 }
 
@@ -100,6 +109,8 @@ void handle_beat(const watchdog::Message &request){
         task->beat();
     }
 
+    DEBUG << "Beat: " << sig << std::endl;
+
     reset_expiration();
 
 }
@@ -120,7 +131,7 @@ watchdog::Message handle_query(const watchdog::Message &request){
             }
         }
         catch(std::out_of_range e){
-            syslog(LOG_ERR, "No such task: %s", task_signature.c_str());
+            ERROR << "No such task: " << task_signature << std::endl;
         }
     }
     else if( query.question() == "Status"){
@@ -185,12 +196,12 @@ void handle(std::shared_ptr<smpl::Channel> client){
                 handle_orders(request);
             }
             else{
-                syslog(LOG_ERR, "Unhandled Request: %s", request.DebugString().c_str());
+                ERROR << "Unhandled Request: " << request.DebugString() << std::endl;
             }
 
         }
         else{
-            syslog(LOG_ERR, "Uninitialized Message: %s", request.DebugString().c_str());
+            ERROR << "Uninitialized Message: " << request.DebugString() << std::endl;;
             break;
         }
 
@@ -201,9 +212,10 @@ void handle(std::shared_ptr<smpl::Channel> client){
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
-    openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
-    setlogmask(LOG_UPTO(LOG_INFO));
-    syslog(LOG_INFO, "Watchdog starting...");
+    log.first.open("/tmp/wd.log", std::ofstream::app);
+    //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
+    //setlogmask(LOG_UPTO(LOG_INFO));
+    INFO << "Watchdog starting..." << std::endl;
 
     signal(SIGALRM, expiration);
     set_timer(std::chrono::nanoseconds::max());
