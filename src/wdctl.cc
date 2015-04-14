@@ -1,5 +1,6 @@
 #include "watchdog.pb.h"
 #include "common_config.h"
+#include <txtable.h>
 #include <string>
 #include <memory>
 #include <smplsocket.h>
@@ -60,7 +61,31 @@ int main(int argc, char *argv[]){
     watchdog::Message response;
     response.ParseFromString(r);
 
-    std::cout << response.DebugString() << std::endl;
+    if(status_request){
+        //print table
+        std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
+        Table table(headings);
+        for(const auto t: response.response().task()){
+            std::string s = t.signature();
+            std::string l = std::to_string(t.last());
+            std::string e = std::to_string(t.expected());
+            std::string m = std::to_string(t.mean());
+            std::string d = std::to_string(t.deviation());
+            std::string ttl = std::to_string(t.time_to_expiration());
+            std::string b = std::to_string(t.beats());
+
+            table.add_row({s,l,e,m,d,ttl,b});
+
+        }
+        std::cout << table << std::endl;
+    }
+    else if(to_dump != ""){
+        std::cout << response.DebugString() << std::endl;
+    }
+    else{
+        std::cout << "No valid command" << std::endl;
+        return 1;
+    }
 
     return 0;
 }
