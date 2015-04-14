@@ -63,16 +63,16 @@ int main(int argc, char *argv[]){
 
     if(status_request){
         //print table
-        std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
+        const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
         Table table(headings);
         for(const auto t: response.response().task()){
-            std::string s = t.signature();
-            std::string l = std::to_string(t.last());
-            std::string e = std::to_string(t.expected());
-            std::string m = std::to_string(t.mean());
-            std::string d = std::to_string(t.deviation());
-            std::string ttl = std::to_string(t.time_to_expiration());
-            std::string b = std::to_string(t.beats());
+            const std::string s = t.signature();
+            const std::string l = std::to_string(t.last());
+            const std::string e = std::to_string(t.expected());
+            const std::string m = std::to_string(t.mean());
+            const std::string d = std::to_string(t.deviation());
+            const std::string ttl = std::to_string(t.time_to_expiration());
+            const std::string b = std::to_string(t.beats());
 
             table.add_row({s,l,e,m,d,ttl,b});
 
