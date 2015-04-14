@@ -6,7 +6,7 @@ PREFIX=/usr/
 CXX=clang++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
-all: pb test puppy libraries headers
+all: pb test puppy libraries headers wdctl
 
 install: pb puppy libraries headers
 	mkdir -p ${DESTDIR}/${PREFIX}/lib
@@ -21,6 +21,9 @@ install: pb puppy libraries headers
 
 pb: src/pb.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o server_config.o common_config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
+
+wdctl: src/wdctl.cc watchdog.pb.o common_config.o
+	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
 
 test: src/test.cc client.o watchdog.pb.o common_config.o client_config.o
 	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o common_config.o client_config.o -o test -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options

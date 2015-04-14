@@ -8,5 +8,6 @@ state.out
 pb
 puppy
 test
+wdctl
 *.so
 *.a
