@@ -147,7 +147,6 @@ void handle_beat(const watchdog::Message &request){
 }
 
 watchdog::Message handle_query(const watchdog::Message &request){
-    std::cout << "Got query" << std::endl;
     auto r = watchdog::Message();
     auto response = r.mutable_response();
     auto query = request.query();
@@ -187,7 +186,6 @@ watchdog::Message handle_query(const watchdog::Message &request){
 }
 
 void handle_orders(const watchdog::Message &request){
-    std::cout << "Got order" << std::endl;
     for(int i = 0; i < request.orders_size(); i++){
         const watchdog::Command &o = request.orders(i);
         for( int j = 0; j < o.to_forget_size(); j++){
