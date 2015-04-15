@@ -25,11 +25,11 @@
 
 #include <utility>
 
-std::pair<std::ofstream, std::mutex> log;
-Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&log, std::string("Critical: "))));
-Log ERROR(std::shared_ptr<Char_Stream>(new File(&log, std::string("Error: "))));
-Log INFO(std::shared_ptr<Char_Stream>(new File(&log, std::string("Info: "))));
-Log DEBUG(std::shared_ptr<Char_Stream>(new File(&log, std::string("Debug: "))));
+std::pair<std::ofstream, std::mutex> _log;
+Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
+Log ERROR(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Error: "))));
+Log INFO(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Info: "))));
+Log DEBUG(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Debug: "))));
 
 typedef std::string Task_Signature;
 
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]){
     std::string log_file = getenv("HOME");
     log_file.append("/.wd.log");
 
-    log.first.open(log_file, std::ofstream::app);
+    _log.first.open(log_file, std::ofstream::app);
     //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     //setlogmask(LOG_UPTO(LOG_INFO));
     INFO << "Watchdog starting..." << std::endl;
