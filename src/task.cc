@@ -72,7 +72,12 @@ std::chrono::high_resolution_clock::duration Task_Data::to_expiration() const{
 }
 
 std::chrono::high_resolution_clock::duration Task_Data::mean() const{
-    return ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
+    if(intervals.size() > 0){
+        return ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
+    }
+    else{
+        return std::chrono::high_resolution_clock::duration(0);
+    }
 }
 
 std::chrono::high_resolution_clock::duration Task_Data::deviation() const{
