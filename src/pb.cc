@@ -212,7 +212,11 @@ void handle(std::shared_ptr<smpl::Channel> client){
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
-    log.first.open("/tmp/wd.log", std::ofstream::app);
+
+    std::string log_file = getenv("HOME");
+    log_file.append("/.wd.log");
+
+    log.first.open(log_file, std::ofstream::app);
     //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     //setlogmask(LOG_UPTO(LOG_INFO));
     INFO << "Watchdog starting..." << std::endl;
