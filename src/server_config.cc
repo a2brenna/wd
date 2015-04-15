@@ -4,6 +4,7 @@
 #include<fstream>
 #include<stdlib.h>
 #include<smplsocket.h>
+#include<iostream>
 
 #include<boost/program_options.hpp>
 
@@ -15,12 +16,16 @@ void get_config(int ac, char *av[]){
 
     po::options_description desc("Options");
     desc.add_options()
-        ("insecure_port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
+        ("help", "Produce help message")
+        ("port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to listen for connections on")
         ;
 
     std::ifstream global(global_config_file, std::ios_base::in);
+
     std::string user_config_file = getenv("HOME");
+    user_config_file.append("/.wd.conf");
+
     std::ifstream user(user_config_file, std::ios_base::in);
 
     po::variables_map vm;
@@ -30,6 +35,10 @@ void get_config(int ac, char *av[]){
     po::notify(vm);
 
     server_address = std::shared_ptr<smpl::Local_Address>(new smpl::Local_Port(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT));
+
+    std::cout
+        << "port " << CONFIG_INSECURE_PORT << std::endl
+        << "server_address " << CONFIG_SERVER_ADDRESS << std::endl;
 
     return;
 }
