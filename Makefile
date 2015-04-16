@@ -17,6 +17,8 @@ install: wd puppy libraries headers
 	cp src/client.h ${DESTDIR}/${PREFIX}/include/watchdog/
 	cp wd ${DESTDIR}/${PREFIX}/bin
 	cp puppy ${DESTDIR}/${PREFIX}/bin
+	cp wdctl ${DESTDIR}/${PREFIX}/bin
+
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
