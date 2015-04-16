@@ -31,8 +31,6 @@ void get_config(int ac, char *av[]){
 }
 
 int main(int argc, char *argv[]){
-    std::cout << "Starting" << std::endl;
-
     get_config(argc, argv);
 
     std::shared_ptr<smpl::Channel> server(server_address->connect());
