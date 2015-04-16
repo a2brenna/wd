@@ -5,7 +5,7 @@ state.out
 *.pb.h
 *.pb.cc
 *.o
-pb
+wd
 puppy
 test
 wdctl

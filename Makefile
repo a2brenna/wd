@@ -6,21 +6,20 @@ PREFIX=/usr/
 CXX=clang++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
-all: pb test puppy libraries headers wdctl
+all: wd test puppy libraries headers wdctl
 
-install: pb puppy libraries headers
+install: wd puppy libraries headers
 	mkdir -p ${DESTDIR}/${PREFIX}/lib
 	mkdir -p ${DESTDIR}/${PREFIX}/bin
 	mkdir -p ${DESTDIR}/${PREFIX}/include/watchdog
 	cp *.a ${DESTDIR}/${PREFIX}/lib
 	cp *.so ${DESTDIR}/${PREFIX}/lib
 	cp src/client.h ${DESTDIR}/${PREFIX}/include/watchdog/
-	cp pb ${DESTDIR}/${PREFIX}/bin
+	cp wd ${DESTDIR}/${PREFIX}/bin
 	cp puppy ${DESTDIR}/${PREFIX}/bin
-	ln -f -sv ${DESTDIR}/${PREFIX}/bin/pb ${DESTDIR}/${PREFIX}/bin/wd
 
-pb: src/pb.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
-	${CXX} ${CXXFLAGS} src/pb.cc watchdog.pb.o task.o server_config.o common_config.o -o pb -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
+wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
+	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
 
 wdctl: src/wdctl.cc watchdog.pb.o common_config.o
 	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options -ltxtable
@@ -65,9 +64,9 @@ clean:
 	rm -f watchdog/watchdog_pb2.py
 	rm -f *.pyc
 	rm -rf __pycache__
-	rm -f src/watchdog.pb.cc
+	rm -f src/watchdog.wd.cc
 	rm -f src/watchdog.pb.h
-	rm -f pb
+	rm -f wd 
 	rm -f test
 	rm -f puppy
 	rm -f *.o
