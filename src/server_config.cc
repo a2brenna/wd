@@ -4,7 +4,6 @@
 #include<fstream>
 #include<stdlib.h>
 #include<smplsocket.h>
-#include<iostream>
 
 #include<boost/program_options.hpp>
 
@@ -35,10 +34,6 @@ void get_config(int ac, char *av[]){
     po::notify(vm);
 
     server_address = std::shared_ptr<smpl::Local_Address>(new smpl::Local_Port(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT));
-
-    std::cout
-        << "port " << CONFIG_INSECURE_PORT << std::endl
-        << "server_address " << CONFIG_SERVER_ADDRESS << std::endl;
 
     return;
 }
