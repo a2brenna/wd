@@ -7,7 +7,6 @@
 #include <smpl.h>
 #include <smplsocket.h>
 #include <fstream>
-#include <iostream>
 
 namespace po = boost::program_options;
 
@@ -42,9 +41,5 @@ void get_config(int ac, char *av[]){
     }
 
     server_address = std::shared_ptr<smpl::Remote_Address>(new smpl::Remote_Port(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT));
-
-    std::cout
-        << "port " << CONFIG_INSECURE_PORT << std::endl
-        << "server_address " << CONFIG_SERVER_ADDRESS << std::endl;
 
 }
