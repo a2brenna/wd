@@ -4,16 +4,21 @@
 #include <iostream>
 
 std::chrono::high_resolution_clock::duration _deviation(std::chrono::high_resolution_clock::duration m, typename std::deque<std::chrono::high_resolution_clock::duration> data){
-    std::vector<unsigned long long> diff;
-    for(const auto &d: data){
-        diff.push_back( (d - m).count() * (d - m).count() );
+    if( data.size() == 0 ){
+        return std::chrono::high_resolution_clock::duration(0);
     }
-    unsigned long long sq_sum = 0;
-    for(const auto &x: diff){
-        sq_sum = sq_sum + x;
+    else{
+        std::vector<unsigned long long> diff;
+        for(const auto &d: data){
+            diff.push_back( (d - m).count() * (d - m).count() );
+        }
+        unsigned long long sq_sum = 0;
+        for(const auto &x: diff){
+            sq_sum = sq_sum + x;
+        }
+        std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round(std::sqrt(sq_sum / data.size())));
+        return stdev;
     }
-    std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round(std::sqrt(sq_sum / data.size())));
-    return stdev;
 }
 
 /*
