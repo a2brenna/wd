@@ -18,7 +18,7 @@ void get_config(int ac, char *av[]){
     desc.add_options()
         ("help", "Produce help message")
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to connect to")
-        ("to_dump", po::value<std::string>(&to_dump), "Task to dump")
+        ("dump", po::value<std::string>(&to_dump), "Task to dump")
         ("status_request", po::bool_switch(&status_request), "Request server status")
         ;
 
