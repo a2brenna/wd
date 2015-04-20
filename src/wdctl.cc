@@ -38,17 +38,18 @@ int main(int argc, char *argv[]){
     std::shared_ptr<smpl::Channel> server(server_address->connect());
 
     watchdog::Message m;
-    auto query = m.mutable_query();
-    auto command = m.add_orders();
 
     if(status_request){
+        auto query = m.mutable_query();
         query->set_question("Status");
     }
     else if(to_dump != ""){
+        auto query = m.mutable_query();
         query->set_question("Dump");
         query->set_signature(to_dump);
     }
     else if(to_forget != ""){
+        auto command = m.add_orders();
         auto f = command->add_to_forget();
         f->set_signature(to_forget);
     }
