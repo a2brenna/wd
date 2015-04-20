@@ -36,11 +36,9 @@ typedef std::string Task_Signature;
 std::mutex tasks_lock;
 std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
 
-std::mutex expiration_lock;
 std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_expiration;
 
-void reset_expiration(){
-    std::unique_lock<std::mutex> l(tasks_lock);
+void unsafe_reset_expiration(){
     std::pair<Task_Signature, std::shared_ptr<Task_Data>> next;
     if(tasks.empty()){
         return;
@@ -55,7 +53,6 @@ void reset_expiration(){
     }
     assert(next.second != nullptr);
     {
-        std::unique_lock<std::mutex> l(expiration_lock);
         next_expiration.first = next.first;
         next_expiration.second= next.second->expected();
         if ( next_expiration.second > std::chrono::high_resolution_clock::now()){
@@ -72,7 +69,7 @@ void expiration(int sig){
     if (sig == SIGALRM){
         //handle potential expiration
         {
-            std::unique_lock<std::mutex> l(expiration_lock);
+            std::unique_lock<std::mutex> l(tasks_lock);
             const auto current_time = std::chrono::high_resolution_clock::now();
 
             if( current_time > next_expiration.second ){
@@ -81,8 +78,8 @@ void expiration(int sig){
             else{
                 ERROR << "Woke up too soon!!" << std::endl;
             }
+            unsafe_reset_expiration();
         }
-        reset_expiration();
     }
     else{
         ERROR << "Unhandled signal " << sig << std::endl;
@@ -107,12 +104,23 @@ void handle_beat(const watchdog::Message &request){
     {
         std::unique_lock<std::mutex> l(task->lock);
         task->beat();
+        unsafe_reset_expiration();
     }
 
     DEBUG << "Beat: " << sig << std::endl;
 
-    reset_expiration();
+}
 
+void handle_orders(const watchdog::Message &request){
+    for(int i = 0; i < request.orders_size(); i++){
+        const watchdog::Command &o = request.orders(i);
+        for( int j = 0; j < o.to_forget_size(); j++){
+            const watchdog::Command::Forget &f = o.to_forget(j);
+            std::unique_lock<std::mutex> la(tasks_lock);
+            tasks.erase(f.signature());
+            unsafe_reset_expiration();
+        }
+    }
 }
 
 watchdog::Message handle_query(const watchdog::Message &request){
@@ -152,18 +160,6 @@ watchdog::Message handle_query(const watchdog::Message &request){
     }
 
     return r;
-}
-
-void handle_orders(const watchdog::Message &request){
-    for(int i = 0; i < request.orders_size(); i++){
-        const watchdog::Command &o = request.orders(i);
-        for( int j = 0; j < o.to_forget_size(); j++){
-            const watchdog::Command::Forget &f = o.to_forget(j);
-            std::unique_lock<std::mutex> la(tasks_lock);
-            tasks.erase(f.signature());
-            reset_expiration();
-        }
-    }
 }
 
 void handle(std::shared_ptr<smpl::Channel> client){
