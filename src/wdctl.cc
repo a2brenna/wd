@@ -11,6 +11,7 @@ namespace po = boost::program_options;
 
 std::shared_ptr<smpl::Remote_Address> server_address;
 std::string to_dump;
+std::string to_forget;
 bool status_request;
 
 void get_config(int ac, char *av[]){
@@ -20,6 +21,7 @@ void get_config(int ac, char *av[]){
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to connect to")
         ("dump", po::value<std::string>(&to_dump), "Task to dump")
         ("status_request", po::bool_switch(&status_request), "Request server status")
+        ("forget", po::value<std::string>(&to_forget), "Task to forget")
         ;
 
     po::variables_map vm;
@@ -36,7 +38,8 @@ int main(int argc, char *argv[]){
     std::shared_ptr<smpl::Channel> server(server_address->connect());
 
     watchdog::Message m;
-        auto query = m.mutable_query();
+    auto query = m.mutable_query();
+    auto command = m.add_orders();
 
     if(status_request){
         query->set_question("Status");
@@ -44,6 +47,10 @@ int main(int argc, char *argv[]){
     else if(to_dump != ""){
         query->set_question("Dump");
         query->set_signature(to_dump);
+    }
+    else if(to_forget != ""){
+        auto f = command->add_to_forget();
+        f->set_signature(to_forget);
     }
     else{
         std::cout << "No valid command" << std::endl;
