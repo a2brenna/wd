@@ -6,7 +6,7 @@ state.out
 *.pb.cc
 *.o
 wd
-puppy
+wdclient
 test
 wdctl
 *.so
