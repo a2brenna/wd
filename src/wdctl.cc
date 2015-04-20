@@ -39,19 +39,24 @@ int main(int argc, char *argv[]){
 
     watchdog::Message m;
 
+    bool awaiting_response = false;
+
     if(status_request){
         auto query = m.mutable_query();
         query->set_question("Status");
+        awaiting_response = true;
     }
     else if(to_dump != ""){
         auto query = m.mutable_query();
         query->set_question("Dump");
         query->set_signature(to_dump);
+        awaiting_response = true;
     }
     else if(to_forget != ""){
         auto command = m.add_orders();
         auto f = command->add_to_forget();
         f->set_signature(to_forget);
+        awaiting_response = false;
     }
     else{
         std::cout << "No valid command" << std::endl;
@@ -62,35 +67,37 @@ int main(int argc, char *argv[]){
     m.SerializeToString(&s);
 
     server->send(s);
-    std::string r = server->recv();
+    if( awaiting_response ){
+        std::string r = server->recv();
 
-    watchdog::Message response;
-    response.ParseFromString(r);
+        watchdog::Message response;
+        response.ParseFromString(r);
 
-    if(status_request){
-        //print table
-        const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
-        Table table(headings);
-        for(const auto t: response.response().task()){
-            const std::string s = t.signature();
-            const std::string l = std::to_string(t.last());
-            const std::string e = std::to_string(t.expected());
-            const std::string m = std::to_string(t.mean());
-            const std::string d = std::to_string(t.deviation());
-            const std::string ttl = std::to_string(t.time_to_expiration());
-            const std::string b = std::to_string(t.beats());
+        if(status_request){
+            //print table
+            const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
+            Table table(headings);
+            for(const auto t: response.response().task()){
+                const std::string s = t.signature();
+                const std::string l = std::to_string(t.last());
+                const std::string e = std::to_string(t.expected());
+                const std::string m = std::to_string(t.mean());
+                const std::string d = std::to_string(t.deviation());
+                const std::string ttl = std::to_string(t.time_to_expiration());
+                const std::string b = std::to_string(t.beats());
 
-            table.add_row({s,l,e,m,d,ttl,b});
+                table.add_row({s,l,e,m,d,ttl,b});
 
+            }
+            std::cout << table << std::endl;
         }
-        std::cout << table << std::endl;
-    }
-    else if(to_dump != ""){
-        std::cout << response.DebugString() << std::endl;
-    }
-    else{
-        std::cout << "No valid command" << std::endl;
-        return 1;
+        else if(to_dump != ""){
+            std::cout << response.DebugString() << std::endl;
+        }
+        else{
+            std::cout << "No valid command" << std::endl;
+            return 1;
+        }
     }
 
     return 0;
