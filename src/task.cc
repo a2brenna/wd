@@ -33,6 +33,11 @@ beat time until noticably later.
 */
 
 void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
+    //If supplied time is in the past...
+    if( c < l ){
+        throw Bad_Beat();
+    }
+
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
         intervals.pop_back();
