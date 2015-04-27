@@ -244,6 +244,10 @@ void load_log(const std::string &logfile){
         }
     }
 
+    {
+        std::unique_lock<std::mutex> l(tasks_lock);
+        unsafe_reset_expiration();
+    }
 }
 
 int main(int argc, char *argv[]){
