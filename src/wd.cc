@@ -122,6 +122,7 @@ void handle_orders(const watchdog::Message &request){
             const watchdog::Command::Forget &f = o.to_forget(j);
             std::unique_lock<std::mutex> la(tasks_lock);
             tasks.erase(f.signature());
+            INFO << "FORGET " << f.signature() << std::endl;
             unsafe_reset_expiration();
         }
     }
