@@ -17,7 +17,7 @@ class Task_Data {
         std::mutex lock;
         std::deque<std::chrono::high_resolution_clock::duration> intervals;
 
-        void beat();
+        std::chrono::high_resolution_clock::time_point beat();
         std::chrono::high_resolution_clock::time_point last() const;
         std::chrono::high_resolution_clock::time_point expected() const;
         std::chrono::high_resolution_clock::duration to_expiration() const;

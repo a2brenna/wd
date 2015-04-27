@@ -31,7 +31,7 @@ considers the beat() sent epsilon after the connection is estabilished, but
 the previously mentioned operations mean that the server does not record the
 beat time until noticably later.
 */
-void Task_Data::beat(){
+std::chrono::high_resolution_clock::time_point Task_Data::beat(){
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
         intervals.pop_back();
@@ -51,6 +51,8 @@ void Task_Data::beat(){
         auto d = _deviation(m, intervals);
         e = l + std::chrono::nanoseconds(m + d * 3);
     }
+
+    return c;
 }
 
 bool Task_Data::expired() const{
