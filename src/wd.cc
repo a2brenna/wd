@@ -97,6 +97,7 @@ std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
         task = std::shared_ptr<Task_Data>(new Task_Data);
         tasks[sig] = task;
     }
+    return task;
 }
 
 void handle_beat(const watchdog::Message &request){
