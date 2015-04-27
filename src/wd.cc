@@ -113,8 +113,6 @@ void handle_beat(const watchdog::Message &request){
         unsafe_reset_expiration();
     }
 
-    DEBUG << "Beat: " << sig << std::endl;
-
 }
 
 void handle_orders(const watchdog::Message &request){
