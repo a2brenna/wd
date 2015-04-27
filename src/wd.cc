@@ -86,20 +86,22 @@ void expiration(int sig){
     }
 }
 
-void handle_beat(const watchdog::Message &request){
+std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
+    std::unique_lock<std::mutex> l(tasks_lock);
     std::shared_ptr<Task_Data> task;
-    const Task_Signature sig = request.beat().signature();
 
-    {
-        std::unique_lock<std::mutex> l(tasks_lock);
-        try{
-            task = tasks.at(sig);
-        }
-        catch(std::out_of_range o){
-            task = std::shared_ptr<Task_Data>(new Task_Data);
-            tasks[sig] = task;
-        }
+    try{
+        task = tasks.at(sig);
     }
+    catch(std::out_of_range o){
+        task = std::shared_ptr<Task_Data>(new Task_Data);
+        tasks[sig] = task;
+    }
+}
+
+void handle_beat(const watchdog::Message &request){
+    const Task_Signature sig = request.beat().signature();
+    std::shared_ptr<Task_Data> task = get_task(sig);
 
     {
         std::unique_lock<std::mutex> l(task->lock);
@@ -203,6 +205,10 @@ void handle(std::shared_ptr<smpl::Channel> client){
         }
 
     }
+
+}
+
+void load_log(const std::string &logfile){
 
 }
 
