@@ -24,6 +24,8 @@
 #include <iostream>
 
 #include <utility>
+#include <boost/algorithm/string.hpp>
+#include <cstdlib>
 
 std::pair<std::ofstream, std::mutex> _log;
 Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
@@ -211,6 +213,32 @@ void handle(std::shared_ptr<smpl::Channel> client){
 
 void load_log(const std::string &logfile){
 
+    std::ifstream f(logfile, std::ifstream::in);
+
+    while(!f.eof()){
+        std::string line;
+        std::getline(f, line);
+
+        std::vector<std::string> tokens;
+        split(tokens, line, boost::is_any_of(" "));
+
+        for(auto i = tokens.begin(); i != tokens.end(); i++){
+            if(*i == "BEAT"){
+                i++;
+                const std::string sig = *i;
+                i++;
+                i++;
+                const std::string time = *i;
+                const auto from_epoch = std::chrono::high_resolution_clock::duration(strtoull(time.c_str(), nullptr, 10));
+                std::chrono::high_resolution_clock::time_point c(from_epoch);
+
+                auto t = get_task(sig);
+                t->beat(c);
+                break;
+            }
+        }
+    }
+
 }
 
 int main(int argc, char *argv[]){
@@ -227,6 +255,8 @@ int main(int argc, char *argv[]){
 
     signal(SIGALRM, expiration);
     set_timer(std::chrono::nanoseconds::max());
+
+    load_log(log_file);
 
     for(;;){
         try{
