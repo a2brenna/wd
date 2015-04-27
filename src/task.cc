@@ -71,7 +71,17 @@ bool Task_Data::expired() const{
 }
 
 size_t Task_Data::num_beats() const{
-    return intervals.size();
+    if(intervals.size() > 0){
+        return intervals.size() + 1;
+    }
+    else{
+        if (l == std::chrono::high_resolution_clock::time_point::min()){
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
 }
 
 std::chrono::high_resolution_clock::time_point Task_Data::last() const{
