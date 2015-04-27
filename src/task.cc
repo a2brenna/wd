@@ -31,13 +31,12 @@ considers the beat() sent epsilon after the connection is estabilished, but
 the previously mentioned operations mean that the server does not record the
 beat time until noticably later.
 */
-std::chrono::high_resolution_clock::time_point Task_Data::beat(){
+
+void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
         intervals.pop_back();
     }
-
-    const auto c = std::chrono::high_resolution_clock::now();
 
     if(l != std::chrono::high_resolution_clock::time_point::min()){
         auto t = c - l;
@@ -51,7 +50,11 @@ std::chrono::high_resolution_clock::time_point Task_Data::beat(){
         auto d = _deviation(m, intervals);
         e = l + std::chrono::nanoseconds(m + d * 3);
     }
+}
 
+std::chrono::high_resolution_clock::time_point Task_Data::beat(){
+    const auto c = std::chrono::high_resolution_clock::now();
+    beat(c);
     return c;
 }
 
@@ -90,4 +93,3 @@ std::chrono::high_resolution_clock::duration Task_Data::mean() const{
 std::chrono::high_resolution_clock::duration Task_Data::deviation() const{
     return _deviation(mean(), intervals);
 }
-
