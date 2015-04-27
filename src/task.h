@@ -7,6 +7,8 @@
 
 const int max_intervals = 10000;
 
+class Bad_Beat {};
+
 class Task_Data {
     private:
         //std::deque<std::chrono::high_resolution_clock::duration> intervals;
