@@ -103,7 +103,8 @@ void handle_beat(const watchdog::Message &request){
 
     {
         std::unique_lock<std::mutex> l(task->lock);
-        task->beat();
+        const auto t = task->beat();
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
         unsafe_reset_expiration();
     }
 
