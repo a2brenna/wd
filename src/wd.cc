@@ -235,6 +235,12 @@ void load_log(const std::string &logfile){
                 t->beat(c);
                 break;
             }
+            else if(*i == "FORGET"){
+                i++;
+                const std::string sig = *i;
+                std::unique_lock<std::mutex> l(tasks_lock);
+                tasks.erase(sig);
+            }
         }
     }
 
