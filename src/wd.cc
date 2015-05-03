@@ -24,6 +24,8 @@
 #include <iostream>
 
 #include <utility>
+#include <boost/algorithm/string.hpp>
+#include <cstdlib>
 
 std::pair<std::ofstream, std::mutex> _log;
 Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
@@ -86,28 +88,30 @@ void expiration(int sig){
     }
 }
 
-void handle_beat(const watchdog::Message &request){
+std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
+    std::unique_lock<std::mutex> l(tasks_lock);
     std::shared_ptr<Task_Data> task;
-    const Task_Signature sig = request.beat().signature();
 
-    {
-        std::unique_lock<std::mutex> l(tasks_lock);
-        try{
-            task = tasks.at(sig);
-        }
-        catch(std::out_of_range o){
-            task = std::shared_ptr<Task_Data>(new Task_Data);
-            tasks[sig] = task;
-        }
+    try{
+        task = tasks.at(sig);
     }
+    catch(std::out_of_range o){
+        task = std::shared_ptr<Task_Data>(new Task_Data);
+        tasks[sig] = task;
+    }
+    return task;
+}
+
+void handle_beat(const watchdog::Message &request){
+    const Task_Signature sig = request.beat().signature();
+    std::shared_ptr<Task_Data> task = get_task(sig);
 
     {
         std::unique_lock<std::mutex> l(task->lock);
-        task->beat();
+        const auto t = task->beat();
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
         unsafe_reset_expiration();
     }
-
-    DEBUG << "Beat: " << sig << std::endl;
 
 }
 
@@ -118,6 +122,7 @@ void handle_orders(const watchdog::Message &request){
             const watchdog::Command::Forget &f = o.to_forget(j);
             std::unique_lock<std::mutex> la(tasks_lock);
             tasks.erase(f.signature());
+            INFO << "FORGET " << f.signature() << std::endl;
             unsafe_reset_expiration();
         }
     }
@@ -205,6 +210,46 @@ void handle(std::shared_ptr<smpl::Channel> client){
 
 }
 
+void load_log(const std::string &logfile){
+
+    std::ifstream f(logfile, std::ifstream::in);
+
+    while(!f.eof()){
+        std::string line;
+        std::getline(f, line);
+
+        std::vector<std::string> tokens;
+        split(tokens, line, boost::is_any_of(" "));
+
+        for(auto i = tokens.begin(); i != tokens.end(); i++){
+            if(*i == "BEAT"){
+                i++;
+                const std::string sig = *i;
+                i++;
+                i++;
+                const std::string time = *i;
+                const auto from_epoch = std::chrono::high_resolution_clock::duration(strtoull(time.c_str(), nullptr, 10));
+                std::chrono::high_resolution_clock::time_point c(from_epoch);
+
+                auto t = get_task(sig);
+                t->beat(c);
+                break;
+            }
+            else if(*i == "FORGET"){
+                i++;
+                const std::string sig = *i;
+                std::unique_lock<std::mutex> l(tasks_lock);
+                tasks.erase(sig);
+            }
+        }
+    }
+
+    {
+        std::unique_lock<std::mutex> l(tasks_lock);
+        unsafe_reset_expiration();
+    }
+}
+
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
@@ -219,6 +264,8 @@ int main(int argc, char *argv[]){
 
     signal(SIGALRM, expiration);
     set_timer(std::chrono::nanoseconds::max());
+
+    load_log(log_file);
 
     for(;;){
         try{

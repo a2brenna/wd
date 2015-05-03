@@ -31,13 +31,17 @@ considers the beat() sent epsilon after the connection is estabilished, but
 the previously mentioned operations mean that the server does not record the
 beat time until noticably later.
 */
-void Task_Data::beat(){
+
+void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
+    //If supplied time is in the past...
+    if( c < l ){
+        throw Bad_Beat();
+    }
+
     int s = intervals.size();
     while( s > (max_intervals - 1) ){
         intervals.pop_back();
     }
-
-    const auto c = std::chrono::high_resolution_clock::now();
 
     if(l != std::chrono::high_resolution_clock::time_point::min()){
         auto t = c - l;
@@ -53,6 +57,12 @@ void Task_Data::beat(){
     }
 }
 
+std::chrono::high_resolution_clock::time_point Task_Data::beat(){
+    const auto c = std::chrono::high_resolution_clock::now();
+    beat(c);
+    return c;
+}
+
 bool Task_Data::expired() const{
     if(std::chrono::high_resolution_clock::now() > e){
         return true;
@@ -61,7 +71,17 @@ bool Task_Data::expired() const{
 }
 
 size_t Task_Data::num_beats() const{
-    return intervals.size();
+    if(intervals.size() > 0){
+        return intervals.size() + 1;
+    }
+    else{
+        if (l == std::chrono::high_resolution_clock::time_point::min()){
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
 }
 
 std::chrono::high_resolution_clock::time_point Task_Data::last() const{
@@ -88,4 +108,3 @@ std::chrono::high_resolution_clock::duration Task_Data::mean() const{
 std::chrono::high_resolution_clock::duration Task_Data::deviation() const{
     return _deviation(mean(), intervals);
 }
-
