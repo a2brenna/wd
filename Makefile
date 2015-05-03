@@ -36,11 +36,11 @@ headers: src/client.h
 
 libraries: libwatchdog.so libwatchdog.a
 
-libwatchdog.so: client.o
-	${CXX} ${CXXFLAGS} -shared -Wl,-soname,libwatchdog.so -o libwatchdog.so client.o
+libwatchdog.so: client.o watchdog.pb.o
+	${CXX} ${CXXFLAGS} -shared -Wl,-soname,libwatchdog.so -o libwatchdog.so client.o watchdog.pb.o
 
-libwatchdog.a: client.o
-	ar rcs libwatchdog.a client.o
+libwatchdog.a: client.o watchdog.pb.o
+	ar rcs libwatchdog.a client.o watchdog.pb.o
 
 client.o: src/client.cc src/client.h
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o
