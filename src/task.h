@@ -7,17 +7,20 @@
 
 const int max_intervals = 10000;
 
+class Bad_Beat {};
+
 class Task_Data {
     private:
         //std::deque<std::chrono::high_resolution_clock::duration> intervals;
-        std::deque<std::chrono::high_resolution_clock::time_point> beats;
+        //std::deque<std::chrono::high_resolution_clock::time_point> beats;
         std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
         std::chrono::high_resolution_clock::time_point e = std::chrono::high_resolution_clock::time_point::max();
     public:
         std::mutex lock;
         std::deque<std::chrono::high_resolution_clock::duration> intervals;
 
-        void beat();
+        std::chrono::high_resolution_clock::time_point beat();
+        void beat(const std::chrono::high_resolution_clock::time_point &c);
         std::chrono::high_resolution_clock::time_point last() const;
         std::chrono::high_resolution_clock::time_point expected() const;
         std::chrono::high_resolution_clock::duration to_expiration() const;
