@@ -174,7 +174,7 @@ void handle(std::shared_ptr<smpl::Channel> client){
         try{
             incoming = client->recv();
         }
-        catch(smpl::Error e){
+        catch(...){
             break;
         }
 
