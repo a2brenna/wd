@@ -5,7 +5,7 @@
 #include <hgutil/time.h>
 #include <mutex>
 
-const int max_intervals = 10000;
+const int MAX_INTERVALS = 10000;
 
 class Bad_Beat {};
 
