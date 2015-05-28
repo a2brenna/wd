@@ -21,26 +21,26 @@ install: wd wdclient libraries headers
 
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
-	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
+	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lhgutil -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
 
 wdctl: src/wdctl.cc watchdog.pb.o common_config.o
-	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options -ltxtable
+	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lhgutil -lcurl -ljsoncpp -lsmplsocket -lboost_program_options -ltxtable
 
 test: src/test.cc client.o watchdog.pb.o common_config.o client_config.o
-	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o common_config.o client_config.o -o test -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
+	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o common_config.o client_config.o -o test -lprotobuf -lpthread -lstdc++ -lhgutil -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
 
 wdclient: src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o
-	${CXX} ${CXXFLAGS} src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o -o wdclient -lprotobuf -lpthread -lstdc++ -lhgutil -lgnutls -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
+	${CXX} ${CXXFLAGS} src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o -o wdclient -lprotobuf -lpthread -lstdc++ -lhgutil -lcurl -ljsoncpp -lsmplsocket -lboost_program_options
 
 headers: src/client.h
 
 libraries: libwatchdog.so libwatchdog.a
 
-libwatchdog.so: client.o
-	${CXX} ${CXXFLAGS} -shared -Wl,-soname,libwatchdog.so -o libwatchdog.so client.o
+libwatchdog.so: client.o watchdog.pb.o
+	${CXX} ${CXXFLAGS} -shared -Wl,-soname,libwatchdog.so -o libwatchdog.so client.o watchdog.pb.o
 
-libwatchdog.a: client.o
-	ar rcs libwatchdog.a client.o
+libwatchdog.a: client.o watchdog.pb.o
+	ar rcs libwatchdog.a client.o watchdog.pb.o
 
 client.o: src/client.cc src/client.h
 	${CXX} ${CXXFLAGS} -c src/client.cc -o client.o

@@ -14,6 +14,7 @@ class Heart {
     public:
 
         Heart(std::shared_ptr<smpl::Channel> server, const std::string id) { _server = server; _id = id; };
+        Heart() {};
         void beat();
 
 };
