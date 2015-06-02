@@ -38,8 +38,7 @@ void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
         throw Bad_Beat();
     }
 
-    int s = intervals.size();
-    while( s > (max_intervals - 1) ){
+    while( intervals.size() > MAX_INTERVALS ){
         intervals.pop_back();
     }
 
