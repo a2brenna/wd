@@ -19,7 +19,6 @@ install: wd wdclient libraries headers
 	cp wdclient ${DESTDIR}/${PREFIX}/bin
 	cp wdctl ${DESTDIR}/${PREFIX}/bin
 
-
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lhgutil -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable
 
@@ -63,9 +62,6 @@ watchdog.pb.o: watchdog.proto
 	${CXX} ${CXXFLAGS} -c src/watchdog.pb.cc -o watchdog.pb.o
 
 clean:
-	rm -f watchdog/watchdog_pb2.py
-	rm -f *.pyc
-	rm -rf __pycache__
 	rm -f src/watchdog.wd.cc
 	rm -f src/watchdog.pb.h
 	rm -f wd
@@ -73,3 +69,5 @@ clean:
 	rm -f wdclient
 	rm -f wdctl
 	rm -f *.o
+	rm -f libwatchdog.a
+	rm -f libwatchdog.so

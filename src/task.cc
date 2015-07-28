@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-std::chrono::high_resolution_clock::duration _deviation(std::chrono::high_resolution_clock::duration m, const std::deque<std::chrono::high_resolution_clock::duration> &data){
+std::chrono::high_resolution_clock::duration _deviation(const std::chrono::high_resolution_clock::duration &m, const std::deque<std::chrono::high_resolution_clock::duration> &data){
     if( data.size() == 0 ){
         return std::chrono::high_resolution_clock::duration(0);
     }
@@ -16,7 +16,7 @@ std::chrono::high_resolution_clock::duration _deviation(std::chrono::high_resolu
         for(const auto &x: diff){
             sq_sum = sq_sum + x;
         }
-        std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round(std::sqrt(sq_sum / data.size())));
+        std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round( std::sqrt( (double)sq_sum / (double)data.size() ) ));
         return stdev;
     }
 }

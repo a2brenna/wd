@@ -6,6 +6,7 @@
 #include <smplsocket.h>
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <chrono>
 
 namespace po = boost::program_options;
 
@@ -79,7 +80,8 @@ int main(int argc, char *argv[]){
             Table table(headings);
             for(const auto t: response.response().task()){
                 const std::string s = t.signature();
-                const std::string l = std::to_string(t.last());
+                const auto current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
+                const std::string l = std::to_string(t.last()) + " (" + std::to_string( current_time - t.last()) + ")";
                 const std::string e = std::to_string(t.expected());
                 const std::string m = std::to_string(t.mean());
                 const std::string d = std::to_string(t.deviation());
