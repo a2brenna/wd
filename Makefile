@@ -64,8 +64,6 @@ watchdog.pb.o: watchdog.proto
 
 clean:
 	rm -f watchdog/watchdog_pb2.py
-	rm -f *.pyc
-	rm -rf __pycache__
 	rm -f src/watchdog.wd.cc
 	rm -f src/watchdog.pb.h
 	rm -f wd
@@ -73,3 +71,5 @@ clean:
 	rm -f wdclient
 	rm -f wdctl
 	rm -f *.o
+	rm -f libwatchdog.a
+	rm -f libwatchdog.so
