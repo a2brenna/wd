@@ -27,6 +27,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
 
+std::mutex log_lock;
 std::pair<std::ofstream, std::mutex> _log;
 Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
 Log ERROR(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Error: "))));
@@ -75,15 +76,18 @@ void expiration(int sig){
             const auto current_time = std::chrono::high_resolution_clock::now();
 
             if( current_time > next_expiration.second ){
+                std::unique_lock<std::mutex> l(log_lock);
                 INFO << "Task: " << next_expiration.first << " expired" << std::endl;
             }
             else{
+                std::unique_lock<std::mutex> l(log_lock);
                 ERROR << "Woke up too soon!!" << std::endl;
             }
             unsafe_reset_expiration();
         }
     }
     else{
+        std::unique_lock<std::mutex> l(log_lock);
         ERROR << "Unhandled signal " << sig << std::endl;
     }
 }
@@ -109,7 +113,10 @@ void handle_beat(const watchdog::Message &request){
     {
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
+        {
+            std::unique_lock<std::mutex> l(log_lock);
+            INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
+        }
         unsafe_reset_expiration();
     }
 
@@ -122,7 +129,10 @@ void handle_orders(const watchdog::Message &request){
             const watchdog::Command::Forget &f = o.to_forget(j);
             std::unique_lock<std::mutex> la(tasks_lock);
             tasks.erase(f.signature());
-            INFO << "FORGET " << f.signature() << std::endl;
+            {
+                std::unique_lock<std::mutex> l(log_lock);
+                INFO << "FORGET " << f.signature() << std::endl;
+            }
             unsafe_reset_expiration();
         }
     }
@@ -144,6 +154,7 @@ watchdog::Message handle_query(const watchdog::Message &request){
             }
         }
         catch(std::out_of_range e){
+            std::unique_lock<std::mutex> l(log_lock);
             ERROR << "No such task: " << task_signature << std::endl;
         }
     }
@@ -197,11 +208,13 @@ void handle(std::shared_ptr<smpl::Channel> client){
                 handle_orders(request);
             }
             else{
+                std::unique_lock<std::mutex> l(log_lock);
                 ERROR << "Unhandled Request: " << request.DebugString() << std::endl;
             }
 
         }
         else{
+            std::unique_lock<std::mutex> l(log_lock);
             ERROR << "Uninitialized Message: " << request.DebugString() << std::endl;;
             break;
         }
@@ -211,10 +224,12 @@ void handle(std::shared_ptr<smpl::Channel> client){
 }
 
 void load_log(const std::string &logfile){
+    size_t line_number = 0;
 
     std::ifstream f(logfile, std::ifstream::in);
 
     while(!f.eof()){
+        line_number++;
         std::string line;
         std::getline(f, line);
 
@@ -232,7 +247,12 @@ void load_log(const std::string &logfile){
                 std::chrono::high_resolution_clock::time_point c(from_epoch);
 
                 auto t = get_task(sig);
-                t->beat(c);
+                try{
+                    t->beat(c);
+                }
+                catch(Bad_Beat b){
+                    std::cerr << line_number << " " << f << std::endl;
+                }
                 break;
             }
             else if(*i == "FORGET"){
@@ -260,7 +280,10 @@ int main(int argc, char *argv[]){
     _log.first.open(log_file, std::ofstream::app);
     //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     //setlogmask(LOG_UPTO(LOG_INFO));
-    INFO << "Watchdog starting..." << std::endl;
+    {
+        std::unique_lock<std::mutex> l(log_lock);
+        INFO << "Watchdog starting..." << std::endl;
+    }
 
     signal(SIGALRM, expiration);
     set_timer(std::chrono::nanoseconds::max());
