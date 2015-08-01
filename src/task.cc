@@ -8,16 +8,36 @@ std::chrono::high_resolution_clock::duration _deviation(const std::chrono::high_
         return std::chrono::high_resolution_clock::duration(0);
     }
     else{
-        std::vector<unsigned long long> diff;
+        //Cast durations to a lower resolution... mostly out of fear that the
+        //math will get wonky because nanosecond values are *too big* and that
+        //doubles are *too sparse* in the relevent ranges.
+        //
+        //On the other hand... if the math is done right we should always end
+        //up with the double most closely approximating the *true* value...
+        //TODO: Examine floating point math vs. nanosecond timestamp magnitude
+        std::vector<std::chrono::milliseconds> low_resolution;
         for(const auto &d: data){
-            diff.push_back( (d - m).count() * (d - m).count() );
+            low_resolution.push_back( std::chrono::duration_cast<std::chrono::milliseconds>(d));
         }
-        unsigned long long sq_sum = 0;
+
+        const std::chrono::milliseconds mean = std::chrono::duration_cast<std::chrono::milliseconds>(m);
+
+        //we switch to doubles here because overflow's a bitch
+        std::vector<double> diff;
+        for(const auto &l: low_resolution){
+            const std::chrono::milliseconds deviation = l - mean;
+            diff.push_back( (double)deviation.count() * (double)deviation.count() );
+        }
+
+        double total_variance = 0;
         for(const auto &x: diff){
-            sq_sum = sq_sum + x;
+            total_variance = total_variance + x;
         }
-        std::chrono::high_resolution_clock::duration stdev((unsigned long long)std::round( std::sqrt( (double)sq_sum / (double)data.size() ) ));
-        return stdev;
+
+        double mean_variance = total_variance / data.size();
+        double standard_deviation = std::sqrt(mean_variance);
+
+        return std::chrono::milliseconds((unsigned long long)std::round(standard_deviation));
     }
 }
 
