@@ -17,7 +17,9 @@ void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
         throw Bad_Beat();
     }
 
-    _intervals( (c - l).count() );
+    if( l != std::chrono::high_resolution_clock::time_point::min()){
+        _intervals( (c - l).count() );
+    }
     l = c;
 
     const auto count = ba::count(_intervals);
