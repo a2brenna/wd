@@ -158,11 +158,14 @@ watchdog::Message handle_query(const watchdog::Message &request){
     auto query = request.query();
 
     if(query.question() == "Dump"){
+        //Replace this with a thing that queries the log file... we no longer
+        //necessarily store all the data
+        /*
         auto task_signature = query.signature();
         auto task_dump = response->mutable_dump();
         try{
             std::unique_lock<std::mutex> l(tasks_lock);
-            for(const auto &d: tasks.at(task_signature)->intervals){
+            for(const auto &d: tasks.at(task_signature)->_intervals){
                 double i = to_seconds(d);
                 task_dump->add_interval(i);
             }
@@ -171,6 +174,7 @@ watchdog::Message handle_query(const watchdog::Message &request){
             std::unique_lock<std::mutex> l(log_lock);
             ERROR << "No such task: " << task_signature << std::endl;
         }
+        */
     }
     else if( query.question() == "Status"){
         std::unique_lock<std::mutex> l(tasks_lock);

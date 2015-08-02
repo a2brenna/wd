@@ -1,45 +1,4 @@
 #include "task.h"
-#include <hgutil/math.h>
-#include <cmath>
-#include <iostream>
-
-std::chrono::high_resolution_clock::duration _deviation(const std::chrono::high_resolution_clock::duration &m, const std::deque<std::chrono::high_resolution_clock::duration> &data){
-    if( data.size() == 0 ){
-        return std::chrono::high_resolution_clock::duration(0);
-    }
-    else{
-        //Cast durations to a lower resolution... mostly out of fear that the
-        //math will get wonky because nanosecond values are *too big* and that
-        //doubles are *too sparse* in the relevent ranges.
-        //
-        //On the other hand... if the math is done right we should always end
-        //up with the double most closely approximating the *true* value...
-        //TODO: Examine floating point math vs. nanosecond timestamp magnitude
-        std::vector<std::chrono::milliseconds> low_resolution;
-        for(const auto &d: data){
-            low_resolution.push_back( std::chrono::duration_cast<std::chrono::milliseconds>(d));
-        }
-
-        const std::chrono::milliseconds mean = std::chrono::duration_cast<std::chrono::milliseconds>(m);
-
-        //we switch to doubles here because overflow's a bitch
-        std::vector<double> diff;
-        for(const auto &l: low_resolution){
-            const std::chrono::milliseconds deviation = l - mean;
-            diff.push_back( (double)deviation.count() * (double)deviation.count() );
-        }
-
-        double total_variance = 0;
-        for(const auto &x: diff){
-            total_variance = total_variance + x;
-        }
-
-        double mean_variance = total_variance / data.size();
-        double standard_deviation = std::sqrt(mean_variance);
-
-        return std::chrono::milliseconds((unsigned long long)std::round(standard_deviation));
-    }
-}
 
 /*
 WARNING: For some reason, the first recorded interval seems to be noticably
@@ -58,22 +17,16 @@ void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
         throw Bad_Beat();
     }
 
-    while( intervals.size() > MAX_INTERVALS ){
-        intervals.pop_back();
-    }
-
-    if(l != std::chrono::high_resolution_clock::time_point::min()){
-        auto t = c - l;
-        intervals.push_front(t);
-    }
-
+    _intervals( (c - l).count() );
     l = c;
 
-    if(intervals.size() > 2){
-        auto m = ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
-        auto d = _deviation(m, intervals);
-        e = l + std::chrono::nanoseconds(m + d * 3);
+    const auto count = ba::count(_intervals);
+    if(count > 2){
+        const auto mean = ba::mean(_intervals);
+        const auto stdev = std::sqrt(ba::variance(_intervals));
+        e = l + std::chrono::high_resolution_clock::duration((unsigned long long)(mean + (stdev * 3)) );
     }
+
 }
 
 std::chrono::high_resolution_clock::time_point Task_Data::beat(){
@@ -90,8 +43,9 @@ bool Task_Data::expired() const{
 }
 
 size_t Task_Data::num_beats() const{
-    if(intervals.size() > 0){
-        return intervals.size() + 1;
+    size_t c = ba::count(_intervals);
+    if(c > 0){
+        return c + 1;
     }
     else{
         if (l == std::chrono::high_resolution_clock::time_point::min()){
@@ -116,14 +70,9 @@ std::chrono::high_resolution_clock::duration Task_Data::to_expiration() const{
 }
 
 std::chrono::high_resolution_clock::duration Task_Data::mean() const{
-    if(intervals.size() > 0){
-        return ::mean(intervals, std::chrono::high_resolution_clock::duration(0));
-    }
-    else{
-        return std::chrono::high_resolution_clock::duration(0);
-    }
+    return std::chrono::high_resolution_clock::duration((unsigned long long)ba::mean(_intervals));
 }
 
 std::chrono::high_resolution_clock::duration Task_Data::deviation() const{
-    return _deviation(mean(), intervals);
+    return std::chrono::high_resolution_clock::duration((unsigned long long)std::sqrt(ba::variance(_intervals)));
 }
