@@ -1,5 +1,4 @@
 #include "server_config.h"
-#include <hgutil/time.h>
 #include <hgutil/log.h>
 #include <sys/time.h>
 
@@ -40,6 +39,21 @@ std::mutex tasks_lock;
 std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
 
 std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_expiration;
+
+double to_seconds(const std::chrono::nanoseconds &ns){
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
+    double seconds = ms.count() / 1000.0;
+    return seconds;
+}
+
+int set_timer(const std::chrono::nanoseconds &ns){
+    struct itimerval t;
+    t.it_interval.tv_sec = 0;
+    t.it_interval.tv_usec = 0;
+    t.it_value.tv_sec = ns.count() / 1000000000;
+    t.it_value.tv_usec = (ns.count() - (t.it_value.tv_sec * 1000000000)) / 1000;
+    return setitimer(ITIMER_REAL, &t, nullptr);
+}
 
 void unsafe_reset_expiration(){
     std::pair<Task_Signature, std::shared_ptr<Task_Data>> next;
