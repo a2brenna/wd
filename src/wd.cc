@@ -1,6 +1,7 @@
 #include "server_config.h"
-#include <hgutil/log.h>
 #include <sys/time.h>
+#include <slog/slog.h>
+#include <slog/file.h>
 
 #include <chrono>
 #include <syslog.h>
@@ -26,11 +27,11 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
 
-std::pair<std::ofstream, std::mutex> _log;
-Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
-Log ERROR(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Error: "))));
-Log INFO(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Info: "))));
-Log DEBUG(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Debug: "))));
+std::shared_ptr<std::pair<std::ofstream, std::mutex>> _log(new std::pair<std::ofstream, std::mutex>());
+slog::Log CRITICAL(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "CRITICAL: ");
+slog::Log ERROR(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "ERROR: ");
+slog::Log INFO(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "INFO: ");
+slog::Log DEBUG(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "DEBUG: ");
 
 typedef std::string Task_Signature;
 
@@ -282,7 +283,7 @@ int main(int argc, char *argv[]){
     std::string log_file = getenv("HOME");
     log_file.append("/.wd.log");
 
-    _log.first.open(log_file, std::ofstream::app);
+    _log->first.open(log_file, std::ofstream::app);
     //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
     //setlogmask(LOG_UPTO(LOG_INFO));
     INFO << "Watchdog starting..." << std::endl;
