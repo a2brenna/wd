@@ -4,7 +4,6 @@
 #include <slog/file.h>
 
 #include <chrono>
-#include <syslog.h>
 #include <memory>
 #include <mutex>
 #include <map>
