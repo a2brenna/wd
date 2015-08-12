@@ -34,6 +34,8 @@ slog::Log DEBUG(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLo
 
 typedef std::string Task_Signature;
 
+class Fatal_Error {};
+
 std::mutex tasks_lock;
 std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
 
@@ -41,17 +43,22 @@ std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_e
 
 double to_seconds(const std::chrono::nanoseconds &ns){
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
-    double seconds = ms.count() / 1000.0;
-    return seconds;
+    return (ms.count() / 1000.0);
 }
 
-int set_timer(const std::chrono::nanoseconds &ns){
+void set_timer(const std::chrono::nanoseconds &ns){
     struct itimerval t;
     t.it_interval.tv_sec = 0;
     t.it_interval.tv_usec = 0;
     t.it_value.tv_sec = ns.count() / 1000000000;
     t.it_value.tv_usec = (ns.count() - (t.it_value.tv_sec * 1000000000)) / 1000;
-    return setitimer(ITIMER_REAL, &t, nullptr);
+    const auto r = setitimer(ITIMER_REAL, &t, nullptr);
+    if(r != 0){
+        throw Fatal_Error();
+    }
+    else{
+        return;
+    }
 }
 
 void unsafe_reset_expiration(){
@@ -80,22 +87,22 @@ void unsafe_reset_expiration(){
     }
 }
 
-void expiration(int sig){
+void handle_expiration(){
+    std::unique_lock<std::mutex> l(tasks_lock);
+    const auto current_time = std::chrono::high_resolution_clock::now();
 
+    if( current_time > next_expiration.second ){
+        INFO << "Task: " << next_expiration.first << " expired" << std::endl;
+    }
+    else{
+        ERROR << "Woke up too soon!!" << std::endl;
+    }
+    unsafe_reset_expiration();
+}
+
+void handle_signal(int sig){
     if (sig == SIGALRM){
-        //handle potential expiration
-        {
-            std::unique_lock<std::mutex> l(tasks_lock);
-            const auto current_time = std::chrono::high_resolution_clock::now();
-
-            if( current_time > next_expiration.second ){
-                INFO << "Task: " << next_expiration.first << " expired" << std::endl;
-            }
-            else{
-                ERROR << "Woke up too soon!!" << std::endl;
-            }
-            unsafe_reset_expiration();
-        }
+        handle_expiration();
     }
     else{
         ERROR << "Unhandled signal " << sig << std::endl;
@@ -278,16 +285,13 @@ void load_log(const std::string &logfile){
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
-
     std::string log_file = getenv("HOME");
     log_file.append("/.wd.log");
 
     _log->first.open(log_file, std::ofstream::app);
-    //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
-    //setlogmask(LOG_UPTO(LOG_INFO));
     INFO << "Watchdog starting..." << std::endl;
 
-    signal(SIGALRM, expiration);
+    signal(SIGALRM, handle_signal);
     set_timer(std::chrono::nanoseconds::max());
 
     load_log(log_file);
