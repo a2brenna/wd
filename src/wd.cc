@@ -12,7 +12,6 @@
 #include <smpl.h>
 #include <smplsocket.h>
 #include <thread>
-#include <functional>
 #include <cassert>
 #include <fstream>
 #include <sstream>
@@ -24,7 +23,6 @@
 
 #include <utility>
 #include <boost/algorithm/string.hpp>
-#include <cstdlib>
 
 std::shared_ptr<std::pair<std::ofstream, std::mutex>> _log(new std::pair<std::ofstream, std::mutex>());
 slog::Log CRITICAL(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "CRITICAL: ");
@@ -133,7 +131,6 @@ void handle_beat(const watchdog::Message &request){
         INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
         unsafe_reset_expiration();
     }
-
 }
 
 void handle_orders(const watchdog::Message &request){
