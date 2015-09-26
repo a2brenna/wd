@@ -19,6 +19,13 @@ install: wd wdclient libraries headers
 	cp wdclient ${DESTDIR}/${PREFIX}/bin
 	cp wdctl ${DESTDIR}/${PREFIX}/bin
 
+uninstall:
+	rm ${DESTDIR}/${PREFIX}/bin/wdclient
+	rm ${DESTDIR}/${PREFIX}/bin/wdctl
+	rm ${DESTDIR}/${PREFIX}/bin/wd
+	rm ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
+	rm ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
+
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -ljsoncpp -lcurl -lsmplsocket -ltxtable -lslog
 
