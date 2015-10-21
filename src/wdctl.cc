@@ -14,6 +14,7 @@ std::shared_ptr<smpl::Remote_Address> server_address;
 std::string to_dump;
 std::string to_forget;
 bool status_request;
+bool long_table = false;
 
 void get_config(int ac, char *av[]){
     po::options_description desc("Options");
@@ -22,6 +23,7 @@ void get_config(int ac, char *av[]){
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to connect to")
         ("dump", po::value<std::string>(&to_dump), "Task to dump")
         ("status_request", po::bool_switch(&status_request), "Request server status")
+        ("long", po::bool_switch(&long_table), "Print long form information")
         ("forget", po::value<std::string>(&to_forget), "Task to forget")
         ;
 
@@ -75,23 +77,38 @@ int main(int argc, char *argv[]){
         response.ParseFromString(r);
 
         if(status_request){
-            //print table
-            const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
-            Table table(headings);
-            for(const auto t: response.response().task()){
-                const std::string s = t.signature();
-                const auto current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
-                const std::string l = std::to_string(t.last()) + " (" + std::to_string( current_time - t.last()) + ")";
-                const std::string e = std::to_string(t.expected());
-                const std::string m = std::to_string(t.mean());
-                const std::string d = std::to_string(t.deviation());
-                const std::string ttl = std::to_string(t.time_to_expiration());
-                const std::string b = std::to_string(t.beats());
+            const auto current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() / 1000.0;
+            if(long_table){
+                const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Mean", "Deviation", "Time To Expiration", "Beats" };
+                Table table(headings);
+                for(const auto t: response.response().task()){
+                    const std::string s = t.signature();
+                    const std::string l = std::to_string(t.last()) + " (" + std::to_string( current_time - t.last()) + ")";
+                    const std::string e = std::to_string(t.expected());
+                    const std::string m = std::to_string(t.mean());
+                    const std::string d = std::to_string(t.deviation());
+                    const std::string ttl = std::to_string(t.time_to_expiration());
+                    const std::string b = std::to_string(t.beats());
 
-                table.add_row({s,l,e,m,d,ttl,b});
+                    table.add_row({s,l,e,m,d,ttl,b});
 
+                }
+                std::cout << table << std::endl;
             }
-            std::cout << table << std::endl;
+            else{
+                const std::vector<std::string> headings = { "Signature", "Last Seen", "Expected", "Beats" };
+                Table table(headings);
+                for(const auto t: response.response().task()){
+                    const std::string s = t.signature();
+                    const std::string l = std::to_string(current_time - t.last());
+                    const std::string e = std::to_string(t.expected() - current_time);
+                    const std::string b = std::to_string(t.beats());
+
+                    table.add_row({s,l,e,b});
+
+                }
+                std::cout << table << std::endl;
+            }
         }
         else if(to_dump != ""){
             std::cout << response.DebugString() << std::endl;
