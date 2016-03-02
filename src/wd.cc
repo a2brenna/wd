@@ -107,8 +107,7 @@ void handle_signal(int sig){
     }
 }
 
-std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
-    std::unique_lock<std::mutex> l(tasks_lock);
+std::shared_ptr<Task_Data> _get_task(const Task_Signature &sig){
     std::shared_ptr<Task_Data> task;
 
     try{
@@ -121,6 +120,11 @@ std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
     return task;
 }
 
+std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
+    std::unique_lock<std::mutex> l(tasks_lock);
+    return _get_task(sig);
+}
+
 void handle_beat(const watchdog::Message &request){
     const Task_Signature sig = request.beat().signature();
     std::shared_ptr<Task_Data> task = get_task(sig);
@@ -128,7 +132,7 @@ void handle_beat(const watchdog::Message &request){
     {
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP" << std::endl;
         unsafe_reset_expiration();
     }
 }
@@ -279,6 +283,28 @@ void load_log(const std::string &logfile){
     }
 }
 
+void beat_handler(){
+    smpl::Local_UDP beat_listener(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT);
+
+    for(;;){
+        try{
+            const std::string incoming = beat_listener.recv();
+            watchdog::Message request;
+            request.ParseFromString(incoming);
+
+            const Task_Signature sig = request.beat().signature();
+            std::shared_ptr<Task_Data> task = get_task(sig);
+            std::unique_lock<std::mutex> l(task->lock);
+            const auto t = task->beat();
+            INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP" << std::endl;
+            unsafe_reset_expiration();
+        }
+        catch(...){
+            //awww sheit
+        }
+    }
+}
+
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
@@ -292,6 +318,10 @@ int main(int argc, char *argv[]){
     set_timer(std::chrono::nanoseconds::max());
 
     load_log(log_file);
+
+    //Start UDP beat listener
+    auto beat_handling_thread = std::thread(beat_handler);
+    beat_handling_thread.detach();
 
     for(;;){
         try{
