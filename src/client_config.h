@@ -8,6 +8,7 @@
 
 extern std::string CONFIG_SIGNATURE;
 extern std::shared_ptr<smpl::Remote_Address> server_address;
+extern bool CONFIG_UDP;
 
 void get_config(int ac, char *av[]);
 

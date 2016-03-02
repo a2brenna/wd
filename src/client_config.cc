@@ -12,6 +12,7 @@ namespace po = boost::program_options;
 
 std::string CONFIG_SIGNATURE = "";
 std::shared_ptr<smpl::Remote_Address> server_address;
+bool CONFIG_UDP = false;
 
 void get_config(int ac, char *av[]){
     po::options_description desc("Options");
@@ -20,6 +21,7 @@ void get_config(int ac, char *av[]){
         ("sig", po::value<std::string>(&CONFIG_SIGNATURE), "The signature to beat with")
         ("port", po::value<int>(&CONFIG_INSECURE_PORT), "Network address to attempt to connect to")
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to attempt to connect to")
+        ("udp", po::bool_switch(&CONFIG_UDP), "Beat using UDP")
         ;
 
     std::ifstream global(global_config_file, std::ios_base::in);

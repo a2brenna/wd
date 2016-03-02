@@ -2,22 +2,28 @@
 
 #include <deque>
 #include <chrono>
-#include <hgutil/time.h>
 #include <mutex>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+namespace ba = boost::accumulators;
 
 const int MAX_INTERVALS = 10000;
 
 class Bad_Beat {};
 
 class Task_Data {
+
     private:
-        //std::deque<std::chrono::high_resolution_clock::duration> intervals;
-        //std::deque<std::chrono::high_resolution_clock::time_point> beats;
         std::chrono::high_resolution_clock::time_point l = std::chrono::high_resolution_clock::time_point::min();
         std::chrono::high_resolution_clock::time_point e = std::chrono::high_resolution_clock::time_point::max();
+
     public:
         std::mutex lock;
-        std::deque<std::chrono::high_resolution_clock::duration> intervals;
+        ba::accumulator_set<unsigned long long, ba::stats<ba::tag::count, ba::tag::mean, ba::tag::variance>> _intervals;
 
         std::chrono::high_resolution_clock::time_point beat();
         void beat(const std::chrono::high_resolution_clock::time_point &c);

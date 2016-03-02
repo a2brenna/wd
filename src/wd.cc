@@ -1,10 +1,9 @@
 #include "server_config.h"
-#include <hgutil/time.h>
-#include <hgutil/log.h>
 #include <sys/time.h>
+#include <slog/slog.h>
+#include <slog/file.h>
 
 #include <chrono>
-#include <syslog.h>
 #include <memory>
 #include <mutex>
 #include <map>
@@ -13,7 +12,6 @@
 #include <smpl.h>
 #include <smplsocket.h>
 #include <thread>
-#include <functional>
 #include <cassert>
 #include <fstream>
 #include <sstream>
@@ -25,20 +23,41 @@
 
 #include <utility>
 #include <boost/algorithm/string.hpp>
-#include <cstdlib>
 
-std::pair<std::ofstream, std::mutex> _log;
-Log CRITICAL(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Critical: "))));
-Log ERROR(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Error: "))));
-Log INFO(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Info: "))));
-Log DEBUG(std::shared_ptr<Char_Stream>(new File(&_log, std::string("Debug: "))));
+std::shared_ptr<std::pair<std::ofstream, std::mutex>> _log(new std::pair<std::ofstream, std::mutex>());
+slog::Log CRITICAL(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "CRITICAL: ");
+slog::Log ERROR(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "ERROR: ");
+slog::Log INFO(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "INFO: ");
+slog::Log DEBUG(std::shared_ptr<slog::Log_Sink>(new slog::File(_log)), slog::kLogErr, "DEBUG: ");
 
 typedef std::string Task_Signature;
+
+class Fatal_Error {};
 
 std::mutex tasks_lock;
 std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
 
 std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_expiration;
+
+double to_seconds(const std::chrono::nanoseconds &ns){
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
+    return (ms.count() / 1000.0);
+}
+
+void set_timer(const std::chrono::nanoseconds &ns){
+    struct itimerval t;
+    t.it_interval.tv_sec = 0;
+    t.it_interval.tv_usec = 0;
+    t.it_value.tv_sec = ns.count() / 1000000000;
+    t.it_value.tv_usec = (ns.count() - (t.it_value.tv_sec * 1000000000)) / 1000;
+    const auto r = setitimer(ITIMER_REAL, &t, nullptr);
+    if(r != 0){
+        throw Fatal_Error();
+    }
+    else{
+        return;
+    }
+}
 
 void unsafe_reset_expiration(){
     std::pair<Task_Signature, std::shared_ptr<Task_Data>> next;
@@ -66,30 +85,29 @@ void unsafe_reset_expiration(){
     }
 }
 
-void expiration(int sig){
+void handle_expiration(){
+    std::unique_lock<std::mutex> l(tasks_lock);
+    const auto current_time = std::chrono::high_resolution_clock::now();
 
+    if( current_time > next_expiration.second ){
+        INFO << "Task: " << next_expiration.first << " expired" << std::endl;
+    }
+    else{
+        ERROR << "Woke up too soon!!" << std::endl;
+    }
+    unsafe_reset_expiration();
+}
+
+void handle_signal(int sig){
     if (sig == SIGALRM){
-        //handle potential expiration
-        {
-            std::unique_lock<std::mutex> l(tasks_lock);
-            const auto current_time = std::chrono::high_resolution_clock::now();
-
-            if( current_time > next_expiration.second ){
-                INFO << "Task: " << next_expiration.first << " expired" << std::endl;
-            }
-            else{
-                ERROR << "Woke up too soon!!" << std::endl;
-            }
-            unsafe_reset_expiration();
-        }
+        handle_expiration();
     }
     else{
         ERROR << "Unhandled signal " << sig << std::endl;
     }
 }
 
-std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
-    std::unique_lock<std::mutex> l(tasks_lock);
+std::shared_ptr<Task_Data> _get_task(const Task_Signature &sig){
     std::shared_ptr<Task_Data> task;
 
     try{
@@ -102,6 +120,11 @@ std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
     return task;
 }
 
+std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
+    std::unique_lock<std::mutex> l(tasks_lock);
+    return _get_task(sig);
+}
+
 void handle_beat(const watchdog::Message &request){
     const Task_Signature sig = request.beat().signature();
     std::shared_ptr<Task_Data> task = get_task(sig);
@@ -109,10 +132,9 @@ void handle_beat(const watchdog::Message &request){
     {
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << std::endl;
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP" << std::endl;
         unsafe_reset_expiration();
     }
-
 }
 
 void handle_orders(const watchdog::Message &request){
@@ -134,11 +156,14 @@ watchdog::Message handle_query(const watchdog::Message &request){
     auto query = request.query();
 
     if(query.question() == "Dump"){
+        //Replace this with a thing that queries the log file... we no longer
+        //necessarily store all the data
+        /*
         auto task_signature = query.signature();
         auto task_dump = response->mutable_dump();
         try{
             std::unique_lock<std::mutex> l(tasks_lock);
-            for(const auto &d: tasks.at(task_signature)->intervals){
+            for(const auto &d: tasks.at(task_signature)->_intervals){
                 double i = to_seconds(d);
                 task_dump->add_interval(i);
             }
@@ -146,6 +171,7 @@ watchdog::Message handle_query(const watchdog::Message &request){
         catch(std::out_of_range e){
             ERROR << "No such task: " << task_signature << std::endl;
         }
+        */
     }
     else if( query.question() == "Status"){
         std::unique_lock<std::mutex> l(tasks_lock);
@@ -211,10 +237,12 @@ void handle(std::shared_ptr<smpl::Channel> client){
 }
 
 void load_log(const std::string &logfile){
+    size_t line_number = 0;
 
     std::ifstream f(logfile, std::ifstream::in);
 
     while(!f.eof()){
+        line_number++;
         std::string line;
         std::getline(f, line);
 
@@ -232,7 +260,12 @@ void load_log(const std::string &logfile){
                 std::chrono::high_resolution_clock::time_point c(from_epoch);
 
                 auto t = get_task(sig);
-                t->beat(c);
+                try{
+                    t->beat(c);
+                }
+                catch(Bad_Beat b){
+                    std::cerr << line_number << " " << f << std::endl;
+                }
                 break;
             }
             else if(*i == "FORGET"){
@@ -250,22 +283,45 @@ void load_log(const std::string &logfile){
     }
 }
 
+void beat_handler(){
+    smpl::Local_UDP beat_listener(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT);
+
+    for(;;){
+        try{
+            const std::string incoming = beat_listener.recv();
+            watchdog::Message request;
+            request.ParseFromString(incoming);
+
+            const Task_Signature sig = request.beat().signature();
+            std::shared_ptr<Task_Data> task = get_task(sig);
+            std::unique_lock<std::mutex> l(task->lock);
+            const auto t = task->beat();
+            INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP" << std::endl;
+            unsafe_reset_expiration();
+        }
+        catch(...){
+            //awww sheit
+        }
+    }
+}
+
 int main(int argc, char *argv[]){
     get_config(argc, argv);
-
 
     std::string log_file = getenv("HOME");
     log_file.append("/.wd.log");
 
-    _log.first.open(log_file, std::ofstream::app);
-    //openlog("watchdog", LOG_NDELAY, LOG_LOCAL1);
-    //setlogmask(LOG_UPTO(LOG_INFO));
+    _log->first.open(log_file, std::ofstream::app);
     INFO << "Watchdog starting..." << std::endl;
 
-    signal(SIGALRM, expiration);
+    signal(SIGALRM, handle_signal);
     set_timer(std::chrono::nanoseconds::max());
 
     load_log(log_file);
+
+    //Start UDP beat listener
+    auto beat_handling_thread = std::thread(beat_handler);
+    beat_handling_thread.detach();
 
     for(;;){
         try{
