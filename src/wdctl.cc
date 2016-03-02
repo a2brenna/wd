@@ -7,6 +7,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <chrono>
+#include <fstream>
 
 namespace po = boost::program_options;
 
@@ -21,13 +22,23 @@ void get_config(int ac, char *av[]){
     desc.add_options()
         ("help", "Produce help message")
         ("server_address", po::value<std::string>(&CONFIG_SERVER_ADDRESS), "Network address to connect to")
+        ("port", po::value<int>(&CONFIG_INSECURE_PORT), "port number")
         ("dump", po::value<std::string>(&to_dump), "Task to dump")
         ("status_request", po::bool_switch(&status_request), "Request server status")
         ("long", po::bool_switch(&long_table), "Print long form information")
         ("forget", po::value<std::string>(&to_forget), "Task to forget")
         ;
 
+    std::ifstream global(global_config_file, std::ios_base::in);
+
+    std::string user_config_file = getenv("HOME");
+    user_config_file.append("/.wd.conf");
+
+    std::ifstream user(user_config_file, std::ios_base::in);
+
     po::variables_map vm;
+    po::store(po::parse_config_file(global, desc), vm);
+    po::store(po::parse_config_file(user, desc), vm);
     po::store(po::parse_command_line(ac, av, desc), vm);
     po::notify(vm);
 
