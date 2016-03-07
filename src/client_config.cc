@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <smpl.h>
 #include <smplsocket.h>
+#include <iostream>
 #include <fstream>
 
 namespace po = boost::program_options;
