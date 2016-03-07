@@ -264,7 +264,6 @@ void load_log(const std::string &logfile){
                     t->beat(c);
                 }
                 catch(Bad_Beat b){
-                    std::cerr << line_number << " " << f << std::endl;
                 }
                 break;
             }
