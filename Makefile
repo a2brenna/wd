@@ -36,16 +36,16 @@ uninstall:
 	rmdir ${DESTDIR}/${PREFIX}/include/watchdog
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
-	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -ljsoncpp -lsmplsocket -ltxtable -lslog
+	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -lsmplsocket -ltxtable -lslog
 
 wdctl: src/wdctl.cc watchdog.pb.o common_config.o
-	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -ljsoncpp -lsmplsocket -lboost_program_options -ltxtable -lslog
+	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lsmplsocket -lboost_program_options -ltxtable -lslog
 
 test: src/test.cc client.o watchdog.pb.o common_config.o client_config.o
-	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o common_config.o client_config.o -o test -lprotobuf -lpthread -lstdc++ -ljsoncpp -lsmplsocket -lboost_program_options -lslog
+	${CXX} ${CXXFLAGS} src/test.cc client.o watchdog.pb.o common_config.o client_config.o -o test -lprotobuf -lpthread -lstdc++ -lsmplsocket -lboost_program_options -lslog
 
 wdclient: src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o
-	${CXX} ${CXXFLAGS} src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o -o wdclient -lprotobuf -lpthread -lstdc++ -ljsoncpp -lsmplsocket -lboost_program_options -lslog
+	${CXX} ${CXXFLAGS} src/wdclient.cc client.o watchdog.pb.o common_config.o client_config.o -o wdclient -lprotobuf -lpthread -lstdc++ -lsmplsocket -lboost_program_options -lslog
 
 headers: src/client.h
 
