@@ -15,15 +15,8 @@ int main(int argc, char *argv[]){
     }
 
     if(CONFIG_UDP){
-        smpl::Remote_UDP server(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT);
-
-        watchdog::Message m;
-        m.mutable_beat()->set_signature(CONFIG_SIGNATURE);
-
-        std::string message;
-        m.SerializeToString(&message);
-
-        server.send(message);
+        std::shared_ptr<smpl::Remote_Postbox> server(new smpl::Remote_UDP(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT));
+        beat(server, CONFIG_SIGNATURE);
     }
     else{
         std::shared_ptr<smpl::Channel> server(server_address->connect());
