@@ -78,7 +78,7 @@ watchdog.pb.o: watchdog.proto
 	${CXX} ${CXXFLAGS} -c src/watchdog.pb.cc -o watchdog.pb.o
 
 clean:
-	rm -f src/watchdog.wd.cc
+	rm -f src/watchdog.pb.cc
 	rm -f src/watchdog.pb.h
 	rm -f wd
 	rm -f test
