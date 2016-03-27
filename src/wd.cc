@@ -286,21 +286,16 @@ void beat_handler(){
     smpl::Local_UDP beat_listener(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT);
 
     for(;;){
-        try{
-            const std::string incoming = beat_listener.recv();
-            watchdog::Message request;
-            request.ParseFromString(incoming);
+        const std::string incoming = beat_listener.recv();
+        watchdog::Message request;
+        request.ParseFromString(incoming);
 
-            const Task_Signature sig = request.beat().signature();
-            std::shared_ptr<Task_Data> task = get_task(sig);
-            std::unique_lock<std::mutex> l(task->lock);
-            const auto t = task->beat();
-            INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP" << std::endl;
-            unsafe_reset_expiration();
-        }
-        catch(...){
-            //awww sheit
-        }
+        const Task_Signature sig = request.beat().signature();
+        std::shared_ptr<Task_Data> task = get_task(sig);
+        std::unique_lock<std::mutex> l(task->lock);
+        const auto t = task->beat();
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP" << std::endl;
+        unsafe_reset_expiration();
     }
 }
 
