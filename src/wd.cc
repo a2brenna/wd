@@ -304,6 +304,7 @@ int main(int argc, char *argv[]){
 
     std::string log_file = getenv("HOME");
     log_file.append("/.wd.log");
+    slog::GLOBAL_PRIORITY = slog::kLogInfo;
 
     _log->first.open(log_file, std::ofstream::app);
     INFO << "Watchdog starting..." << std::endl;
