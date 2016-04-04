@@ -19,4 +19,6 @@ class Heart {
 
 };
 
+void beat(std::shared_ptr<smpl::Remote_Postbox> server, const std::string id);
+
 #endif

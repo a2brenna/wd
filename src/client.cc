@@ -12,3 +12,13 @@ void Heart::beat(){
         _server->send(message);
     }
 }
+
+void beat(std::shared_ptr<smpl::Remote_Postbox> server, const std::string id){
+        watchdog::Message m;
+        m.mutable_beat()->set_signature(id);
+
+        std::string message;
+        m.SerializeToString(&message);
+
+        server->send(message);
+}

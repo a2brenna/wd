@@ -32,8 +32,7 @@ uninstall:
 	rm -f ${DESTDIR}/${PREFIX}/bin/wd
 	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
 	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
-	rm -f ${DESTDIR}/${PREFIX}/include/watchdog/client.h
-	rmdir ${DESTDIR}/${PREFIX}/include/watchdog
+	rm -rf ${DESTDIR}/${PREFIX}/include/watchdog/
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
 	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -lsmplsocket -ltxtable -lslog
