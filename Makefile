@@ -8,7 +8,7 @@ CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: wd test wdclient libraries headers wdctl
 
-install: wd wdclient libraries headers
+install: wd wdclient wdctl libraries headers
 	mkdir -p ${DESTDIR}/${PREFIX}/lib
 	mkdir -p ${DESTDIR}/${PREFIX}/bin
 	mkdir -p ${DESTDIR}/${PREFIX}/include/watchdog
@@ -27,12 +27,12 @@ install: wd wdclient libraries headers
 	chmod -R 544 ${DESTDIR}/${PREFIX}/include/watchdog/client.h
 
 uninstall:
-	rm ${DESTDIR}/${PREFIX}/bin/wdclient
-	rm ${DESTDIR}/${PREFIX}/bin/wdctl
-	rm ${DESTDIR}/${PREFIX}/bin/wd
-	rm ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
-	rm ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
-	rm ${DESTDIR}/${PREFIX}/include/watchdog/client.h
+	rm -f ${DESTDIR}/${PREFIX}/bin/wdclient
+	rm -f ${DESTDIR}/${PREFIX}/bin/wdctl
+	rm -f ${DESTDIR}/${PREFIX}/bin/wd
+	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
+	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
+	rm -f ${DESTDIR}/${PREFIX}/include/watchdog/client.h
 	rmdir ${DESTDIR}/${PREFIX}/include/watchdog
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
