@@ -19,13 +19,6 @@ install: wd wdclient wdctl libraries headers
 	cp wdclient ${DESTDIR}/${PREFIX}/bin
 	cp wdctl ${DESTDIR}/${PREFIX}/bin
 
-	chmod -R 544 ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
-	chmod -R 544 ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
-	chmod -R 544 ${DESTDIR}/${PREFIX}/bin/wdctl
-	chmod -R 544 ${DESTDIR}/${PREFIX}/bin/wd
-	chmod -R 544 ${DESTDIR}/${PREFIX}/bin/wdclient
-	chmod -R 544 ${DESTDIR}/${PREFIX}/include/watchdog/client.h
-
 uninstall:
 	rm -f ${DESTDIR}/${PREFIX}/bin/wdclient
 	rm -f ${DESTDIR}/${PREFIX}/bin/wdctl
