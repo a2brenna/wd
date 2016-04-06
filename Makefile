@@ -12,12 +12,14 @@ install: wd wdclient wdctl libraries headers
 	mkdir -p ${DESTDIR}/${PREFIX}/lib
 	mkdir -p ${DESTDIR}/${PREFIX}/bin
 	mkdir -p ${DESTDIR}/${PREFIX}/include/watchdog
+	mkdir -p ${DESTDIR}/${PREFIX}/etc/watchdog/
 	cp *.a ${DESTDIR}/${PREFIX}/lib
 	cp *.so ${DESTDIR}/${PREFIX}/lib
 	cp src/client.h ${DESTDIR}/${PREFIX}/include/watchdog/
 	cp wd ${DESTDIR}/${PREFIX}/bin
 	cp wdclient ${DESTDIR}/${PREFIX}/bin
 	cp wdctl ${DESTDIR}/${PREFIX}/bin
+	cp wd.conf ${DESTDIR}/${PREFIX}/etc/watchdog/
 
 uninstall:
 	rm -f ${DESTDIR}/${PREFIX}/bin/wdclient
@@ -25,6 +27,7 @@ uninstall:
 	rm -f ${DESTDIR}/${PREFIX}/bin/wd
 	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.so
 	rm -f ${DESTDIR}/${PREFIX}/lib/libwatchdog.a
+	rm -rf ${DESTDIR}/${PREFIX}/etc/watchdog/wd.conf
 	rm -rf ${DESTDIR}/${PREFIX}/include/watchdog/
 
 wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
