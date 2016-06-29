@@ -3,7 +3,7 @@ LIBRARY_DIR=$(shell echo ~)/local/lib
 DESTDIR=/
 PREFIX=/usr/
 
-CXX=clang++
+CXX=g++
 CXXFLAGS=-L${LIBRARY_DIR} -I${INCLUDE_DIR} -O2 -g -std=c++11 -fPIC -Wall -Wextra
 
 all: wd test wdclient libraries headers wdctl
