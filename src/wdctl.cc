@@ -17,6 +17,24 @@ std::string to_forget;
 bool status_request;
 bool long_table = false;
 
+std::string hr_string(double d){
+    std::string output;
+
+    size_t hours = std::floor(d / 3600);
+    if( hours > 0 ){
+        output.append(std::to_string(hours) + "h ");
+        d = d - (hours * 3600);
+    }
+    size_t minutes = std::floor(d / 60);
+    if( minutes > 0 ){
+        output.append(std::to_string(minutes) + "m ");
+        d = d - (minutes * 60);
+    }
+    size_t seconds = d;
+    output.append(std::to_string(seconds) + "s");
+    return output;
+}
+
 void get_config(int ac, char *av[]){
     po::options_description desc("Options");
     desc.add_options()
@@ -94,8 +112,8 @@ int main(int argc, char *argv[]){
                 Table table(headings);
                 for(const auto t: response.response().task()){
                     const std::string s = t.signature();
-                    const std::string l = std::to_string(t.last()) + " (" + std::to_string( current_time - t.last()) + ")";
-                    const std::string e = std::to_string(t.expected());
+                    const std::string l = hr_string(t.last()) + " (" + hr_string(current_time - t.last()) + ")";
+                    const std::string e = hr_string(t.expected());
                     const std::string m = std::to_string(t.mean());
                     const std::string d = std::to_string(t.deviation());
                     const std::string ttl = std::to_string(t.time_to_expiration());
@@ -111,8 +129,8 @@ int main(int argc, char *argv[]){
                 Table table(headings);
                 for(const auto t: response.response().task()){
                     const std::string s = t.signature();
-                    const std::string l = std::to_string(current_time - t.last());
-                    const std::string e = std::to_string(t.expected() - current_time);
+                    const std::string l = hr_string(current_time - t.last());
+                    const std::string e = hr_string(t.expected() - current_time);
                     const std::string b = std::to_string(t.beats());
 
                     table.add_row({s,l,e,b});
