@@ -28,6 +28,7 @@ message Message{
 
 message Heartbeat{
     optional string signature = 1;
+    optional bytes cookie = 2;
 }
 
 message Query{
