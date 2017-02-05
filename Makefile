@@ -30,8 +30,8 @@ uninstall:
 	rm -rf ${DESTDIR}/etc/watchdog/wd.conf
 	rm -rf ${DESTDIR}/${PREFIX}/include/watchdog/
 
-wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o
-	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -lsmplsocket -ltxtable -lslog
+wd: src/wd.cc src/server_config.h watchdog.pb.o task.o server_config.o common_config.o encode.o
+	${CXX} ${CXXFLAGS} src/wd.cc watchdog.pb.o task.o server_config.o common_config.o encode.o -o wd -lprotobuf -lpthread -lstdc++ -lboost_program_options -lsmplsocket -ltxtable -lslog
 
 wdctl: src/wdctl.cc watchdog.pb.o common_config.o
 	${CXX} ${CXXFLAGS} src/wdctl.cc watchdog.pb.o common_config.o -o wdctl -lprotobuf -lpthread -lstdc++ -lsmplsocket -lboost_program_options -ltxtable -lslog

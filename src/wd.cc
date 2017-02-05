@@ -18,6 +18,7 @@
 #include <txtable.h>
 #include "task.h"
 #include "watchdog.pb.h"
+#include "encode.h"
 
 #include <iostream>
 
@@ -132,7 +133,7 @@ void handle_beat(const watchdog::Message &request){
     {
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP" << std::endl;
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP cookie " << base16_encode(request.beat().cookie()) << std::endl;
         unsafe_reset_expiration();
     }
 }
@@ -294,7 +295,7 @@ void beat_handler(){
         std::shared_ptr<Task_Data> task = get_task(sig);
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP" << std::endl;
+        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP cookie " << base16_encode(request.beat().cookie()) << std::endl;
         unsafe_reset_expiration();
     }
 }
