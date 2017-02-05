@@ -7,6 +7,7 @@
 #include <string>
 
 extern std::string CONFIG_SIGNATURE;
+extern std::string COOKIE;
 extern std::shared_ptr<smpl::Remote_Address> server_address;
 extern bool CONFIG_TCP;
 
