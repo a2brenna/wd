@@ -45,69 +45,6 @@ double to_seconds(const std::chrono::nanoseconds &ns){
     return (ms.count() / 1000.0);
 }
 
-void set_timer(const std::chrono::nanoseconds &ns){
-    struct itimerval t;
-    t.it_interval.tv_sec = 0;
-    t.it_interval.tv_usec = 0;
-    t.it_value.tv_sec = ns.count() / 1000000000;
-    t.it_value.tv_usec = (ns.count() - (t.it_value.tv_sec * 1000000000)) / 1000;
-    const auto r = setitimer(ITIMER_REAL, &t, nullptr);
-    if(r != 0){
-        throw Fatal_Error();
-    }
-    else{
-        return;
-    }
-}
-
-void unsafe_reset_expiration(){
-    std::pair<Task_Signature, std::shared_ptr<Task_Data>> next;
-    if(tasks.empty()){
-        return;
-    }
-    else{
-        next = *(tasks.begin());
-        for(const auto &t: tasks){
-            if( next.second->expected() > t.second->expected() ){
-                next = t;
-            }
-        }
-    }
-    assert(next.second != nullptr);
-    {
-        next_expiration.first = next.first;
-        next_expiration.second= next.second->expected();
-        if ( next_expiration.second > std::chrono::high_resolution_clock::now()){
-            set_timer(next_expiration.second - std::chrono::high_resolution_clock::now());
-        }
-        else{
-            set_timer(std::chrono::high_resolution_clock::duration(0));
-        }
-    }
-}
-
-void handle_expiration(){
-    std::unique_lock<std::mutex> l(tasks_lock);
-    const auto current_time = std::chrono::high_resolution_clock::now();
-
-    if( current_time > next_expiration.second ){
-        INFO << "Task: " << next_expiration.first << " expired" << std::endl;
-    }
-    else{
-        ERROR << "Woke up too soon!!" << std::endl;
-    }
-    unsafe_reset_expiration();
-}
-
-void handle_signal(int sig){
-    if (sig == SIGALRM){
-        handle_expiration();
-    }
-    else{
-        ERROR << "Unhandled signal " << sig << std::endl;
-    }
-}
-
 std::shared_ptr<Task_Data> _get_task(const Task_Signature &sig){
     std::shared_ptr<Task_Data> task;
 
@@ -134,7 +71,6 @@ void handle_beat(const watchdog::Message &request){
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
         INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP cookie " << base16_encode(request.beat().cookie()) << std::endl;
-        unsafe_reset_expiration();
     }
 }
 
@@ -146,7 +82,6 @@ void handle_orders(const watchdog::Message &request){
             std::unique_lock<std::mutex> la(tasks_lock);
             tasks.erase(f.signature());
             INFO << "FORGET " << f.signature() << std::endl;
-            unsafe_reset_expiration();
         }
     }
 }
@@ -277,10 +212,6 @@ void load_log(const std::string &logfile){
         }
     }
 
-    {
-        std::unique_lock<std::mutex> l(tasks_lock);
-        unsafe_reset_expiration();
-    }
 }
 
 void beat_handler(){
@@ -296,7 +227,6 @@ void beat_handler(){
         std::unique_lock<std::mutex> l(task->lock);
         const auto t = task->beat();
         INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP cookie " << base16_encode(request.beat().cookie()) << std::endl;
-        unsafe_reset_expiration();
     }
 }
 
@@ -309,9 +239,6 @@ int main(int argc, char *argv[]){
 
     _log->first.open(log_file, std::ofstream::app);
     INFO << "Watchdog starting..." << std::endl;
-
-    signal(SIGALRM, handle_signal);
-    set_timer(std::chrono::nanoseconds::max());
 
     load_log(log_file);
 
