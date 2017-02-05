@@ -19,7 +19,7 @@ install: wd wdclient wdctl libraries headers
 	cp wd ${DESTDIR}/${PREFIX}/bin
 	cp wdclient ${DESTDIR}/${PREFIX}/bin
 	cp wdctl ${DESTDIR}/${PREFIX}/bin
-	cp wd.conf ${DESTDIR}/etc/watchdog/
+	#cp wd.conf ${DESTDIR}/etc/watchdog/
 
 uninstall:
 	rm -f ${DESTDIR}/${PREFIX}/bin/wdclient
