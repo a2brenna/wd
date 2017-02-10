@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
             h.detach();
         }
         catch(...){
-            std::cerr << "Error accepting connection" << std::endl;
+            ERROR << "Error accepting connection" << std::endl;
         }
     }
 
