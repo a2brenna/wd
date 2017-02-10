@@ -43,22 +43,17 @@ double to_seconds(const std::chrono::nanoseconds &ns){
     return (ms.count() / 1000.0);
 }
 
-std::shared_ptr<Task_Data> _get_task(const Task_Signature &sig){
-    std::shared_ptr<Task_Data> task;
-
-    try{
-        task = tasks.at(sig);
-    }
-    catch(std::out_of_range o){
-        task = std::shared_ptr<Task_Data>(new Task_Data);
-        tasks[sig] = task;
-    }
-    return task;
-}
-
 std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
     std::unique_lock<std::mutex> l(tasks_lock);
-    return _get_task(sig);
+
+    try{
+        return tasks.at(sig);
+    }
+    catch(std::out_of_range o){
+        std::shared_ptr<Task_Data> task = std::shared_ptr<Task_Data>(new Task_Data);
+        tasks[sig] = task;
+        return task;
+    }
 }
 
 void handle_beat(const watchdog::Message &request){
