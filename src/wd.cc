@@ -55,49 +55,6 @@ std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
     }
 }
 
-watchdog::Message handle_query(const watchdog::Message &request){
-    auto r = watchdog::Message();
-    auto response = r.mutable_response();
-    auto query = request.query();
-
-    if(query.question() == "Dump"){
-        //Replace this with a thing that queries the log file... we no longer
-        //necessarily store all the data
-        /*
-        auto task_signature = query.signature();
-        auto task_dump = response->mutable_dump();
-        try{
-            std::unique_lock<std::mutex> l(tasks_lock);
-            for(const auto &d: tasks.at(task_signature)->_intervals){
-                double i = to_seconds(d);
-                task_dump->add_interval(i);
-            }
-        }
-        catch(std::out_of_range e){
-            ERROR << "No such task: " << task_signature << std::endl;
-        }
-        */
-    }
-    else if( query.question() == "Status"){
-        std::unique_lock<std::mutex> l(tasks_lock);
-        for (const auto &t: tasks){
-            auto task = response->add_task();
-            task->set_signature(t.first);
-            task->set_last(to_seconds(t.second->last().time_since_epoch()));
-            task->set_expected(to_seconds(t.second->expected().time_since_epoch()));
-            task->set_mean(to_seconds(t.second->mean()));
-            task->set_deviation(to_seconds(t.second->deviation()));
-            task->set_time_to_expiration(to_seconds(t.second->to_expiration()));
-            task->set_beats(t.second->num_beats());
-        }
-    }
-    else{
-        assert(false);
-    }
-
-    return r;
-}
-
 void handle(std::shared_ptr<smpl::Channel> client){
     for(;;){
 
@@ -125,10 +82,47 @@ void handle(std::shared_ptr<smpl::Channel> client){
                 }
             }
             else if(request.has_query()){
-                watchdog::Message response;
-                response = handle_query(request);
+                watchdog::Message r;
+                auto response = r.mutable_response();
+                auto query = request.query();
+
+                if(query.question() == "Dump"){
+                    //Replace this with a thing that queries the log file... we no longer
+                    //necessarily store all the data
+                    /*
+                    auto task_signature = query.signature();
+                    auto task_dump = response->mutable_dump();
+                    try{
+                        std::unique_lock<std::mutex> l(tasks_lock);
+                        for(const auto &d: tasks.at(task_signature)->_intervals){
+                            double i = to_seconds(d);
+                            task_dump->add_interval(i);
+                        }
+                    }
+                    catch(std::out_of_range e){
+                        ERROR << "No such task: " << task_signature << std::endl;
+                    }
+                    */
+                }
+                else if( query.question() == "Status"){
+                    std::unique_lock<std::mutex> l(tasks_lock);
+                    for (const auto &t: tasks){
+                        auto task = response->add_task();
+                        task->set_signature(t.first);
+                        task->set_last(to_seconds(t.second->last().time_since_epoch()));
+                        task->set_expected(to_seconds(t.second->expected().time_since_epoch()));
+                        task->set_mean(to_seconds(t.second->mean()));
+                        task->set_deviation(to_seconds(t.second->deviation()));
+                        task->set_time_to_expiration(to_seconds(t.second->to_expiration()));
+                        task->set_beats(t.second->num_beats());
+                    }
+                }
+                else{
+                    assert(false);
+                }
+
                 std::string s;
-                response.SerializeToString(&s);
+                r.SerializeToString(&s);
                 client->send(s);
             }
             else if(request.orders_size() > 0){
