@@ -11,10 +11,15 @@ the previously mentioned operations mean that the server does not record the
 beat time until noticably later.
 */
 
-void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
+void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c, const std::string &cookie){
     //If supplied time is in the past...
     if( c < l ){
         throw Bad_Beat();
+    }
+
+    if(cookie != _cookie){
+        _cookie = cookie;
+        return;
     }
 
     if( l != std::chrono::high_resolution_clock::time_point::min()){
@@ -28,12 +33,11 @@ void Task_Data::beat(const std::chrono::high_resolution_clock::time_point &c){
         const auto stdev = std::sqrt(ba::variance(_intervals));
         e = l + std::chrono::high_resolution_clock::duration((unsigned long long)(mean + (stdev * 3)) );
     }
-
 }
 
-std::chrono::high_resolution_clock::time_point Task_Data::beat(){
+std::chrono::high_resolution_clock::time_point Task_Data::beat(const std::string &cookie){
     const auto c = std::chrono::high_resolution_clock::now();
-    beat(c);
+    beat(c, cookie);
     return c;
 }
 

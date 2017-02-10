@@ -73,11 +73,13 @@ void handle(std::shared_ptr<smpl::Channel> client){
 
             if(request.has_beat()){
                 const Task_Signature sig = request.beat().signature();
+                const std::string cookie = request.beat().cookie();
+
                 std::shared_ptr<Task_Data> task = get_task(sig);
 
                 {
                     std::unique_lock<std::mutex> l(task->lock);
-                    const auto t = task->beat();
+                    const auto t = task->beat(cookie);
                     INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP cookie " << base16_encode(request.beat().cookie()) << std::endl;
                 }
             }
@@ -159,9 +161,11 @@ void beat_handler(){
         request.ParseFromString(incoming);
 
         const Task_Signature sig = request.beat().signature();
+        const std::string cookie = request.beat().cookie();
+
         std::shared_ptr<Task_Data> task = get_task(sig);
         std::unique_lock<std::mutex> l(task->lock);
-        const auto t = task->beat();
+        const auto t = task->beat(cookie);
         INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport UDP cookie " << base16_encode(request.beat().cookie()) << std::endl;
     }
 }
@@ -197,7 +201,8 @@ int main(int argc, char *argv[]){
 
                     auto t = get_task(sig);
                     try{
-                        t->beat(c);
+                        //TODO: fix this
+                        t->beat(c, "");
                     }
                     catch(Bad_Beat b){
                     }
