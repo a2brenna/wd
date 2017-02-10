@@ -150,48 +150,6 @@ void handle(std::shared_ptr<smpl::Channel> client){
 
 }
 
-void load_log(const std::string &logfile){
-    size_t line_number = 0;
-
-    std::ifstream f(logfile, std::ifstream::in);
-
-    while(!f.eof()){
-        line_number++;
-        std::string line;
-        std::getline(f, line);
-
-        std::vector<std::string> tokens;
-        split(tokens, line, boost::is_any_of(" "));
-
-        for(auto i = tokens.begin(); i != tokens.end(); i++){
-            if(*i == "BEAT"){
-                i++;
-                const std::string sig = *i;
-                i++;
-                i++;
-                const std::string time = *i;
-                const auto from_epoch = std::chrono::high_resolution_clock::duration(strtoull(time.c_str(), nullptr, 10));
-                std::chrono::high_resolution_clock::time_point c(from_epoch);
-
-                auto t = get_task(sig);
-                try{
-                    t->beat(c);
-                }
-                catch(Bad_Beat b){
-                }
-                break;
-            }
-            else if(*i == "FORGET"){
-                i++;
-                const std::string sig = *i;
-                std::unique_lock<std::mutex> l(tasks_lock);
-                tasks.erase(sig);
-            }
-        }
-    }
-
-}
-
 void beat_handler(){
     smpl::Local_UDP beat_listener(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT);
 
@@ -211,14 +169,53 @@ void beat_handler(){
 int main(int argc, char *argv[]){
     get_config(argc, argv);
 
-    std::string log_file = getenv("HOME");
-    log_file.append("/.wd.log");
-    slog::GLOBAL_PRIORITY = slog::kLogInfo;
+    const std::string log_file = [](){
+        std::string log_file = getenv("HOME");
+        log_file.append("/.wd.log");
+        return log_file;
+    }();
 
+    [](const std::string &log_file){
+        std::ifstream f(log_file, std::ifstream::in);
+
+        while(!f.eof()){
+            std::string line;
+            std::getline(f, line);
+
+            std::vector<std::string> tokens;
+            split(tokens, line, boost::is_any_of(" "));
+
+            for(auto i = tokens.begin(); i != tokens.end(); i++){
+                if(*i == "BEAT"){
+                    i++;
+                    const std::string sig = *i;
+                    i++;
+                    i++;
+                    const std::string time = *i;
+                    const auto from_epoch = std::chrono::high_resolution_clock::duration(strtoull(time.c_str(), nullptr, 10));
+                    std::chrono::high_resolution_clock::time_point c(from_epoch);
+
+                    auto t = get_task(sig);
+                    try{
+                        t->beat(c);
+                    }
+                    catch(Bad_Beat b){
+                    }
+                    break;
+                }
+                else if(*i == "FORGET"){
+                    i++;
+                    const std::string sig = *i;
+                    std::unique_lock<std::mutex> l(tasks_lock);
+                    tasks.erase(sig);
+                }
+            }
+        }
+    }(log_file);
+
+    slog::GLOBAL_PRIORITY = slog::kLogInfo;
     _log->first.open(log_file, std::ofstream::app);
     INFO << "Watchdog starting..." << std::endl;
-
-    load_log(log_file);
 
     //Start UDP beat listener
     auto beat_handling_thread = std::thread(beat_handler);
