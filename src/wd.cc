@@ -38,8 +38,6 @@ class Fatal_Error {};
 std::mutex tasks_lock;
 std::map<Task_Signature, std::shared_ptr<Task_Data>> tasks;
 
-std::pair<Task_Signature, std::chrono::high_resolution_clock::time_point> next_expiration;
-
 double to_seconds(const std::chrono::nanoseconds &ns){
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(ns);
     return (ms.count() / 1000.0);
