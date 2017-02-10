@@ -45,7 +45,6 @@ double to_seconds(const std::chrono::nanoseconds &ns){
 
 std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
     std::unique_lock<std::mutex> l(tasks_lock);
-
     try{
         return tasks.at(sig);
     }
@@ -53,29 +52,6 @@ std::shared_ptr<Task_Data> get_task(const Task_Signature &sig){
         std::shared_ptr<Task_Data> task = std::shared_ptr<Task_Data>(new Task_Data);
         tasks[sig] = task;
         return task;
-    }
-}
-
-void handle_beat(const watchdog::Message &request){
-    const Task_Signature sig = request.beat().signature();
-    std::shared_ptr<Task_Data> task = get_task(sig);
-
-    {
-        std::unique_lock<std::mutex> l(task->lock);
-        const auto t = task->beat();
-        INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP cookie " << base16_encode(request.beat().cookie()) << std::endl;
-    }
-}
-
-void handle_orders(const watchdog::Message &request){
-    for(int i = 0; i < request.orders_size(); i++){
-        const watchdog::Command &o = request.orders(i);
-        for( int j = 0; j < o.to_forget_size(); j++){
-            const watchdog::Command::Forget &f = o.to_forget(j);
-            std::unique_lock<std::mutex> la(tasks_lock);
-            tasks.erase(f.signature());
-            INFO << "FORGET " << f.signature() << std::endl;
-        }
     }
 }
 
@@ -139,7 +115,14 @@ void handle(std::shared_ptr<smpl::Channel> client){
         if(request.IsInitialized()){
 
             if(request.has_beat()){
-                handle_beat(request);
+                const Task_Signature sig = request.beat().signature();
+                std::shared_ptr<Task_Data> task = get_task(sig);
+
+                {
+                    std::unique_lock<std::mutex> l(task->lock);
+                    const auto t = task->beat();
+                    INFO << "BEAT " << sig << " time " << t.time_since_epoch().count() << " transport TCP cookie " << base16_encode(request.beat().cookie()) << std::endl;
+                }
             }
             else if(request.has_query()){
                 watchdog::Message response;
@@ -149,7 +132,15 @@ void handle(std::shared_ptr<smpl::Channel> client){
                 client->send(s);
             }
             else if(request.orders_size() > 0){
-                handle_orders(request);
+                for(int i = 0; i < request.orders_size(); i++){
+                    const watchdog::Command &o = request.orders(i);
+                    for( int j = 0; j < o.to_forget_size(); j++){
+                        const watchdog::Command::Forget &f = o.to_forget(j);
+                        std::unique_lock<std::mutex> la(tasks_lock);
+                        tasks.erase(f.signature());
+                        INFO << "FORGET " << f.signature() << std::endl;
+                    }
+                }
             }
             else{
                 ERROR << "Unhandled Request: " << request.DebugString() << std::endl;
