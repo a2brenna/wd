@@ -16,12 +16,23 @@ int main(int argc, char *argv[]){
 
     if(CONFIG_TCP){
         std::shared_ptr<smpl::Channel> server(server_address->connect());
-        Heart h(server, CONFIG_SIGNATURE);
-        h.beat();
+        if(COOKIE.size() > 0){
+            Heart h(server, CONFIG_SIGNATURE, COOKIE);
+            h.beat();
+        }
+        else{
+            Heart h(server, CONFIG_SIGNATURE);
+            h.beat();
+        }
     }
     else{
         std::shared_ptr<smpl::Remote_Postbox> server(new smpl::Remote_UDP(CONFIG_SERVER_ADDRESS, CONFIG_INSECURE_PORT));
-        beat(server, CONFIG_SIGNATURE);
+        if(COOKIE.size() > 0){
+            beat(server, CONFIG_SIGNATURE, COOKIE);
+        }
+        else{
+            beat(server, CONFIG_SIGNATURE);
+        }
     }
-
+    return 0;
 };
