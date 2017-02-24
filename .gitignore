@@ -7,6 +7,7 @@ state.out
 *.o
 wd
 wdclient
+wclient.static
 test
 wdctl
 *.so
